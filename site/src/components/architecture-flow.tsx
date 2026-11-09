@@ -8,28 +8,23 @@ import {
   type Node,
 } from "@xyflow/react";
 
-import { architecture } from "../lib/architecture.ts";
+import { architecture, providerIcon } from "../lib/architecture.ts";
 
 const NODES: Node[] = architecture.nodes.map((node) => ({
   id: node.id,
   position: { x: node.x, y: node.y },
   className: `flow-node flow-node-${node.kind}`,
-  sourcePosition:
-    node.id === "write" || node.id === "review"
-      ? Position.Bottom
-      : node.id === "replan" || node.id === "budget"
-        ? Position.Left
-        : Position.Right,
-  targetPosition:
-    node.id === "replan" || node.id === "readback"
-      ? Position.Top
-      : node.id === "budget" || node.id === "write"
-        ? Position.Right
-        : Position.Left,
+  sourcePosition: Position.Right,
+  targetPosition: Position.Left,
   data: {
     label: (
       <>
-        <strong>{node.label}</strong>
+        <strong>
+          {node.icon !== null && (
+            <img src={providerIcon(node.icon)} alt="" width="28" height="28" />
+          )}{" "}
+          {node.label}
+        </strong>
         <span>{node.detail}</span>
       </>
     ),

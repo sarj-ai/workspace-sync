@@ -36,7 +36,7 @@ export async function deriveDocumentationReference(root: URL) {
       .trim();
   };
   const example = await publicExample("examples/audit-directory.ts");
-  const planExample = await publicExample("examples/plan-and-apply.ts");
+  const planExample = await publicExample("examples/sync-profiles.ts");
   const policySchema = z.toJSONSchema(WorkspaceSyncPolicySchema, {
     io: "input",
   });

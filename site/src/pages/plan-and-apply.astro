@@ -22,8 +22,8 @@ const preview = `~ slack.profile[${JSON.stringify(profile.slackUserId)}]\n${chan
   <p>This synthetic preview runs the real <a href={siteHref("api/org-sync/model/")}>profile planner</a> at build time.</p>
   <h2>Apply</h2>
   <Code code={REFERENCE.planExample} lang="ts" />
-  <p>Pass a host-configured <a href={siteHref("api/org-sync/service/")}>OrgSyncService</a>. Review the audit report, retain its hash, then call <code>apply</code> with that hash and a host-owned write budget. Changed state blocks apply. Each run selects at most one profile; review a new plan before continuing.</p>
-  <p>These are example functions over <code>run</code>, available in <a href={`${REFERENCE.repository}/blob/main/examples/plan-and-apply.ts`}>the repository</a>.</p>
+  <p><code>SlackProfileSync</code> is exported by the package. Supply your Google and Slack clients, preview the plan, and approve it in your application. <code>apply(plan)</code> carries the approval hash and rechecks current data for you.</p>
+  <p>One apply updates at most one profile. It needs no SQL database. Scheduled hosts can pass an <code>identityBudget</code> option to share a one-person limit across retries and other provider operations.</p>
   <h2>Terraform?</h2>
   <p>Keep the TypeScript core. A thin Terraform adapter could expose these workflows later, but replacing the core would duplicate provider integrations and host approval guards.</p>
   <p>A provider <a href="https://developer.hashicorp.com/terraform/plugin/framework/actions">action</a> is a closer fit for invoking reconciliation than a resource that owns every employee account. Actions support side effects without changing Terraform resource state. Keep approval and write guards in the core, and <a href="https://developer.hashicorp.com/terraform/language/manage-sensitive-data">secrets outside saved plans and state</a>.</p>

@@ -7,6 +7,7 @@ import type { GoogleGroupSnapshot } from "../org-sync/channel-model.ts";
 import { orgSyncSettings } from "../org-sync/config.ts";
 import { googleAuthorityFingerprintRecord } from "../org-sync/google-directory-authority.ts";
 import type { GoogleDirectoryUser } from "../org-sync/model.ts";
+import { sha256 } from "../runtime/sha256.ts";
 import { logEvent } from "../shared/log-event.ts";
 import type { ITrycompPeopleClient } from "./client.ts";
 import {
@@ -631,13 +632,9 @@ export class TrycompPeopleSyncService implements ITrycompPeopleSyncService {
     action: TrycompAction,
     index: number,
   ): Promise<string> {
-    const encoded = new TextEncoder().encode(
+    return sha256(
       JSON.stringify({ action, index, planHash, policyVersion: 1 }),
     );
-    const digest = await crypto.subtle.digest("SHA-256", encoded);
-    return [...new Uint8Array(digest)]
-      .map((byte) => byte.toString(16).padStart(2, "0"))
-      .join("");
   }
 
   #blockedWithoutPlan(

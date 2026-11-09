@@ -1,10 +1,13 @@
+import { z } from "zod";
+
 import {
   type IdentityWriteBudget,
   reserveIdentityWriteBudget,
 } from "../identity-provisioning/identity-budget-contracts.ts";
+import { sha256 } from "../runtime/sha256.ts";
 import { logEvent } from "../shared/log-event.ts";
 import type { IGoogleDirectoryClient } from "./google-directory-client.ts";
-import { defaultSleep, type Sleep } from "./http.ts";
+import type { Sleep } from "./http.ts";
 import {
   buildOrgProjectionPlan,
   changedManagedFields,
@@ -26,11 +29,10 @@ import type {
   SlackSnapshot,
 } from "./org-slack-client.ts";
 
-type ApplyResult = Promise<{
-  blocked: OrgSyncFailure[];
-  failed: OrgSyncFailure[];
-  writes: number;
-}>;
+const ReviewedPlanSchema = z.object({
+  planHash: z.string().regex(/^[a-f0-9]{64}$/u),
+  status: z.literal("audit"),
+});
 
 const REQUIRED_SLACK_SCOPES = [
   "users.profile:read",
@@ -38,7 +40,6 @@ const REQUIRED_SLACK_SCOPES = [
   "users:read",
   "users:read.email",
 ] as const;
-const PROFILE_WRITE_INTERVAL_MS = 2500;
 const PROFILE_SELECTION_POLICY_VERSION = "stable_user_v1";
 const PROFILE_REASON_RANK = {
   matched: 0,
@@ -123,17 +124,42 @@ export interface OrgSyncServiceContract {
   ): Promise<OrgSyncRunReport>;
 }
 
-export class OrgSyncService implements OrgSyncServiceContract {
+export interface SlackProfileSyncContract {
+  plan(): Promise<OrgSyncRunReport>;
+  apply(
+    reviewed: Pick<OrgSyncRunReport, "planHash" | "status">,
+    options?: Pick<OrgSyncRunOptions, "identityBudget">,
+  ): Promise<OrgSyncRunReport>;
+}
+
+export class OrgSyncService
+  implements OrgSyncServiceContract, SlackProfileSyncContract
+{
   readonly #config: OrgSyncConfig;
   readonly #google: IGoogleDirectoryClient;
   readonly #slack: IOrgSlackClient;
-  readonly #sleep: Sleep;
 
   constructor(options: OrgSyncServiceOptions) {
     this.#config = options.config;
     this.#google = options.google;
     this.#slack = options.slack;
-    this.#sleep = options.sleep ?? defaultSleep;
+  }
+
+  plan(): Promise<OrgSyncRunReport> {
+    return this.run({ mode: "audit", trigger: "local" });
+  }
+
+  async apply(
+    reviewed: Pick<OrgSyncRunReport, "planHash" | "status">,
+    options: Pick<OrgSyncRunOptions, "identityBudget"> = {},
+  ): Promise<OrgSyncRunReport> {
+    const { planHash } = ReviewedPlanSchema.parse(reviewed);
+    return this.run({
+      mode: "live",
+      trigger: "local",
+      expectedPlanHash: planHash,
+      identityBudget: options.identityBudget,
+    });
   }
 
   async run(
@@ -190,12 +216,9 @@ export class OrgSyncService implements OrgSyncServiceContract {
     googleSnapshot?: readonly GoogleDirectoryUser[],
   ): Promise<OrgSyncRunReport> {
     const deadlineAt = startedAt + MAX_RUN_MS;
-    const slackProjectionTargetSnapshot = await this.#slack.listSnapshot(
-      runId,
-      deadlineAt,
-    );
+    const slackSnapshot = await this.#slack.listSnapshot(runId, deadlineAt);
     const schema = validateSlackSchema(
-      slackProjectionTargetSnapshot,
+      slackSnapshot,
       this.#config.fieldIds,
       this.#config.expectedSlackTeamId,
     );
@@ -206,30 +229,25 @@ export class OrgSyncService implements OrgSyncServiceContract {
       googleUsers,
       this.#config.protectedDepartedGoogleUserIds,
     );
-    const provisionalPlan = buildOrgProjectionPlan({
-      excludedGoogleUserIds: this.#config.excludedGoogleUserIds,
-      expectedRootGoogleUserIds: this.#config.expectedRootGoogleUserIds,
-      fieldIds: schema.fieldIds,
-      googleUsers,
-      managedDomain: this.#config.managedDomain,
-      slackUsers: slackProjectionTargetSnapshot.members,
-    });
+    const project = (slackUsers: SlackMember[]) =>
+      buildOrgProjectionPlan({
+        excludedGoogleUserIds: this.#config.excludedGoogleUserIds,
+        expectedRootGoogleUserIds: this.#config.expectedRootGoogleUserIds,
+        fieldIds: schema.fieldIds,
+        googleUsers,
+        managedDomain: this.#config.managedDomain,
+        slackUsers,
+      });
+    const provisionalPlan = project(slackSnapshot.members);
     const exactMembers = await hydrateSlackProfiles(
       this.#slack,
-      slackProjectionTargetSnapshot.members,
+      slackSnapshot.members,
       provisionalPlan,
       this.#config,
       runId,
       deadlineAt,
     );
-    const plan = buildOrgProjectionPlan({
-      excludedGoogleUserIds: this.#config.excludedGoogleUserIds,
-      expectedRootGoogleUserIds: this.#config.expectedRootGoogleUserIds,
-      fieldIds: schema.fieldIds,
-      googleUsers,
-      managedDomain: this.#config.managedDomain,
-      slackUsers: exactMembers,
-    });
+    const plan = project(exactMembers);
     const changedProfiles = plan.profiles.filter(
       (profile) => profile.changedFields.length > 0,
     );
@@ -246,8 +264,8 @@ export class OrgSyncService implements OrgSyncServiceContract {
         startedAt,
       );
     }
-    const actor = slackProjectionTargetSnapshot.members.find(
-      (member) => member.id === slackProjectionTargetSnapshot.actorUserId,
+    const actor = slackSnapshot.members.find(
+      (member) => member.id === slackSnapshot.actorUserId,
     );
     const membersById = new Map(
       exactMembers.map((member) => [member.id, member]),
@@ -263,13 +281,12 @@ export class OrgSyncService implements OrgSyncServiceContract {
       (profile) => !roleSkippedIds.has(profile.slackUserId),
     );
     const selectedProfile = selectProfileForWrite(writableChangedProfiles);
-    const selectedProfiles = selectedProfile ? [selectedProfile] : [];
     const planHash = await hashPlan(
       plan,
       schema,
       selectedProfile?.slackUserId ?? null,
     );
-    logPlan(runId, plan, planHash, selectedProfiles);
+    logPlan(runId, plan, planHash, selectedProfile);
     const roleWarnings = roleSkipped.map(
       (profile) =>
         `Slack role prevents the installed token from updating ${profile.identity}; retained as audit-only drift`,
@@ -282,12 +299,10 @@ export class OrgSyncService implements OrgSyncServiceContract {
     if (options.mode === "audit")
       return finishReport({ ...base, status: "audit" }, startedAt);
     const requiresApproval =
-      selectedProfiles.length > this.#config.maxAutomaticChanges ||
-      selectedProfiles.some(
-        (profile) =>
-          profile.reason === "slack_orphan" ||
-          profile.reason === "not_org_participant",
-      );
+      selectedProfile !== null &&
+      (this.#config.maxAutomaticChanges < 1 ||
+        selectedProfile.reason === "slack_orphan" ||
+        selectedProfile.reason === "not_org_participant");
     if (
       (requiresApproval || options.expectedPlanHash !== undefined) &&
       options.expectedPlanHash !== planHash
@@ -296,10 +311,9 @@ export class OrgSyncService implements OrgSyncServiceContract {
         `Safety stop: this exact change set requires approval; set the expected plan hash to ${planHash}`,
       ];
       logEvent("org_sync.mass_change_blocked", {
-        changes: selectedProfiles.length,
-        "destructive_clears": selectedProfiles.filter(
-          (profile) => profile.reason === "slack_orphan",
-        ).length,
+        changes: selectedProfile === null ? 0 : 1,
+        "destructive_clears":
+          selectedProfile?.reason === "slack_orphan" ? 1 : 0,
         limit: this.#config.maxAutomaticChanges,
         "plan_hash": planHash,
         "run_id": runId,
@@ -307,10 +321,9 @@ export class OrgSyncService implements OrgSyncServiceContract {
       return finishReport({ ...base, errors, status: "blocked" }, startedAt);
     }
 
-    const applied = await this.#apply(
+    const applied = await this.#applyProfile(
       runId,
-      selectedProfiles,
-      { ...slackProjectionTargetSnapshot, members: exactMembers },
+      selectedProfile,
       schema.fieldIds,
       deadlineAt,
       options.identityBudget,
@@ -327,110 +340,48 @@ export class OrgSyncService implements OrgSyncServiceContract {
         startedAt,
       );
     }
-    const skippedIds = new Set(roleSkippedIds);
-    for (const failure of applied.blocked) {
-      skippedIds.add(failure.slackUserId);
-    }
-    for (const failure of applied.failed) {
-      skippedIds.add(failure.slackUserId);
-    }
-    const verification = await verifyAll(
-      this.#slack,
-      selectedProfiles.filter(
-        (profile) => !skippedIds.has(profile.slackUserId),
-      ),
-      schema.fieldIds,
-      runId,
-      deadlineAt,
-    );
-    const failed = [...applied.failed, ...verification.failures];
-    const blocked = [...base.blocked, ...applied.blocked];
-    const status = convergenceStatus(failed.length, blocked.length);
     return finishReport(
       {
         ...base,
-        blocked,
-        failed,
-        status,
-        verified: verification.verified,
-        warnings: base.warnings,
-        writes: applied.writes,
+        ...applied,
+        status: applied.failed.length > 0 ? "failed" : "success",
       },
       startedAt,
     );
   }
 
-  async #apply(
+  async #applyProfile(
     runId: string,
-    profiles: ProfilePlan[],
-    initialSnapshot: SlackSnapshot,
+    profile: ProfilePlan | null,
     fieldIds: ManagedFieldIds,
     deadlineAt: number,
     identityBudget: IdentityWriteBudget | undefined,
-  ): ApplyResult {
-    const membersById = new Map(
-      initialSnapshot.members.map((member) => [member.id, member]),
-    );
-    const blocked: OrgSyncFailure[] = [];
-    const failed: OrgSyncFailure[] = [];
-    let writeAttempts = 0;
-    let writes = 0;
-    const beforeWrite = async (): Promise<void> => {
-      if (Date.now() > deadlineAt)
-        throw new Error("Org sync run exceeded its write deadline");
-      if (writeAttempts > 0) {
-        logEvent("org_sync.rate_wait", {
-          "run_id": runId,
-          "wait_ms": PROFILE_WRITE_INTERVAL_MS,
-        });
-        await this.#sleep(PROFILE_WRITE_INTERVAL_MS);
-        if (Date.now() > deadlineAt) {
-          throw new Error(
-            "Org sync run exceeded its write deadline during pacing",
-          );
-        }
-      }
-      writeAttempts++;
-    };
-
-    for (const profile of profiles) {
-      if (Date.now() >= deadlineAt) {
-        failed.push({
-          error: "Org sync run exceeded its overall deadline",
-          slackUserId: profile.slackUserId,
-        });
-        break;
-      }
-      const target = membersById.get(profile.slackUserId);
-      if (!target) {
-        failed.push({
-          error: "Slack target disappeared after planning",
-          slackUserId: profile.slackUserId,
-        });
-        continue;
-      }
-      try {
-        // eslint-disable-next-line no-await-in-loop -- Each profile write outcome is recorded before the next mutation and deadline check.
-        const written = await this.#applyOne(
-          runId,
-          profile,
-          fieldIds,
-          deadlineAt,
-          beforeWrite,
-          identityBudget,
-        );
-        if (written) writes++;
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        failed.push({ error: message, slackUserId: profile.slackUserId });
-        logEvent("org_sync.profile_failed", {
-          error: message,
-          "run_id": runId,
-          "slack_user_id": profile.slackUserId,
-        });
-      }
+  ): Promise<Pick<OrgSyncRunReport, "failed" | "verified" | "writes">> {
+    if (profile === null) return { failed: [], verified: 0, writes: 0 };
+    try {
+      if (Date.now() >= deadlineAt)
+        throw new Error("Org sync run exceeded its overall deadline");
+      const written = await this.#applyOne(
+        runId,
+        profile,
+        fieldIds,
+        deadlineAt,
+        identityBudget,
+      );
+      return { failed: [], verified: 1, writes: written ? 1 : 0 };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      logEvent("org_sync.profile_failed", {
+        error: message,
+        "run_id": runId,
+        "slack_user_id": profile.slackUserId,
+      });
+      return {
+        failed: [{ error: message, slackUserId: profile.slackUserId }],
+        verified: 0,
+        writes: 0,
+      };
     }
-    return { blocked, failed, writes };
   }
 
   async #applyOne(
@@ -438,10 +389,8 @@ export class OrgSyncService implements OrgSyncServiceContract {
     profile: ProfilePlan,
     fieldIds: ManagedFieldIds,
     deadlineAt: number,
-    beforeWrite: () => Promise<void>,
     identityBudget: IdentityWriteBudget | undefined,
   ): Promise<boolean> {
-    await beforeWrite();
     const latest = await this.#slack.getProfile(
       profile.slackUserId,
       runId,
@@ -469,13 +418,17 @@ export class OrgSyncService implements OrgSyncServiceContract {
       identityBudget,
       profile.googleUserId ?? undefined,
     );
-    await this.#writeWithAmbiguousRecovery(
-      runId,
-      profile,
-      fieldIds,
-      payload,
-      deadlineAt,
-    );
+    let failure: { error: unknown } | undefined;
+    try {
+      await this.#slack.setProfile(
+        profile.slackUserId,
+        payload,
+        runId,
+        deadlineAt,
+      );
+    } catch (error) {
+      failure = { error };
+    }
     const readback = await this.#slack.getProfile(
       profile.slackUserId,
       runId,
@@ -487,6 +440,7 @@ export class OrgSyncService implements OrgSyncServiceContract {
       fieldIds,
     );
     if (remaining.length > 0) {
+      if (failure !== undefined) throw failure.error;
       throw new Error(
         `Slack read-back mismatch for fields: ${remaining.join(",")}`,
       );
@@ -497,53 +451,6 @@ export class OrgSyncService implements OrgSyncServiceContract {
     });
     return true;
   }
-
-  async #writeWithAmbiguousRecovery(
-    runId: string,
-    profile: ProfilePlan,
-    fieldIds: ManagedFieldIds,
-    payload: {
-      fields: Record<string, { alt: string; value: string }>;
-      title?: string | undefined;
-    },
-    deadlineAt: number,
-  ): Promise<void> {
-    try {
-      await this.#slack.setProfile(
-        profile.slackUserId,
-        payload,
-        runId,
-        deadlineAt,
-      );
-    } catch (error) {
-      const postFailureReadback = await this.#slack.getProfile(
-        profile.slackUserId,
-        runId,
-        deadlineAt,
-      );
-      const managedFieldsAfterPostFailure = readManagedFields(
-        postFailureReadback,
-        fieldIds,
-      );
-      if (
-        changedManagedFields(
-          managedFieldsAfterPostFailure,
-          profile.desired,
-          fieldIds,
-        ).length > 0
-      )
-        throw error;
-    }
-  }
-}
-
-function convergenceStatus(
-  failed: number,
-  blocked: number,
-): Extract<OrgSyncRunReport["status"], "blocked" | "failed" | "success"> {
-  if (failed > 0) return "failed";
-  if (blocked > 0) return "blocked";
-  return "success";
 }
 
 function validateProtectedDepartedUsers(
@@ -898,9 +805,7 @@ async function hashPlan(
     teamId: schema.teamId,
     unplacedGoogle: plan.unplacedGoogle,
   };
-  const bytes = new TextEncoder().encode(JSON.stringify(stable));
-  const digest = new Uint8Array(await crypto.subtle.digest("SHA-256", bytes));
-  return [...digest].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+  return sha256(JSON.stringify(stable));
 }
 
 function reportBase(
@@ -973,10 +878,10 @@ function logPlan(
   runId: string,
   plan: OrgProjectionPlan,
   planHash: string,
-  changedProfiles: ProfilePlan[],
+  profile: ProfilePlan | null,
 ): void {
   logEvent("org_sync.plan_ready", {
-    changes: changedProfiles.length,
+    changes: profile === null ? 0 : 1,
     "google_only": plan.googleOnly.length,
     matched: plan.matched,
     "plan_hash": planHash,
@@ -984,7 +889,7 @@ function logPlan(
     "slack_orphans": plan.slackOrphans.length,
     warnings: plan.warnings.length,
   });
-  for (const profile of changedProfiles) {
+  if (profile !== null) {
     logEvent("org_sync.profile_diff", {
       fields: profile.changedFields.join(","),
       "google_user_id": profile.googleUserId,
@@ -993,44 +898,4 @@ function logPlan(
       "slack_user_id": profile.slackUserId,
     });
   }
-}
-
-async function verifyAll(
-  slack: IOrgSlackClient,
-  profiles: ProfilePlan[],
-  fieldIds: ManagedFieldIds,
-  runId: string,
-  deadlineAt: number,
-): Promise<{ failures: OrgSyncFailure[]; verified: number }> {
-  const failures: OrgSyncFailure[] = [];
-  let verified = 0;
-  for (const profile of profiles) {
-    try {
-      // eslint-disable-next-line no-await-in-loop -- Each post-write profile read is compared with its own desired state before continuing.
-      const current = await slack.getProfile(
-        profile.slackUserId,
-        runId,
-        deadlineAt,
-      );
-      const remaining = changedManagedFields(
-        readManagedFields(current, fieldIds),
-        profile.desired,
-        fieldIds,
-      );
-      if (remaining.length > 0) {
-        failures.push({
-          error: `Final verification mismatch: ${remaining.join(",")}`,
-          slackUserId: profile.slackUserId,
-        });
-        continue;
-      }
-      verified++;
-    } catch (error) {
-      failures.push({
-        error: error instanceof Error ? error.message : String(error),
-        slackUserId: profile.slackUserId,
-      });
-    }
-  }
-  return { failures, verified };
 }

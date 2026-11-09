@@ -1,6 +1,8 @@
 import type { D1Database } from "@cloudflare/workers-types";
 import { z } from "zod";
 
+import { sha256 } from "../runtime/sha256.ts";
+
 export interface GoogleDirectoryWatchConfig {
   googleDirectoryWatchAddress: string;
   googleDirectoryWatchToken: string;
@@ -175,16 +177,6 @@ function missingConfiguration(env: GoogleDirectoryWatchConfig): string[] {
   return Object.entries(required)
     .filter(([, value]) => value.trim() === "")
     .map(([key]) => key);
-}
-
-async function sha256(value: string): Promise<string> {
-  const digest = await crypto.subtle.digest(
-    "SHA-256",
-    new TextEncoder().encode(value),
-  );
-  return [...new Uint8Array(digest)]
-    .map((byte) => byte.toString(16).padStart(2, "0"))
-    .join("");
 }
 
 export class GoogleDirectoryWatchChannelManager implements GoogleDirectoryWatchRenewalPort {

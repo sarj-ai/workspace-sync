@@ -1,0 +1,6 @@
+Google, Slack, GitHub, Linear, PagerDuty and Sentry SVGs: SVG Logos, CC0 1.0.
+Source: https://github.com/gilbarbara/logos/tree/22f03ffc4a652309d1fea4ade70f46e9e1d6602c
+License: LICENSE.txt
+Attio favicon: https://attio.com/favicon.ico?favicon.0t61hvyp-jaev.ico
+Comp AI favicon: https://www.trycomp.ai/favicon.png
+Brand marks identify their respective integrations.

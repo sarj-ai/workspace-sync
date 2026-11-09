@@ -1,3 +1,4 @@
+import { sha256 as hashContent } from "../runtime/sha256.ts";
 import { logEvent } from "../shared/log-event.ts";
 import type {
   GoogleOrgChartDriveClient,
@@ -62,12 +63,7 @@ export class OrgChartService implements IOrgChartService {
       this.#policy,
     );
     const encoded = new TextEncoder().encode(html);
-    const digest = new Uint8Array(
-      await crypto.subtle.digest("SHA-256", encoded),
-    );
-    const sha256 = [...digest]
-      .map((byte) => byte.toString(16).padStart(2, "0"))
-      .join("");
+    const sha256 = await hashContent(html);
     if (mode === "live" && sha256 !== request.expectedSha256) {
       throw new Error("Organization chart source changed after planning");
     }

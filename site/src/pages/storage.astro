@@ -1,0 +1,21 @@
+---
+import ReferencePage from "../components/reference-page.astro";
+import { siteHref } from "../lib/reference";
+---
+
+<ReferencePage title="Storage">
+  <p>Basic <a href={siteHref("plan-and-apply/")}>Slack profile plan/apply</a> needs no database. Configure storage only for the workflows you run.</p>
+  <table>
+    <thead><tr><th>Workflow</th><th>Why it keeps state</th><th>Module</th></tr></thead>
+    <tbody>
+      <tr><td>Scheduled limits</td><td>Keep retries and parallel tasks on the same person.</td><td><a href={siteHref("api/identity-provisioning/identity-budget-repository/")}>IdentityBudgetRepository</a></td></tr>
+      <tr><td>Concurrent workers</td><td>Prevent two workers from making the same change.</td><td><a href={siteHref("api/identity-sync/resource-lease/")}>Resource leases</a></td></tr>
+      <tr><td>Google notifications</td><td>Authenticate channels, ignore duplicate events and resume incomplete scans.</td><td><a href={siteHref("api/identity-lifecycle/contracts/")}>Directory lifecycle</a></td></tr>
+      <tr><td>Account lifecycle</td><td>Remember approvals, completed operations and deleted accounts.</td><td><a href={siteHref("api/identity-provisioning/persistence/")}>Lifecycle store</a></td></tr>
+      <tr><td>Slack memberships</td><td>Remove only memberships created by the sync.</td><td><a href={siteHref("api/org-sync/channel-membership-provenance/")}>Membership ownership</a></td></tr>
+      <tr><td>Change notifications</td><td>Find existing messages instead of posting duplicates.</td><td><a href={siteHref("api/workspace-directory/d1-workspace-ledger-history-index/")}>Message history</a></td></tr>
+      <tr><td>Comp AI</td><td>Track changes, deliveries and uncertain provider responses before retrying.</td><td><a href={siteHref("api/trycomp/safety/")}>Comp AI safety store</a></td></tr>
+    </tbody>
+  </table>
+  <p>The consuming application owns SQL schemas, migrations and retained audit records. These stores are used by active workflows; deleting their tables would lose retry, approval or ownership checks.</p>
+</ReferencePage>

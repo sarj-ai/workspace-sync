@@ -52,8 +52,19 @@
   text-align: left;
 }
 .flow-node strong {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   font-size: 0.9rem;
+}
+.flow-node img {
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0.2rem;
+  margin: 0;
+  flex-shrink: 0;
+  border-radius: 0.3rem;
+  background: white;
 }
 .flow-node span {
   display: block;

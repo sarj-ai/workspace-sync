@@ -3,6 +3,7 @@ import { normalizeIdentityEmail as normalizeEmail } from "../identity-sync/norma
 import type { GoogleGroupSnapshot } from "../org-sync/channel-model.ts";
 import { orgSyncSettings } from "../org-sync/config.ts";
 import type { GoogleDirectoryUser } from "../org-sync/model.ts";
+import { sha256 } from "../runtime/sha256.ts";
 import {
   hasTrycompDeactivationSafety,
   isVerifiedDeviceFreeTrycompRevocation,
@@ -645,14 +646,4 @@ async function authorityBoundPlanHash(input: {
       .toSorted((left, right) => left.id.localeCompare(right.id)),
   };
   return sha256(JSON.stringify(evidence));
-}
-
-async function sha256(value: string): Promise<string> {
-  const digest = await crypto.subtle.digest(
-    "SHA-256",
-    new TextEncoder().encode(value),
-  );
-  return [...new Uint8Array(digest)]
-    .map((byte) => byte.toString(16).padStart(2, "0"))
-    .join("");
 }

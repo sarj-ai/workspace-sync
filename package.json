@@ -1,8 +1,8 @@
 {
   "name": "@sarj-ai/workspace-sync",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "private": true,
-  "description": "Google Workspace directory authority and guarded identity reconciliation",
+  "description": "Sync profiles and access from Google Workspace",
   "license": "MIT",
   "type": "module",
   "packageManager": "pnpm@12.15.0",

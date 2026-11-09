@@ -1,6 +1,7 @@
 import type { D1Database } from "@cloudflare/workers-types";
 import { z } from "zod";
 
+import { sha256 } from "../runtime/sha256.ts";
 import { GOOGLE_DIRECTORY_WATCH_EVENTS } from "./channel-manager.ts";
 import type { GoogleDirectoryWatchNotification } from "./contracts.ts";
 
@@ -29,11 +30,7 @@ export interface GoogleWatchChannelAuthenticator {
 }
 
 export async function googleWatchTokenSha256(token: string): Promise<string> {
-  const bytes = new TextEncoder().encode(token);
-  const digest = await crypto.subtle.digest("SHA-256", bytes);
-  return [...new Uint8Array(digest)]
-    .map((byte) => byte.toString(16).padStart(2, "0"))
-    .join("");
+  return sha256(token);
 }
 
 function constantTimeEqual(left: string, right: string): boolean {

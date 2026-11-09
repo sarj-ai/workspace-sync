@@ -1,15 +1,11 @@
 import { z } from "zod";
 
+import { sha256 } from "../runtime/sha256.ts";
+
 const JsonRecordSchema = z.record(z.string(), z.unknown());
 
 export async function contentHash(value: unknown): Promise<string> {
-  const bytes = await crypto.subtle.digest(
-    "SHA-256",
-    new TextEncoder().encode(stableStringify(value)),
-  );
-  return [...new Uint8Array(bytes)]
-    .map((byte) => byte.toString(16).padStart(2, "0"))
-    .join("");
+  return sha256(stableStringify(value));
 }
 
 function stableStringify(value: unknown): string {
