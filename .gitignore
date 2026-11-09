@@ -8,5 +8,4 @@ coverage/
 site/dist/
 .wrangler/
 site/.astro/
-site/generated/
 site/public/generated/
