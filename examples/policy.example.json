@@ -1,0 +1,47 @@
+{
+  "contractorAuthorityGroup": {
+    "acceptedEmails": [
+      "team-contractors@example.com",
+      "team-eng-contract@example.com"
+    ],
+    "email": "team-contractors@example.com",
+    "id": "contractor-group-test"
+  },
+  "employeeEntitlementExcludedEmails": [],
+  "ignoredDeletedGoogleUserIds": [],
+  "org": {
+    "allowedEmptyDepartmentGoogleUserIds": ["100000000000000000001"],
+    "allTeamDriveId": "test-shared-drive",
+    "excludedGoogleUserIds": [],
+    "expectedRootGoogleUserIds": [
+      "100000000000000000001",
+      "100000000000000000002"
+    ],
+    "expectedSlackTeamId": "TTEST000001",
+    "protectedDepartedGoogleUserIds": [],
+    "fieldIds": {
+      "manages": "XTESTMANAGES",
+      "reportsTo": "XTESTREPORTS",
+      "team": "XTESTTEAM"
+    },
+    "googleAdminSubject": "admin@example.com",
+    "googleUserProject": "workspace-sync-test",
+    "managedDomain": "example.com",
+    "maxAutomaticChanges": 10,
+    "minimumGoogleParticipants": 40,
+    "orgChartFileId": "test-org-chart-file"
+  },
+  "reviewedGitHubDirectGrantRetentions": [],
+  "reviewedGitHubTeamMemberships": [],
+  "sentryTeamSlug": "platform",
+  "trycomp": {
+    "contractorGroupEmail": "team-contractors@example.com",
+    "contractorGroupId": "contractor-group-test",
+    "maxAutomaticActivations": 1,
+    "maxAutomaticContractorDeactivations": 1,
+    "maxAutomaticInactiveGoogleDeactivations": 1,
+    "maxAutomaticDeactivations": 1,
+    "offboardingOnly": true,
+    "minimumGoogleUsers": 40
+  }
+}

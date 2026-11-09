@@ -1,0 +1,82 @@
+# Managed by code-standards; regenerate with `code-standards show ci --output .github/workflows/standards.yml`.
+name: Standards
+
+on:
+  pull_request:
+  merge_group:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: standards-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  standards:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Harden the runner
+        uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: '0.13.5'
+          enable-cache: true
+          cache-dependency-glob: |
+            .sarj-standards.toml
+            **/uv.lock
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+      - name: Activate Corepack
+        run: corepack enable
+      - name: Install JavaScript dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Install the pinned native tool bootstrap
+        env:
+          UV_PYTHON_DOWNLOADS_JSON_URL: https://raw.githubusercontent.com/astral-sh/uv/4ecd0eff2a81e3ffdcd7cfee10d08936e4747c17/crates/uv-python-managed/download-metadata.json
+        run: uv run --no-config --no-project --python 3.15.0 --with code-standards==9.6.5 python -m sarj_standards.libs.adoption.native_bootstrap
+      - name: Install and attest applicable native tools
+        env:
+          GITHUB_TOKEN: ${{ github.server_url == 'https://github.com' && github.token || '' }}
+        run: uvx --no-config --isolated --python 3.14 --from sarj-standards-bootstrap code-standards setup --tools-only
+      - name: Prepare pinned zizmor
+        run: uvx --no-config --isolated --python 3.12 --from zizmor==1.31.1 zizmor --version
+      - name: Restore Standards results
+        id: standards-results
+        if: vars.STANDARDS_RESULT_CACHE != 'off'
+        continue-on-error: true
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ runner.temp }}/standards-results
+          key: standards-results-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.sarj-standards.toml') }}-${{ github.sha }}
+          restore-keys: standards-results-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.sarj-standards.toml') }}-
+      - name: Run standards
+        shell: bash
+        env:
+          SARJ_STANDARDS_BASE: >-
+            ${{ !(github.event_name == 'push' && github.event.created &&
+            github.event.before == '0000000000000000000000000000000000000000') &&
+            (github.event.pull_request.base.sha || github.event.merge_group.base_sha ||
+            github.event.before) || '' }}
+          SARJ_STANDARDS_RESULT_CACHE: >-
+            ${{ vars.STANDARDS_RESULT_CACHE != 'off' && format('{0}/standards-results', runner.temp) || 'off' }}
+          SARJ_STANDARDS_RESULT_CACHE_WRITE: >-
+            ${{ github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && '1' || '' }}
+        run: uvx --no-config --isolated --python 3.14 --from sarj-standards-bootstrap code-standards check --trust-repository-code --format github
+      - name: Save trusted Standards results
+        if: vars.STANDARDS_RESULT_CACHE != 'off' && github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        continue-on-error: true
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ runner.temp }}/standards-results
+          key: ${{ steps.standards-results.outputs.cache-primary-key }}

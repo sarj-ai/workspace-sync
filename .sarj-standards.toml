@@ -1,0 +1,41 @@
+# Managed by `code-standards setup`; commit this file.
+bundle = "9.6.5"
+rule_profile = "all"
+schema = 4
+
+[capabilities]
+disable = [
+  "ruff",
+  "pyright",
+  "swiftformat",
+  "swiftlint",
+  "ktlint",
+  "detekt",
+  "mobile-security",
+  "checkov",
+  "deptry",
+  "jscpd",
+  "knip",
+  "sqlfluff",
+]
+
+[artifacts]
+durable = [
+  "**/README.md",
+  "docs/**",
+  "**/docs/**",
+  "architecture/**",
+  "**/adr/**",
+  ".github/**",
+  "**/AGENTS.md",
+  "**/CLAUDE.md",
+]
+
+[dest]
+kotlin = "."
+python = "."
+swift = "."
+typescript = "."
+
+[hooks]
+manager = "pre-commit"

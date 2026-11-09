@@ -1,0 +1,69 @@
+import type { WorkspaceSyncPolicy } from "../src/configuration.ts";
+
+export const TEST_POLICY: WorkspaceSyncPolicy = {
+  contractorAuthorityGroup: {
+    acceptedEmails: [
+      "team-contractors@company.test",
+      "team-eng-contract@company.test",
+    ],
+    email: "team-contractors@company.test",
+    id: "contractor-group-test",
+  },
+  employeeEntitlementExcludedEmails: [
+    "excluded-one@company.test",
+    "excluded-two@company.test",
+    "excluded-three@company.test",
+    "service@company.test",
+    "excluded-four@company.test",
+  ],
+  ignoredDeletedGoogleUserIds: ["999999999999999999999"],
+  org: {
+    allowedEmptyDepartmentGoogleUserIds: ["999999999999999999901"],
+    allTeamDriveId: "test-shared-drive",
+    excludedGoogleUserIds: [
+      "999999999999999999910",
+      "999999999999999999911",
+      "999999999999999999912",
+      "999999999999999999913",
+      "999999999999999999914",
+      "999999999999999999915",
+      "999999999999999999916",
+      "999999999999999999917",
+    ],
+    expectedRootGoogleUserIds: [
+      "999999999999999999901",
+      "999999999999999999902",
+    ],
+    expectedSlackTeamId: "TTEST000001",
+    protectedDepartedGoogleUserIds: [
+      "999999999999999999903",
+      "999999999999999999904",
+      "999999999999999999905",
+      "999999999999999999906",
+    ],
+    fieldIds: {
+      manages: "XTESTMANAGES",
+      reportsTo: "XTESTREPORTS",
+      team: "XTESTTEAM",
+    },
+    googleAdminSubject: "root-admin@company.test",
+    googleUserProject: "workspace-sync-test",
+    managedDomain: "company.test",
+    maxAutomaticChanges: 10,
+    minimumGoogleParticipants: 40,
+    orgChartFileId: "test-org-chart-file",
+  },
+  reviewedGitHubDirectGrantRetentions: [],
+  reviewedGitHubTeamMemberships: [],
+  sentryTeamSlug: "platform",
+  trycomp: {
+    contractorGroupEmail: "team-contractors@company.test",
+    contractorGroupId: "contractor-group-test",
+    maxAutomaticActivations: 1,
+    maxAutomaticContractorDeactivations: 1,
+    maxAutomaticInactiveGoogleDeactivations: 1,
+    maxAutomaticDeactivations: 1,
+    offboardingOnly: true,
+    minimumGoogleUsers: 40,
+  },
+};

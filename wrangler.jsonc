@@ -1,0 +1,25 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "sarj-workspace-sync-docs",
+  "main": "site/worker.ts",
+  "compatibility_date": "2026-11-08",
+  "workers_dev": false,
+  "preview_urls": false,
+  "assets": {
+    "directory": "./site/dist",
+    "binding": "ASSETS",
+    "run_worker_first": true,
+    "not_found_handling": "404-page",
+    "html_handling": "force-trailing-slash",
+  },
+  "routes": [
+    {
+      "pattern": "engineering.sarj.ai/projects/workspace-sync",
+      "zone_name": "sarj.ai",
+    },
+    {
+      "pattern": "engineering.sarj.ai/projects/workspace-sync/*",
+      "zone_name": "sarj.ai",
+    },
+  ],
+}
