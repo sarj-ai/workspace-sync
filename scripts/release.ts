@@ -176,7 +176,9 @@ async function checkDistribution() {
     assert.equal(manifest.exports["."].import, "./dist/configuration.js");
     const files = await readdir(path.join(root, "dist"));
     assert.ok(files.includes("configuration.js"));
-    await import("../dist/configuration.js");
+    await import(
+      pathToFileURL(path.join(root, manifest.exports["."].import)).href
+    );
   });
   check("Source and test publication boundary", () =>
     assert.ok(
@@ -280,7 +282,17 @@ async function smoke(): Promise<void> {
     const metadata: unknown = JSON.parse(
       await readFile(new URL("package.json", packagedRoot), "utf8"),
     );
-    const expected: unknown = { ...manifest };
+    // pnpm omits package-manager metadata and packing hooks from the consumer manifest.
+    const {
+      packageManager: _packageManager,
+      scripts,
+      ...publishedManifest
+    } = manifest;
+    const { prepack: _prepack, ...consumerScripts } = scripts;
+    const expected: unknown = {
+      ...publishedManifest,
+      scripts: consumerScripts,
+    };
     assert.deepEqual(metadata, expected);
     const { z } = await import("zod");
     const configuration: unknown = await import(
