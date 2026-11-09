@@ -19,7 +19,7 @@ import { z } from "zod";
 import { OrgSyncSettingsSchema } from "./org-sync/org-sync-settings-schema.ts";
 
 const GoogleUserIdSchema = z.string().regex(/^[1-9]\d{4,29}$/u);
-const EmailSchema = z.email().transform((value) => value.toLowerCase());
+const EmailSchema = z.email().toLowerCase();
 const ContractorAuthorityGroupSchema = z
   .strictObject({
     acceptedEmails: z.array(EmailSchema).min(1),

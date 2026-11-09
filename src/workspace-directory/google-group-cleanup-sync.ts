@@ -37,7 +37,7 @@ export function isProtectedGoogleCleanupUser(
   );
 }
 
-const EmailSchema = z.email().transform((value) => value.toLowerCase());
+const EmailSchema = z.email().toLowerCase();
 const Sha256Schema = z.string().regex(/^[a-f0-9]{64}$/u);
 const InactiveLifecycleSchema = z.enum(["archived", "deleted", "suspended"]);
 const PrivilegedGoogleGroupRoleSchema = z.enum(["MANAGER", "OWNER"]);

@@ -12,11 +12,11 @@ export const PagerDutyTeamRoleSchema = z.enum([
 export const PagerDutyTeamMappingSchema = z
   .strictObject({
     excludedEmails: z
-      .array(z.email().transform((value) => value.toLowerCase()))
+      .array(z.email().toLowerCase())
       .max(MAX_PAGERDUTY_TEAM_EXCLUSIONS)
       .readonly()
       .optional(),
-    googleGroupEmail: z.email().transform((value) => value.toLowerCase()),
+    googleGroupEmail: z.email().toLowerCase(),
     googleGroupId: z.string().min(1),
     pagerDutyRole: PagerDutyTeamRoleSchema,
     pagerDutyTeamId: PagerDutyIdSchema,

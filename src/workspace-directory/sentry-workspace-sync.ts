@@ -9,7 +9,7 @@ import {
   sentryMemberEmail,
 } from "./sentry-workspace-client.ts";
 
-const EmailSchema = z.email().transform((value) => value.toLowerCase());
+const EmailSchema = z.email().toLowerCase();
 const MAX_AUTHORITY_MEMBERS = 50;
 const MAX_ACTIONS = 25;
 

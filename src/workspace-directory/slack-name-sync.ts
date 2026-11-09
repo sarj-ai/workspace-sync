@@ -25,7 +25,7 @@ const REQUIRED_SLACK_SCOPES = [
   "users:read",
   "users:read.email",
 ] as const;
-const EmailSchema = z.email().transform((value) => value.toLowerCase());
+const EmailSchema = z.email().toLowerCase();
 const NameSchema = z.string().trim().min(1).max(50);
 const Sha256Schema = z.string().regex(/^[a-f0-9]{64}$/u);
 export const SlackNameActionSchema = z.strictObject({

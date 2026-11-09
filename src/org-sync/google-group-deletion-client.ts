@@ -26,7 +26,7 @@ const DirectoryGroupSnapshotSchema = GoogleGroupIdentitySchema.extend({
 const DirectoryGroupResponseSchema = z.record(z.string(), JsonValueSchema);
 
 export const GoogleGroupDeletionTargetSchema = z.strictObject({
-  googleGroupEmail: z.email().transform((value) => value.toLowerCase()),
+  googleGroupEmail: z.email().toLowerCase(),
   googleGroupId: z.string().trim().min(1).optional(),
 });
 export type GoogleGroupDeletionTarget = z.output<
