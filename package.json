@@ -1,6 +1,6 @@
 {
   "name": "@sarj-ai/workspace-sync",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": true,
   "description": "Google Workspace directory authority and guarded identity reconciliation",
   "license": "MIT",
@@ -530,7 +530,7 @@
   },
   "scripts": {
     "build": "node scripts/build.ts",
-    "check": "tsrs --noEmit",
+    "check": "tsrs --noEmit && node scripts/documentation.ts --site --check && pnpm --dir site check",
     "lint": "uvx --no-config --isolated --python 3.14 --from sarj-standards-bootstrap code-standards check --trust-repository-code",
     "test": "vitest run",
     "security": "node scripts/release.ts check",
@@ -539,11 +539,11 @@
     "prepack": "pnpm build",
     "format": "oxfmt",
     "format:check": "oxfmt --check",
-    "docs:generate": "pnpm build && node scripts/documentation.ts",
+    "docs:generate": "pnpm build && node scripts/documentation.ts --site",
     "docs:check": "node scripts/documentation.ts --check",
-    "site:build": "node scripts/documentation.ts --site",
+    "site:build": "node scripts/documentation.ts --site && pnpm --dir site build",
     "site:deploy": "wrangler deploy --strict",
-    "verify:application": "pnpm check && pnpm build && pnpm docs:check && pnpm test && pnpm security && pnpm audit --audit-level low"
+    "verify:application": "pnpm build && pnpm docs:check && pnpm check && pnpm test && pnpm security && pnpm audit --audit-level low"
   },
   "dependencies": {
     "@cloudflare/workers-types": "5.20261108.1",

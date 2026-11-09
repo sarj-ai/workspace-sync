@@ -1,0 +1,17 @@
+---
+import { Code } from "@astrojs/starlight/components";
+
+import ReferencePage from "../../components/reference-page.astro";
+import { REFERENCE } from "../../lib/reference";
+
+export function getStaticPaths() {
+  return REFERENCE.modules.map((entry) => ({ params: { module: entry.module }, props: { entry } }));
+}
+interface Props { entry: (typeof REFERENCE.modules)[number] }
+const { entry } = Astro.props;
+---
+
+<ReferencePage title={entry.module}>
+  <p><code>{entry.name}</code> · <a href={`${REFERENCE.repository}/blob/main/src/${entry.module}.ts`}>Source</a></p>
+  <Code code={entry.declaration} lang="ts" />
+</ReferencePage>

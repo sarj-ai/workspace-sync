@@ -21,6 +21,6 @@
     "vitest.config.ts",
     "scripts/**/*.ts",
     "examples/**/*.ts",
-    "site/**/*.ts"
+    "site/worker.ts"
   ]
 }

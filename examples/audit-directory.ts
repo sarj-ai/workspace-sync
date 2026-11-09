@@ -1,5 +1,7 @@
 import { readFile } from "node:fs/promises";
 
+import { z } from "zod";
+
 import {
   configureWorkspaceSyncPolicy,
   getWorkspaceSyncPolicy,
@@ -13,17 +15,18 @@ const input: unknown = JSON.parse(await readFile(policyPath, "utf8"));
 configureWorkspaceSyncPolicy(input);
 const policy = getWorkspaceSyncPolicy();
 
-function requiredEnvironment(name: string): string {
-  // eslint-disable-next-line @sarj/no-raw-env -- This standalone CLI validates each credential here before constructing a provider client.
-  const value = process.env[name];
-  if (!value?.trim()) throw new Error(`Missing environment variable: ${name}`);
-  return value;
-}
+const credentials = z
+  .object({
+    GOOGLE_SERVICE_ACCOUNT_EMAIL: z.email(),
+    GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY: z.string().trim().min(1),
+  })
+  // eslint-disable-next-line @sarj/no-raw-env -- Zod validates this standalone CLI's credentials before constructing a provider client.
+  .parse(process.env);
 
 const directory = new GoogleDirectoryClient({
   adminSubject: policy.org.googleAdminSubject,
-  privateKey: requiredEnvironment("GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY"),
-  serviceAccountEmail: requiredEnvironment("GOOGLE_SERVICE_ACCOUNT_EMAIL"),
+  privateKey: credentials.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY,
+  serviceAccountEmail: credentials.GOOGLE_SERVICE_ACCOUNT_EMAIL,
   userProject: policy.org.googleUserProject,
 });
 const users = await directory.listAllUsers(

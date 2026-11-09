@@ -1,0 +1,17 @@
+---
+import SharedReferencePage from "@sarj/design/ReferencePage.astro";
+
+import { REFERENCE, SIDEBAR } from "../lib/reference";
+
+interface Props {
+  title: string;
+}
+const { title } = Astro.props;
+---
+
+<SharedReferencePage title={title} description={REFERENCE.description} sidebar={SIDEBAR}>
+  <article class="reference-page">
+    <h1>{title}</h1>
+    <slot />
+  </article>
+</SharedReferencePage>

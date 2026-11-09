@@ -1,0 +1,13 @@
+---
+import ReferencePage from "../../components/reference-page.astro";
+import { REFERENCE, siteHref } from "../../lib/reference";
+
+const groups = Map.groupBy(REFERENCE.modules, (entry) => entry.module.includes("/") ? entry.module.split("/")[0] ?? "configuration" : "configuration");
+---
+
+<ReferencePage title="API">
+  {Array.from(groups, ([group, modules]) => <section id={group}>
+    <h2>{group}</h2>
+    <ul class="module-list">{modules.map((entry) => <li><a href={siteHref(`api/${entry.module}/`)}><code>{entry.name.replace("@sarj-ai/workspace-sync/", "")}</code></a></li>)}</ul>
+  </section>)}
+</ReferencePage>
