@@ -183,8 +183,8 @@ importers:
         version: 4.6.7
     devDependencies:
       '@sarj/eslint-plugin':
-        specifier: 19.0.2
-        version: 19.0.2(@typescript/typescript6@6.0.2)(tsrs@0.23.0-ts7.1.0-beta)
+        specifier: 19.7.0
+        version: 19.7.0(@typescript/typescript6@6.0.2)(tsrs@0.23.0-ts7.1.0-beta)
       '@types/d3-hierarchy':
         specifier: 3.1.7
         version: 3.1.7
@@ -1099,8 +1099,8 @@ packages:
   '@rolldown/pluginutils@1.0.1':
     resolution: {integrity: sha512-2j9bGt5Jh8hj+vPtgzPtl72j0yRxHAyumoo6TNfAjsLB04UtpSvPbPcDcBMxz7n+9CYB0c1GxQFxYRg2jimqGw==}
 
-  '@sarj/eslint-plugin@19.0.2':
-    resolution: {integrity: sha512-rfkKyU8qwWoZ8AvvH+HaJZ2PryEGTCdgWm4oB4KiXHD3uFd24rm23rLgoarvdlHkiNffyRWwbeMR7lJ1PRbsyg==}
+  '@sarj/eslint-plugin@19.7.0':
+    resolution: {integrity: sha512-AiHLyTe/GiArwwaRHfxaNuyubo87TWqRa4yWUMoUYpV1VTxTeqj2tk28hWpWpwPK6uGG7BToXhdXcgG14jErFw==}
     engines: {node: ^22.22.2 || >=24.15.0}
     peerDependencies:
       tsrs: '>=0.23.0-ts7.1.0-beta'
@@ -2185,7 +2185,7 @@ snapshots:
 
   '@rolldown/pluginutils@1.0.1': {}
 
-  '@sarj/eslint-plugin@19.0.2(@typescript/typescript6@6.0.2)(tsrs@0.23.0-ts7.1.0-beta)':
+  '@sarj/eslint-plugin@19.7.0(@typescript/typescript6@6.0.2)(tsrs@0.23.0-ts7.1.0-beta)':
     dependencies:
       '@eslint/css-tree': 4.1.2
       change-case: 5.4.4

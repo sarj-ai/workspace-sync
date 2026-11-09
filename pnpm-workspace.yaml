@@ -174,7 +174,7 @@ minimumReleaseAgeExclude:
   - "mdn-data@2.37.2"
   - "oxc-parser@0.148.0"
   - "tinypool@2.2.0"
-  - "@sarj/eslint-plugin@19.0.2"
+  - "@sarj/eslint-plugin@19.7.0"
 # Exact tested Standards peers; registry integrity is reviewed before resolution.
 trustPolicyExclude:
   - "@oxfmt/binding-android-arm-eabi@0.76.0"

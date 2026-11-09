@@ -557,7 +557,7 @@
     "@types/node": "26.6.6",
     "typescript": "npm:@typescript/typescript6@6.0.2",
     "vitest": "5.1.0",
-    "@sarj/eslint-plugin": "19.0.2",
+    "@sarj/eslint-plugin": "19.7.0",
     "eslint-plugin-zod": "5.2.2",
     "oxfmt": "0.76.0",
     "oxlint": "1.91.0",
