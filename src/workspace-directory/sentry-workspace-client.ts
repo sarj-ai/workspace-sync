@@ -24,7 +24,7 @@ const SlugSchema = z
   .min(1)
   .max(64)
   .regex(/^[a-z0-9][a-z0-9_-]*$/u);
-const EmailSchema = z.email().transform((value) => value.toLowerCase());
+const EmailSchema = z.email().toLowerCase();
 const PositiveIntegerSchema = z.number().int().positive();
 const SentryProviderIdSchema = z.string().regex(/^\d{1,32}$/u);
 const SentryScopeSchema = z

@@ -16,7 +16,7 @@ import { indexNamedActiveGoogleUsers } from "./index-named-active-google-users.t
 
 const MAX_ACTIONS = 100;
 const MAX_GOOGLE_USERS = 500;
-const EmailSchema = z.email().transform((value) => value.toLowerCase());
+const EmailSchema = z.email().toLowerCase();
 const FullNameSchema = z.string().trim().min(1).max(200);
 const Sha256Schema = z.string().regex(/^[a-f0-9]{64}$/u);
 

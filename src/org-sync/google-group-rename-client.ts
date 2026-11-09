@@ -60,8 +60,8 @@ const DirectoryGroupSnapshotSchema = GoogleGroupIdentitySchema.extend({
 
 export const GoogleGroupRenameInputSchema = z
   .strictObject({
-    newEmail: z.email().transform((value) => value.toLowerCase()),
-    oldEmail: z.email().transform((value) => value.toLowerCase()),
+    newEmail: z.email().toLowerCase(),
+    oldEmail: z.email().toLowerCase(),
   })
   .refine(({ newEmail, oldEmail }) => newEmail !== oldEmail, {
     message: "Old and new Google group emails must differ",

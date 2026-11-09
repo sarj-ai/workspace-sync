@@ -19,7 +19,7 @@ const PAGE_SIZE = 100;
 
 const PagerDutyIdSchema = z.string().regex(/^P[A-Z0-9]+$/);
 const PagerDutyUserSchema = z.object({
-  email: z.email().transform((value) => value.toLowerCase()),
+  email: z.email().toLowerCase(),
   id: PagerDutyIdSchema,
   name: z.string().trim().min(1),
   role: z.string().trim().min(1),
