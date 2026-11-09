@@ -5,6 +5,7 @@ import {
   type DesiredProvisioningPlan,
   type ProvisioningProviderId,
 } from "../catalog/identity-authority.ts";
+import { sha256 } from "../runtime/sha256.ts";
 import { logEvent } from "../shared/log-event.ts";
 import type {
   IdentityProviderConnector,
@@ -486,15 +487,7 @@ async function hashPlan(
       subjectId: operation.subject.googleUserId,
     })),
   );
-  const digest = await crypto.subtle.digest(
-    "SHA-256",
-    new TextEncoder().encode(canonical),
-  );
-  return identityProvisioningSha256(
-    [...new Uint8Array(digest)]
-      .map((byte) => byte.toString(16).padStart(2, "0"))
-      .join(""),
-  );
+  return identityProvisioningSha256(await sha256(canonical));
 }
 
 async function retryWithoutMasking(

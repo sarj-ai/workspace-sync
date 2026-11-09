@@ -2,14 +2,14 @@
 
 # Workspace Sync
 
-Google Workspace directory authority and guarded identity reconciliation.
+Sync profiles and access from Google Workspace.
 
 [Documentation](https://engineering.sarj.ai/projects/workspace-sync/) · [Plan / apply](https://engineering.sarj.ai/projects/workspace-sync/plan-and-apply/) · [API](https://engineering.sarj.ai/projects/workspace-sync/api/)
 
 Node.js >=24.0.0:
 
 ```sh
-pnpm add https://github.com/sarj-ai/workspace-sync/releases/download/v0.2.1/sarj-ai-workspace-sync-0.2.1.tgz zod@4.6.7
+pnpm add https://github.com/sarj-ai/workspace-sync/releases/download/v0.2.2/sarj-ai-workspace-sync-0.2.2.tgz zod@4.6.7
 ```
 
 Start with the [read-only example](https://engineering.sarj.ai/projects/workspace-sync/configuration/).

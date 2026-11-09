@@ -6,6 +6,7 @@ import {
   GoogleUserIdSchema,
   PrimaryEmailSchema,
 } from "../catalog/identity-authority.ts";
+import { sha256 } from "../runtime/sha256.ts";
 
 const NonBlankTextSchema = z.string().trim().min(1);
 const IsoInstantSchema = z.iso.datetime({ offset: true });
@@ -451,16 +452,6 @@ function canonicalJson(value: unknown): string {
       .join(",")}}`;
   }
   return JSON.stringify(value);
-}
-
-async function sha256(value: string): Promise<string> {
-  const digest = await crypto.subtle.digest(
-    "SHA-256",
-    new TextEncoder().encode(value),
-  );
-  return [...new Uint8Array(digest)]
-    .map((byte) => byte.toString(16).padStart(2, "0"))
-    .join("");
 }
 
 function validateSummary(

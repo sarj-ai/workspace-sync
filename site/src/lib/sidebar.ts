@@ -6,6 +6,7 @@ export const SIDEBAR: ReferenceSidebar = [
   { label: "Plan / apply", link: "/plan-and-apply/" },
   { label: "Configuration", link: "/configuration/" },
   { label: "API", link: "/api/" },
+  { label: "Storage", link: "/storage/" },
   { label: "Development", link: "/development/" },
   { label: "Security", link: "/security/" },
 ];

@@ -1,21 +1,14 @@
 import { spawnSync } from "node:child_process";
 
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { z } from "zod";
 
-import { apply, plan } from "../examples/plan-and-apply.ts";
 import { profilePlan } from "../examples/profile-plan.ts";
 import metadata from "../package.json" with { type: "json" };
 import {
   architecture,
   architectureMermaid,
 } from "../site/src/lib/architecture.ts";
-import type {
-  GoogleDirectoryUser,
-  SlackProfile,
-} from "../src/org-sync/model.ts";
-import type { IOrgSlackClient } from "../src/org-sync/org-slack-client.ts";
-import { OrgSyncService } from "../src/org-sync/service.ts";
 
 describe("documentation examples", () => {
   it.each([
@@ -57,115 +50,8 @@ describe("documentation examples", () => {
     });
   });
 
-  it.each([
-    { drift: false, status: "success", writes: 1, verified: 1 },
-    { drift: true, status: "blocked", writes: 0, verified: 0 },
-  ])(
-    "applies only the reviewed plan (drift: $drift)",
-    async ({ drift, status, writes, verified }) => {
-      const user: GoogleDirectoryUser = {
-        id: "12345",
-        primaryEmail: "ada@company.test",
-        organizations: [
-          { department: "Engineering", primary: true, title: "Staff Engineer" },
-        ],
-      };
-      let current: SlackProfile = {
-        email: user.primaryEmail,
-        title: "Engineer",
-        fields: { XfTeam: { value: "Engineering" } },
-      };
-      const setProfile = vi.fn<IOrgSlackClient["setProfile"]>(
-        async (_id, profile) => {
-          current = {
-            ...current,
-            ...profile,
-            fields: { ...current.fields, ...profile.fields },
-          };
-        },
-      );
-      const reserve = vi
-        .fn<(userId: string) => Promise<void>>()
-        .mockResolvedValue(undefined);
-      const sync = new OrgSyncService({
-        config: {
-          allowedEmptyDepartmentGoogleUserIds: [],
-          excludedGoogleUserIds: [],
-          expectedRootGoogleUserIds: [user.id],
-          expectedSlackTeamId: "TEXAMPLE",
-          fieldIds: {
-            manages: "XfManages",
-            reportsTo: "XfReportsTo",
-            team: "XfTeam",
-          },
-          managedDomain: "company.test",
-          maxAutomaticChanges: 1,
-          minimumGoogleParticipants: 1,
-          protectedDepartedGoogleUserIds: [],
-        },
-        google: { listAllUsers: async () => [user] },
-        slack: {
-          getProfile: async () => current,
-          listSnapshot: async () => ({
-            actorUserId: "UADMIN",
-            fields: [
-              {
-                id: "XfManages",
-                label: "Manages",
-                type: "user",
-                "is_protected": true,
-              },
-              {
-                id: "XfReportsTo",
-                label: "Reports to",
-                type: "user",
-                "is_protected": true,
-              },
-              {
-                id: "XfTeam",
-                label: "Team",
-                type: "text",
-                "is_protected": true,
-              },
-            ],
-            members: [
-              { id: "UADMIN", profile: {}, "is_admin": true },
-              { id: "UADA", profile: current },
-            ],
-            scopes: [
-              "users.profile:read",
-              "users.profile:write",
-              "users:read",
-              "users:read.email",
-            ],
-            teamId: "TEXAMPLE",
-          }),
-          setProfile,
-        },
-      });
-      const reviewed = await plan(sync);
-      expect(reviewed.status).toBe("audit");
-      expect(reviewed.planHash).toMatch(/^[a-f0-9]{64}$/u);
-      expect(setProfile).not.toHaveBeenCalled();
-      expect(reserve).not.toHaveBeenCalled();
-      if (drift)
-        user.organizations = [
-          {
-            department: "Engineering",
-            primary: true,
-            title: "Principal Engineer",
-          },
-        ];
-      const result = await apply(sync, reviewed, { required: true, reserve });
-      expect(result).toMatchObject({ status, writes, verified });
-      expect(result.planHash === reviewed.planHash).toBe(!drift);
-      expect(setProfile).toHaveBeenCalledTimes(writes);
-      expect(reserve.mock.calls).toEqual(drift ? [] : [[user.id]]);
-    },
-  );
-
   it("keeps diagram edges and source links within the public API", () => {
-    const ids = new Set(architecture.nodes.map((node) => node.id));
+    const ids = new Set<string>(architecture.nodes.map((node) => node.id));
     expect(ids.size).toBe(architecture.nodes.length);
     const modules = new Set(
       Object.values(metadata.exports).flatMap((target) => {

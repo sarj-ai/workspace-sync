@@ -10,6 +10,7 @@ import {
   SLACK_USER_GROUPS_RESOURCE_LEASE_KEY,
   withResourceLease,
 } from "../identity-sync/resource-lease.ts";
+import { sha256 } from "../runtime/sha256.ts";
 import { logEvent } from "../shared/log-event.ts";
 import {
   assertReviewedLifecycleIdentity,
@@ -3293,13 +3294,7 @@ async function hashPlan(
     selectionPolicyVersion: USER_GROUP_SELECTION_POLICY_VERSION,
     userGroups: plan.userGroups,
   });
-  const digest = await crypto.subtle.digest(
-    "SHA-256",
-    new TextEncoder().encode(canonical),
-  );
-  return [...new Uint8Array(digest)]
-    .map((byte) => byte.toString(16).padStart(2, "0"))
-    .join("");
+  return sha256(canonical);
 }
 
 function reportWithError(

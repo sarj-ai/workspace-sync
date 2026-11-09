@@ -6,6 +6,7 @@ import {
   resourceLeaseKey,
   withResourceLease,
 } from "../identity-sync/resource-lease.ts";
+import { sha256 } from "../runtime/sha256.ts";
 import { logEvent } from "../shared/log-event.ts";
 import { orgSyncSettings } from "./config.ts";
 import { exchangeGoogleToken } from "./exchange-google-token.ts";
@@ -118,7 +119,7 @@ export class GoogleOrgChartDriveClient implements OrgChartDriveClient {
       Date.now() + MAX_MUTATION_RUN_MS,
     );
     const key = resourceLeaseKey(
-      `google-drive/artifact/${await contentSha256(this.#options.fileId)}`,
+      `google-drive/artifact/${await sha256(this.#options.fileId)}`,
     );
     const durationMs = deadlineAt - Date.now() + LEASE_POST_DEADLINE_FENCE_MS;
     if (deadlineAt <= Date.now())
@@ -148,7 +149,7 @@ export class GoogleOrgChartDriveClient implements OrgChartDriveClient {
     const file = await this.#getMetadata(token, runId, deadlineAt);
     this.#validateDestination(file);
     await this.#validatePermissions(token, runId, deadlineAt);
-    return contentSha256(await this.#download(token, runId, deadlineAt));
+    return sha256(await this.#download(token, runId, deadlineAt));
   }
 
   async #upsertUnderLease(
@@ -161,14 +162,14 @@ export class GoogleOrgChartDriveClient implements OrgChartDriveClient {
     this.#validateDestination(file);
     await this.#validatePermissions(token, runId, deadlineAt);
     const current = await this.#download(token, runId, deadlineAt);
-    if ((await contentSha256(current)) !== expectedCurrentSha256) {
+    if ((await sha256(current)) !== expectedCurrentSha256) {
       throw new Error("Managed Google Drive org chart changed after planning");
     }
     let changed = false;
     if (current !== html) {
       const etag = await this.#getDriveV2Etag(token, runId, deadlineAt);
       const pinnedCurrent = await this.#download(token, runId, deadlineAt);
-      if ((await contentSha256(pinnedCurrent)) !== expectedCurrentSha256) {
+      if ((await sha256(pinnedCurrent)) !== expectedCurrentSha256) {
         throw new Error(
           "Managed Google Drive org chart changed while binding its ETag",
         );
@@ -428,12 +429,6 @@ export class GoogleOrgChartDriveClient implements OrgChartDriveClient {
       "run_id": runId,
     });
   }
-}
-
-async function contentSha256(content: string): Promise<string> {
-  const encoded = new TextEncoder().encode(content);
-  const digest = new Uint8Array(await crypto.subtle.digest("SHA-256", encoded));
-  return [...digest].map((byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
 function validatePermissionSet(

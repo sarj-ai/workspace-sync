@@ -6,6 +6,7 @@ import {
   type ProviderAccount,
   provisioningIdempotencyKey,
 } from "../catalog/identity-authority.ts";
+import { sha256 } from "../runtime/sha256.ts";
 import type {
   IdentityProviderPlanner,
   IdentityProviderPlanningContext,
@@ -294,11 +295,5 @@ async function desiredStateHash(
     lifecycle: subject.lifecycle.kind,
     target,
   });
-  const digest = await crypto.subtle.digest(
-    "SHA-256",
-    new TextEncoder().encode(canonical),
-  );
-  return [...new Uint8Array(digest)]
-    .map((byte) => byte.toString(16).padStart(2, "0"))
-    .join("");
+  return sha256(canonical);
 }

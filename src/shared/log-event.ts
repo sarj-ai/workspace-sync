@@ -4,13 +4,11 @@ export type LogEventMeta = Record<
 >;
 
 export function logEvent(event: string, meta: LogEventMeta = {}): void {
-  console.warn(serializeEvent(event, meta));
-}
-
-function serializeEvent(event: string, meta: LogEventMeta): string {
-  return JSON.stringify({
-    ...meta,
-    evt: event,
-    t: Date.now(),
-  });
+  console.warn(
+    JSON.stringify({
+      ...meta,
+      evt: event,
+      t: Date.now(),
+    }),
+  );
 }

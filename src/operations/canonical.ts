@@ -1,8 +1,8 @@
 import { z } from "zod";
 
+import { sha256 } from "../runtime/sha256.ts";
 import { type JsonValue, JsonValueSchema } from "./schemas.ts";
 
-const ENCODER = new TextEncoder();
 const JsonScalarSchema = z.union([z.null(), z.boolean(), z.string()]);
 const JsonNumberSchema = z.number();
 const JsonObjectSchema = z.record(z.string(), z.unknown());
@@ -13,22 +13,14 @@ export function canonicalJson(value: JsonValue): string {
 }
 
 export async function sha256Hex(value: JsonValue): Promise<string> {
-  const digest = await crypto.subtle.digest(
-    "SHA-256",
-    ENCODER.encode(canonicalJson(value)),
-  );
-  return bytesToHex(new Uint8Array(digest));
+  return sha256(canonicalJson(value));
 }
 
 export function sameJson(left: JsonValue, right: JsonValue): boolean {
   return canonicalJson(left) === canonicalJson(right);
 }
 
-export function bytesToHex(bytes: Uint8Array): string {
-  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join(
-    "",
-  );
-}
+export { bytesToHex } from "../runtime/sha256.ts";
 
 export function hexToBytes(value: string): null | Uint8Array {
   if (!/^[a-f0-9]+$/.test(value) || value.length % 2 !== 0) return null;

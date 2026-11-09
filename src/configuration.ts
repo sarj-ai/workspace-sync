@@ -117,3 +117,8 @@ function deepFreeze<Value>(value: Value): Value {
   }
   return value;
 }
+
+export {
+  OrgSyncService as SlackProfileSync,
+  type SlackProfileSyncContract,
+} from "./org-sync/service.ts";

@@ -10,18 +10,18 @@ import { siteHref } from "../lib/reference";
 ---
 
 <ReferencePage title="Architecture">
-  <p class="command-help">Google supplies directory authority. The host reviews the plan and supplies credentials, policy and durable write budgets.</p>
+  <p class="command-help">Google Workspace supplies the people and teams. Each provider compares its current state, prepares changes and applies the approved result.</p>
   <ArchitectureFlow client:visible />
-  <p class="command-help">Pan or use the zoom controls. Dashed nodes belong to the host.</p>
+  <p class="command-help">Pan or zoom to explore. Your application owns approval.</p>
   <details>
     <summary>Data flow and source</summary>
     <ol>{architecture.nodes.map((node) => <li><a href={siteHref(`api/${node.module}/`)}>{node.label}</a> — {node.detail}.</li>)}</ol>
   </details>
-  <h2>Read before writing</h2>
-  <p>Audit stops at the plan. Live mode refreshes provider state, checks the reviewed hash, reserves the host's budget, applies one Slack profile and verifies it by reading it back. Replan for the next profile.</p>
-  <p>Other provider workflows compose their own authority, lease and readback guards; this diagram follows <a href={siteHref("api/org-sync/service/")}>OrgSyncService</a>.</p>
+  <h2>Plan, review, apply</h2>
+  <p>Preview changes first. Applying checks that the data still matches the plan, makes the change, and reads the result back. If the data changed, review a new plan.</p>
+  <p><a href={siteHref("plan-and-apply/")}>SlackProfileSync</a> updates one profile per apply. Other integrations expose their own modules above. <a href={siteHref("storage/")}>Storage</a> is optional for basic profile sync.</p>
   <details>
-    <summary>Mermaid source</summary>
+    <summary>Mermaid source (11.3+)</summary>
     <Code code={architectureMermaid()} lang="text" />
   </details>
   <p><a href={siteHref("architecture.mmd")} download>Download Mermaid</a></p>
