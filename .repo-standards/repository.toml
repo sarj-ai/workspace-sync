@@ -1,0 +1,6 @@
+enabled_rules = ["repository/documentation/placement"]
+repository_id = "workspace-sync"
+components = []
+
+[documentation]
+entrypoints = ["THIRD_PARTY_NOTICES.md"]

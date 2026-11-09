@@ -1,0 +1,32 @@
+# Managed by code-standards commit policy; regenerate with `code-standards setup`.
+name: Commit policy
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+  merge_group:
+    types: [checks_requested]
+
+permissions:
+  contents: read
+
+jobs:
+  # GitHub can select the newest workflow run for a commit after a metadata edit, so every event needs
+  # a real verifier result under the stable required name, even when the base and head are unchanged.
+  commit-policy-v1:
+    concurrency:
+      group: commit-policy-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Harden the runner
+        uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.merged && github.event.pull_request.head.sha || '' }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: sarj-ai/repo-standards/pull-request-commits@9f46f7b27730a5c025c2a64711fce161a5bf2d9c # v6.22.1

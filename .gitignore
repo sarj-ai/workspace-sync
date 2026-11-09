@@ -1,0 +1,9 @@
+node_modules/
+dist/
+coverage/
+.env
+.env.*
+*.tgz
+.security-review/
+site/dist/
+.wrangler/
