@@ -1,3 +1,5 @@
+packages:
+  - site
 blockExoticSubdeps: true
 strictDepBuilds: true
 ignoreScripts: true
@@ -241,3 +243,8 @@ trustPolicyExclude:
   - "syncpack@15.3.3"
   - "tsrs@0.23.0-ts7.1.0-beta"
 allowBuilds: {}
+
+# The same shared components and Starlight release are qualified by the LRA site.
+peerDependencyRules:
+  allowedVersions:
+    "@sarj/design>@astrojs/starlight": "0.42.7"

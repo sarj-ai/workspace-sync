@@ -1,0 +1,16 @@
+---
+import { Code } from "@astrojs/starlight/components";
+
+import ReferencePage from "../components/reference-page.astro";
+import { REFERENCE, siteHref } from "../lib/reference";
+---
+
+<ReferencePage title="Configuration">
+  <p>Configure one immutable policy per process or Worker isolate. Supply credentials through the host environment.</p>
+  <h2>Read-only audit</h2>
+  <Code code={REFERENCE.example} lang="ts" />
+  <h2>Policy</h2>
+  <p><code>WorkspaceSyncPolicySchema.parse</code> validates shape and cross-field invariants.</p>
+  <p><a href={siteHref("policy.schema.json")}>JSON Schema</a> · <a href={siteHref("policy.example.json")}>Synthetic example</a></p>
+  <details><summary>Example policy</summary><Code code={REFERENCE.policyExample} lang="json" /></details>
+</ReferencePage>

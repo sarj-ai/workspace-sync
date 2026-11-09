@@ -1,22 +1,17 @@
 /**
  * Google Workspace supplies directory authority for guarded reconciliation with
- * Slack, GitHub, Linear, PagerDuty, Sentry and Trycomp. Provider clients, planners,
- * leases, write budgets and readbacks compose into host-owned workflows.
+ * Slack, GitHub, Linear, PagerDuty, Sentry and Trycomp.
  *
- * Configure one tenant per process or Worker isolate. Policy is cloned and frozen;
- * a different tenant requires a separate process or isolate. Credentials belong
- * in the host's secret store and must never appear in policy or logs. Isolate
- * persistence and provider credentials per tenant as well.
+ * Use one immutable policy per process or Worker isolate. Isolate tenant storage
+ * and credentials; keep secrets out of policy and logs.
  *
- * Trusted host code owns authentication, scheduling, migrations, persistence,
+ * The trusted host owns authentication, scheduling, migrations, persistence,
  * signed-plan approval and audit retention. Untrusted callers must not supply
- * policy, credentials or provider ports, or invoke provider writes directly.
- * Directory access defaults to the read-only scope. Write access requires an
- * explicit scope, narrow provider grants and the operation's authority guards.
+ * policy, credentials or provider ports. Directory access defaults to read-only;
+ * writes require explicit scopes, narrow grants and authority guards.
  *
- * Preserve fresh authority, reviewed plan hashes, provenance, write budgets,
- * leases and provider readbacks when composing an executor. D1 adapters expect
- * host-owned tables; the package does not migrate production databases.
+ * Executors must preserve fresh authority, reviewed hashes, provenance, write
+ * budgets, leases and provider readbacks. D1 tables and migrations belong to the host.
  */
 import { dequal } from "dequal";
 import { z } from "zod";
@@ -97,10 +92,6 @@ export const WorkspaceSyncPolicySchema = z
 export type WorkspaceSyncPolicy = z.output<typeof WorkspaceSyncPolicySchema>;
 let configuredPolicy: WorkspaceSyncPolicy | undefined;
 
-/* Configure one tenant per process or Worker isolate before constructing clients.
- * No credentials belong in this policy. Configuration is immutable for the
- * isolate lifetime; a second tenant requires a separate isolate or process.
- */
 export function configureWorkspaceSyncPolicy(input: unknown): void {
   const parsed = WorkspaceSyncPolicySchema.parse(input);
   if (configuredPolicy !== undefined) {

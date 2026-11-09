@@ -2,7 +2,6 @@ interface Environment {
   readonly ASSETS: { fetch(request: Request): Promise<Response> };
 }
 
-/** Only the project's public static documentation is served. */
 export default {
   fetch(
     request: Request,

@@ -1,0 +1,91 @@
+[hidden] {
+  display: none !important;
+}
+.reference-page {
+  min-width: 0;
+  max-width: 60rem;
+  padding-block: 1.25rem 3rem;
+}
+.reference-page > h1 {
+  margin-block: 0 1.25rem;
+}
+.reference-page > section {
+  margin-top: 2rem;
+}
+.command-help {
+  color: var(--sl-color-gray-2);
+}
+.module-list {
+  overflow-wrap: anywhere;
+}
+.reference-page details {
+  margin-block: 1.5rem;
+}
+.reference-page summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.architecture-flow {
+  height: 38rem;
+  margin-block: 1.5rem;
+  border: 1px solid var(--sarj-color-rule);
+  border-radius: 0.75rem;
+  background: var(--sl-color-black);
+  --xy-background-color: var(--sl-color-black);
+  --xy-background-pattern-dots-color: var(--sarj-color-rule);
+  --xy-edge-stroke: var(--sl-color-gray-3);
+  --xy-edge-stroke-selected: var(--sl-color-accent);
+  --xy-controls-button-background-color: var(--sl-color-black);
+  --xy-controls-button-background-color-hover: var(--sl-color-gray-6);
+  --xy-controls-button-color: var(--sl-color-white);
+  --xy-controls-button-border-color: var(--sarj-color-rule);
+  --xy-attribution-background-color: var(--sl-color-black);
+}
+.flow-node.react-flow__node {
+  width: 230px;
+  padding: 1rem;
+  border: 1px solid var(--sarj-color-rule);
+  border-radius: 0.7rem;
+  background: var(--sl-color-black);
+  color: var(--sl-color-white);
+  font-family: var(--sl-font);
+  text-align: left;
+}
+.flow-node strong {
+  display: block;
+  font-size: 0.9rem;
+}
+.flow-node span {
+  display: block;
+  margin-top: 0.35rem;
+  color: var(--sl-color-gray-2);
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+.flow-node-compute.react-flow__node {
+  border-color: var(--sl-color-accent);
+}
+.flow-node-host.react-flow__node {
+  border-color: var(--sl-color-accent);
+  border-style: dashed;
+}
+.flow-node-write.react-flow__node {
+  border-color: var(--sarj-color-pass);
+}
+.architecture-flow .react-flow__handle {
+  background: var(--sl-color-accent);
+  border-color: var(--sl-color-black);
+}
+.architecture-flow .react-flow__attribution a {
+  color: var(--sl-color-gray-2);
+}
+@media (max-width: 35rem) {
+  .architecture-flow {
+    height: 31rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}

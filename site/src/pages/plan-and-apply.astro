@@ -1,0 +1,30 @@
+---
+import { Code } from "@astrojs/starlight/components";
+import CodeComparison from "@sarj/design/CodeComparison.astro";
+
+import ReferencePage from "../components/reference-page.astro";
+import { REFERENCE, siteHref } from "../lib/reference";
+
+const profile = REFERENCE.preview;
+const changes = profile.changedFields.map((field) => `  ~ ${field}: ${JSON.stringify(profile.current[field])} -> ${JSON.stringify(profile.desired[field])}`).join("\n");
+const preview = `~ slack.profile[${JSON.stringify(profile.slackUserId)}]\n${changes}\n\nPlan: ${String(REFERENCE.preview.changedFields.length)} field(s) to update.`;
+---
+
+<ReferencePage title="Plan / apply">
+  <p class="command-help">A Terraform-style workflow through the TypeScript API.</p>
+  <h2>Plan</h2>
+  <Code code={preview} lang="text" />
+  <CodeComparison
+    id="profile-plan"
+    before={{ label: "Current", files: [{ source: JSON.stringify(profile.current, null, 2), language: "json" }] }}
+    after={{ label: "Desired", files: [{ source: JSON.stringify(profile.desired, null, 2), language: "json" }] }}
+  />
+  <p>This synthetic preview runs the real <a href={siteHref("api/org-sync/model/")}>profile planner</a> at build time.</p>
+  <h2>Apply</h2>
+  <Code code={REFERENCE.planExample} lang="ts" />
+  <p>Pass a host-configured <a href={siteHref("api/org-sync/service/")}>OrgSyncService</a>. Review the audit report, retain its hash, then call <code>apply</code> with that hash and a host-owned write budget. Changed state blocks apply. Each run selects at most one profile; review a new plan before continuing.</p>
+  <p>These are example functions over <code>run</code>, available in <a href={`${REFERENCE.repository}/blob/main/examples/plan-and-apply.ts`}>the repository</a>.</p>
+  <h2>Terraform?</h2>
+  <p>Keep the TypeScript core. A thin Terraform adapter could expose these workflows later, but replacing the core would duplicate provider integrations and host approval guards.</p>
+  <p>A provider <a href="https://developer.hashicorp.com/terraform/plugin/framework/actions">action</a> is a closer fit for invoking reconciliation than a resource that owns every employee account. Actions support side effects without changing Terraform resource state. Keep approval and write guards in the core, and <a href="https://developer.hashicorp.com/terraform/language/manage-sensitive-data">secrets outside saved plans and state</a>.</p>
+</ReferencePage>

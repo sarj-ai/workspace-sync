@@ -1,0 +1,9 @@
+---
+import ReferencePage from "../components/reference-page.astro";
+import { REFERENCE } from "../lib/reference";
+---
+
+<ReferencePage title="Security">
+  <p><a href={`${REFERENCE.repository}/security/advisories/new`}>Report a vulnerability privately</a> with the affected version and a synthetic reproduction. Keep credentials and employee data out of public issues.</p>
+  {REFERENCE.security.map((paragraph) => <p>{paragraph.replaceAll("\n", " ")}</p>)}
+</ReferencePage>

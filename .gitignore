@@ -7,3 +7,5 @@ coverage/
 .security-review/
 site/dist/
 .wrangler/
+site/.astro/
+site/public/generated/
