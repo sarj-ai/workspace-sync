@@ -103,21 +103,30 @@ export class D1GoogleWatchNotificationReceiptStore implements GoogleWatchNotific
       )
       .bind(notification.channelId, notification.messageNumber)
       .first();
-    const existing = raw ? ExistingNotificationRowSchema.parse(raw) : null;
-    if (existing?.status === "enqueued" || existing?.status === "ignored") {
-      return { kind: "duplicate", outcome: existing.status };
-    }
-    if (!existing)
+    if (raw === null)
       throw new Error("google_watch_notification_missing_after_claim_conflict");
-    if (existing.status === "failed")
-      return { kind: "in-flight", retryAfterSeconds: 1 };
-    return {
-      kind: "in-flight",
-      retryAfterSeconds: Math.max(
-        1,
-        Math.ceil((existing["lease_expires_at_ms"] - nowMs) / 1000),
-      ),
-    };
+    const existing = ExistingNotificationRowSchema.parse(raw);
+    switch (existing.status) {
+      case "enqueued":
+      case "ignored":
+        return { kind: "duplicate", outcome: existing.status };
+      case "failed":
+        return { kind: "in-flight", retryAfterSeconds: 1 };
+      case "claimed":
+        return {
+          kind: "in-flight",
+          retryAfterSeconds: Math.max(
+            1,
+            Math.ceil((existing["lease_expires_at_ms"] - nowMs) / 1000),
+          ),
+        };
+      default: {
+        const unsupported: never = existing.status;
+        throw new Error(
+          `unsupported_google_notification_state:${String(unsupported)}`,
+        );
+      }
+    }
   }
 
   async finish(

@@ -304,7 +304,6 @@ async function readBoundedSlackResponse(
       new RetryDeadlineExceededError({ label: `slack.${method}` }),
     );
   signal.addEventListener("abort", onAbort, { once: true });
-  let completed = false;
   try {
     let chunk = await Promise.race([reader.read(), deadline]);
     while (!chunk.done) {
@@ -318,12 +317,13 @@ async function readBoundedSlackResponse(
     }
     parts.push(decoder.decode());
     const parsed: unknown = JSON.parse(parts.join(""));
-    completed = true;
+    reader.releaseLock();
     return parsed;
+  } catch (error) {
+    void reader.cancel().catch(() => undefined);
+    throw error;
   } finally {
     signal.removeEventListener("abort", onAbort);
-    if (!completed) void reader.cancel().catch(() => undefined);
-    else reader.releaseLock();
   }
 }
 

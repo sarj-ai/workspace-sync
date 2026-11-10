@@ -1,0 +1,464 @@
+{
+  "scope": "Workspace Sync 0.4.0 and its consuming Automations storage contract",
+  "discovery": "All tracked source files were scanned for status/phase/state, optional fields, counters, timestamps, leases, retries, provider effects and ordering; migration readers/writers are inventoried in the consuming app. Inventory entries group one authoritative model, not filename keywords.",
+  "persistenceOwner": "sarj-ai/automations; migration 0088_explicit_identity_execution.sql",
+  "machines": [
+    {
+      "id": "authority-identity",
+      "sources": [
+        "src/catalog/identity-authority.ts",
+        "src/identity-lifecycle/contracts.ts",
+        "src/identity-lifecycle/project-google-directory-authority.ts"
+      ],
+      "decision": "consolidate",
+      "oldRepresentation": "Google provider booleans and duplicate catalog model in Automations",
+      "authoritativeReplacement": "AuthoritativeGoogleDirectoryUserStateSchema and AuthorityIdentitySchema; one exported identity-authority module",
+      "events": [
+        "refetch",
+        "active",
+        "suspend",
+        "archive",
+        "delete",
+        "undelete"
+      ],
+      "guards": [
+        "immutable Google ID",
+        "runtime schema validation",
+        "protected administrator evidence"
+      ],
+      "terminalStates": [],
+      "recovery": "A deletion retains immutable provider links through identity history; missing authority remains incomplete."
+    },
+    {
+      "id": "github-identity",
+      "sources": [
+        "src/catalog/identity-authority.ts",
+        "src/identity-sync/derive-google-identity-authority-transition.ts"
+      ],
+      "decision": "retain-explicit",
+      "oldRepresentation": "Unlinked/verified/conflicting identity links",
+      "authoritativeReplacement": "GitHubIdentityStateSchema and exhaustive authority transition results",
+      "events": ["attest", "unlink", "observe-conflict"],
+      "guards": [
+        "immutable provider ID and canonical login",
+        "one-time attestation record",
+        "fresh parent authority"
+      ],
+      "terminalStates": [],
+      "recovery": "Conflicting or missing links never authorize destructive account changes."
+    },
+    {
+      "id": "execution-policy",
+      "sources": [
+        "src/identity-provisioning/contracts.ts",
+        "src/identity-provisioning/orchestrator.ts"
+      ],
+      "decision": "simplify",
+      "oldRepresentation": "Audit, kill switch, bounded automatic, and unexposed approved-apply path with redundant fixed fields",
+      "authoritativeReplacement": "IdentityProvisioningExecutionPolicySchema: audit-only | kill-switch-engaged(reason) | bounded-automatic-deprovision",
+      "events": ["reconcile", "disable", "enable-bounded-deprovision"],
+      "guards": [
+        "maximum one subject",
+        "GitHub deprovision only",
+        "protected identity guard",
+        "runtime policy schema"
+      ],
+      "terminalStates": ["audit-only", "provider-disabled"],
+      "recovery": "Unknown policy variants fail validation; adding a supported policy requires exhaustive execution handling."
+    },
+    {
+      "id": "reviewed-approval",
+      "sources": [
+        "src/identity-provisioning/contracts.ts",
+        "src/identity-provisioning/persistence.ts"
+      ],
+      "decision": "delete",
+      "oldRepresentation": "Unused approval schema, approval persistence, expiry and claim APIs",
+      "authoritativeReplacement": "Deleted; Automations migration 0088 checks that approvals are empty before dropping their table",
+      "events": [],
+      "guards": ["Migration aborts for unexpected approval or run evidence"],
+      "terminalStates": [],
+      "recovery": "No caller in the consuming application; production preflight found zero rows. This never replaces Workspace signed parent approvals."
+    },
+    {
+      "id": "reconciliation-run",
+      "sources": ["src/identity-provisioning/persistence.ts"],
+      "decision": "delete-obsolete-states",
+      "oldRepresentation": "Write-only planned/applying/completed/failed columns with no run lifecycle producer",
+      "authoritativeReplacement": "Immutable run identity (authority revision, plan hash, creation time), with unique canonical run ID",
+      "events": ["create-plan", "replay-plan"],
+      "guards": [
+        "atomic D1 batch",
+        "exact operation identity",
+        "unique revision/hash"
+      ],
+      "terminalStates": [],
+      "recovery": "A duplicate plan reuses its canonical identity; operations own execution evidence."
+    },
+    {
+      "id": "identity-operation",
+      "sources": [
+        "src/identity-provisioning/persistence.ts",
+        "src/identity-provisioning/orchestrator.ts",
+        "src/identity-provisioning/github-managed-deprovision-connector.ts"
+      ],
+      "decision": "convert",
+      "oldRepresentation": "Pending/claimed/succeeded with every provider error returned to pending",
+      "authoritativeReplacement": "pending -> claimed -> dispatching -> succeeded; dispatching -> uncertain -> recovering -> succeeded or uncertain. Fresh/recovery claims are a discriminated union.",
+      "events": [
+        "claim",
+        "mark-dispatching",
+        "apply",
+        "authoritative-readback",
+        "complete",
+        "retry",
+        "lease-expired"
+      ],
+      "guards": [
+        "generation and owner CAS",
+        "unexpired lease at dispatch",
+        "immutable exact plan",
+        "bounded subject and provider",
+        "SQL state invariants and transition triggers"
+      ],
+      "terminalStates": ["succeeded"],
+      "recovery": "Persist dispatch before the exact provider call. Failed prewrite checks return to pending. Uncertain/crashed dispatches use read-only connector.recover; no new DELETE is issued. Migration treats all legacy attempted pending/claimed records as uncertain."
+    },
+    {
+      "id": "provider-effect",
+      "sources": [
+        "src/runtime/provider-write.ts",
+        "src/org-sync/google-groups-client.ts",
+        "src/org-sync/google-group-rename-client.ts",
+        "src/org-sync/google-group-deletion-client.ts",
+        "src/org-sync/service.ts",
+        "src/org-sync/channel-membership-provenance.ts"
+      ],
+      "decision": "convert",
+      "oldRepresentation": "Optional errors and implicit success flags across Google, GitHub and Slack writes",
+      "authoritativeReplacement": "ProviderWriteOutcome acknowledged | uncertain(error); ChannelKickOutcome for Slack-specific transport errors",
+      "events": [
+        "dispatch-once",
+        "acknowledgement",
+        "transport-error",
+        "exact-readback"
+      ],
+      "guards": [
+        "existing fresh authority, identity budgets, snapshots, leases and exact postconditions remain mandatory"
+      ],
+      "terminalStates": ["verified-postcondition"],
+      "recovery": "Acknowledgement is not verification. A thrown request is not proof of no effect. Readback can establish the required postcondition; failed readback preserves uncertainty."
+    },
+    {
+      "id": "resource-lease",
+      "sources": ["src/identity-sync/resource-lease.ts"],
+      "decision": "convert",
+      "oldRepresentation": "Boolean operationFailed, possibly undefined error, and non-null asserted result",
+      "authoritativeReplacement": "ResourceLeaseAcquisition and OperationOutcome<Result> discriminated unions",
+      "events": ["acquire", "run", "throw", "release", "expire"],
+      "guards": [
+        "owner/generation/expiry CAS",
+        "release in every operation outcome"
+      ],
+      "terminalStates": [],
+      "recovery": "Release failure cannot mask the original operation error; a synchronous throw also releases the lease. Expired generations cannot release a replacement owner."
+    },
+    {
+      "id": "lifecycle-event",
+      "sources": [
+        "src/identity-provisioning/persistence.ts",
+        "src/identity-lifecycle/google-directory-lifecycle-refresh-handler.ts"
+      ],
+      "decision": "retain-explicit",
+      "oldRepresentation": "Durable pending/claimed/completed/terminal_failed records",
+      "authoritativeReplacement": "One D1 repository owns transitions; typed input and claimed-event DTOs validate required per-command data",
+      "events": [
+        "record",
+        "claim",
+        "retry",
+        "complete",
+        "complete-verified-cohort",
+        "hold-expired-authority"
+      ],
+      "guards": [
+        "event identity collision checks",
+        "owner/generation CAS",
+        "bounded retry schedule",
+        "exact payload cohort matching",
+        "newer authority prevents stale deletion"
+      ],
+      "terminalStates": ["completed", "terminal_failed"],
+      "recovery": "Expired claims are reclaimed; equivalent older events complete only from current verified authority. Deleted authority beyond the provider retention window remains terminal_failed, never successful."
+    },
+    {
+      "id": "full-inventory",
+      "sources": [
+        "src/identity-lifecycle/d1-google-directory-full-reconciliation-store.ts",
+        "src/identity-lifecycle/google-directory-full-reconciler.ts"
+      ],
+      "decision": "retain-explicit",
+      "oldRepresentation": "Started run plus nullable manifest and completion metadata",
+      "authoritativeReplacement": "One store enforces started -> manifest capture -> exact completed or failed transitions; GoogleDirectoryFullReconciliationResult is a closed result union",
+      "events": [
+        "begin",
+        "capture-inventory",
+        "process-events",
+        "complete",
+        "fail"
+      ],
+      "guards": [
+        "minimum complete population",
+        "root/admin identities",
+        "manifest and every event hash/kind/time",
+        "completion timestamps"
+      ],
+      "terminalStates": [],
+      "recovery": "An incomplete event prefix cannot mark a full run healthy; crashes remain visibly started/failed. No provider mutation is permitted by its audit policy."
+    },
+    {
+      "id": "watch-channel",
+      "sources": [
+        "src/identity-lifecycle/channel-manager.ts",
+        "src/identity-lifecycle/channel-authenticator.ts"
+      ],
+      "decision": "retain-explicit",
+      "oldRepresentation": "Active/stopped rows and expiry",
+      "authoritativeReplacement": "Typed create/renew actions and ready/blocked/disabled plans; active-channel-only DTOs",
+      "events": ["create", "renew", "authenticate", "stop", "expire"],
+      "guards": [
+        "channel/resource/token binding",
+        "future expiry",
+        "bounded renewal overlap"
+      ],
+      "terminalStates": [],
+      "recovery": "New channels activate before old ones stop. A missing acknowledgement does not grant notification authority."
+    },
+    {
+      "id": "watch-notification",
+      "sources": [
+        "src/identity-lifecycle/d1-google-watch-notification-receipt-store.ts",
+        "src/identity-lifecycle/webhook-handler.ts"
+      ],
+      "decision": "simplify",
+      "oldRepresentation": "String status branches with fallback assuming the only remaining status was claimed",
+      "authoritativeReplacement": "Exhaustive status switch and acquired(lease) | duplicate(outcome) | in-flight(retryAfterSeconds) result union",
+      "events": [
+        "claim",
+        "duplicate",
+        "lease-expired",
+        "enqueue",
+        "ignore",
+        "fail"
+      ],
+      "guards": [
+        "channel/message identity",
+        "owner/generation CAS",
+        "claim lease",
+        "validated headers/body"
+      ],
+      "terminalStates": ["enqueued", "ignored"],
+      "recovery": "Failed/expired admissions can be retried; terminal enqueued/ignored receipts deduplicate repeated events. New statuses require compile-time exhaustive handling."
+    },
+    {
+      "id": "identity-retention",
+      "sources": [
+        "src/identity-lifecycle/google-directory-identity-history.ts",
+        "src/identity-provisioning/persistence.ts"
+      ],
+      "decision": "retain-explicit",
+      "oldRepresentation": "Retained links and deletion tombstone lifetime",
+      "authoritativeReplacement": "Typed immutable identity snapshots and bounded tombstone commands",
+      "events": [
+        "capture",
+        "restore-deleted",
+        "record-tombstone",
+        "clear-on-newer-live-authority",
+        "purge-expired"
+      ],
+      "guards": [
+        "immutable user ID",
+        "explicit unlink supersedes history",
+        "source event claim",
+        "retention deadline"
+      ],
+      "terminalStates": [],
+      "recovery": "Old identity evidence never becomes new active authority; missing snapshots fail closed."
+    },
+    {
+      "id": "attestation",
+      "sources": [
+        "src/identity-sync/github-identity-attestation-attempt-store.ts",
+        "src/identity-sync/github-identity-admin-attestation.ts",
+        "src/identity-sync/github-inactive-identity-attestation.ts"
+      ],
+      "decision": "retain-explicit",
+      "oldRepresentation": "Attempt and resolution histories consolidated in 0.3.0",
+      "authoritativeReplacement": "One immutable attempt with at most one exact terminal resolution; typed attestation/authority transition contracts",
+      "events": ["reserve", "dispatch", "observe", "resolve"],
+      "guards": [
+        "fresh parent fence",
+        "immutable target",
+        "one identity budget",
+        "write-once resolution"
+      ],
+      "terminalStates": [],
+      "recovery": "An unresolved write remains fenced across retries and deployments; a lack of acknowledgement never settles it."
+    },
+    {
+      "id": "identity-budget",
+      "sources": [
+        "src/identity-provisioning/identity-budget-repository.ts",
+        "src/identity-provisioning/identity-budget-contracts.ts"
+      ],
+      "decision": "retain-explicit",
+      "oldRepresentation": "Consumed permanent budget alongside expiring resource leases",
+      "authoritativeReplacement": "Immutable one-subject reservation, separately typed from resource lease ownership",
+      "events": ["reserve", "repeat-same-subject", "reject-different-subject"],
+      "guards": [
+        "unique execution/service identity",
+        "non-refundable budget",
+        "immutable SQL triggers"
+      ],
+      "terminalStates": [],
+      "recovery": "A crash consumes the reservation; no reset or compensation invents a second authorized identity."
+    },
+    {
+      "id": "slack-membership-provenance",
+      "sources": [
+        "src/org-sync/channel-membership-provenance.ts",
+        "src/org-sync/channel-service.ts"
+      ],
+      "decision": "retain-explicit",
+      "oldRepresentation": "Membership provenance and removal control flow",
+      "authoritativeReplacement": "Typed addition/removal plans, exact authority guards and mandatory readback; explicit kick outcomes",
+      "events": ["observe", "plan", "reserve", "join", "remove", "verify"],
+      "guards": [
+        "fresh source membership",
+        "protected roots",
+        "exact target",
+        "bounded writer budget"
+      ],
+      "terminalStates": [],
+      "recovery": "Manual/unowned membership is retained. Unknown writes require authoritative readback; failed readback retains audit evidence."
+    },
+    {
+      "id": "ledger-history",
+      "sources": [
+        "src/workspace-directory/d1-workspace-ledger-history-index.ts",
+        "src/workspace-directory/ledger-history-sql.ts"
+      ],
+      "decision": "retain-explicit",
+      "oldRepresentation": "Separate access/workspace indexes consolidated in 0.3.0",
+      "authoritativeReplacement": "One namespaced Slack history/message store with typed cursor/revision operations",
+      "events": ["claim-scan", "index-page", "complete-scan", "read-message"],
+      "guards": [
+        "scope isolation",
+        "revision CAS",
+        "paired scan cursor bounds",
+        "duplicate detection"
+      ],
+      "terminalStates": [],
+      "recovery": "Incomplete pages retain their cursor and cannot imply complete history."
+    },
+    {
+      "id": "deprovision-authority",
+      "sources": [
+        "src/identity-provisioning/github-deprovision-authority-snapshot-store.ts",
+        "src/identity-provisioning/attio-deprovision-authority-snapshot-store.ts",
+        "src/identity-provisioning/attio-deprovision-authority-capture.ts"
+      ],
+      "decision": "retain-explicit",
+      "oldRepresentation": "Provider captures, incomplete inventories and authority freshness",
+      "authoritativeReplacement": "Strict runtime authority schemas, ready/blocked observations and exact snapshot fingerprints",
+      "events": ["capture", "validate", "expire", "refresh", "readback"],
+      "guards": [
+        "complete provider inventory",
+        "immutable identity",
+        "fresh Google lifecycle",
+        "protected roots"
+      ],
+      "terminalStates": [],
+      "recovery": "Provider read failure remains incomplete; no email guess repairs missing deletion evidence."
+    },
+    {
+      "id": "deployment-fence",
+      "sources": [
+        "src/workspace-directory/workspace-deployment-fence-repository.ts"
+      ],
+      "decision": "retain-explicit",
+      "oldRepresentation": "Shared expiring fence records",
+      "authoritativeReplacement": "Typed deployment lease commands with generation/owner/version guards",
+      "events": ["acquire", "assert-active", "release", "expire"],
+      "guards": [
+        "one immutable policy per process",
+        "active generation",
+        "deployment correlation"
+      ],
+      "terminalStates": [],
+      "recovery": "A stale deployment cannot authorize a provider write."
+    },
+    {
+      "id": "provider-planning",
+      "sources": [
+        "src/identity-provisioning/desired-identity-state-planner.ts",
+        "src/access-guard/model.ts",
+        "src/trycomp/model.ts",
+        "src/trycomp/plan.ts",
+        "src/provider-readiness.ts"
+      ],
+      "decision": "retain-explicit",
+      "oldRepresentation": "Provider account facts and eligibility decisions",
+      "authoritativeReplacement": "Closed satisfied/blocked/provision/deprovision and readiness/plan unions; provider observations distinguish absent, present, ambiguous and unsupported",
+      "events": ["observe", "plan", "deny", "verify"],
+      "guards": [
+        "runtime boundary schemas",
+        "immutable identity links",
+        "contractor eligibility",
+        "protected admin evidence"
+      ],
+      "terminalStates": [],
+      "recovery": "Unsupported or ambiguous observations remain blocked. Audit plans authorize no execution."
+    },
+    {
+      "id": "http-retry-and-body-lifetime",
+      "sources": [
+        "src/org-sync/http.ts",
+        "src/org-sync/slack-api-transport.ts",
+        "src/clients/runtime-fetch.ts",
+        "src/runtime/read-bounded-text.ts"
+      ],
+      "decision": "simplify",
+      "oldRepresentation": "Retry counters, response limits, and a completion boolean controlling stream cleanup",
+      "authoritativeReplacement": "Bounded retry loops and explicit exception/resource lifetime; completion flag removed",
+      "events": [
+        "read",
+        "timeout",
+        "abort",
+        "retry-eligible-read",
+        "cancel-body",
+        "release-reader"
+      ],
+      "guards": [
+        "deadline and byte limits",
+        "method-aware retry policy",
+        "caller cancellation"
+      ],
+      "terminalStates": [],
+      "recovery": "Write requests are never assumed absent after timeout; response cleanup preserves original errors."
+    }
+  ],
+  "justifiedRepresentationExceptions": [
+    {
+      "scope": "Relational SQL state",
+      "reason": "D1 stores one constrained row per entity. Runtime code consumes only validated state-specific command DTOs/claims, and every mutation is conditional on the authoritative current SQL state and version. Duplicating full database rows as a second in-memory state store would introduce another source of truth."
+    },
+    {
+      "scope": "Provider-native booleans and pagination",
+      "reason": "Google/Slack/GitHub wire data and nullable pagination tokens are external contracts. Validate them at the boundary and project authority/observation/plan unions before decisions. A single optional cursor or optional resource is an Option with no contradictory field combinations; bounded lexical loops own its lifetime."
+    },
+    {
+      "scope": "Immutable facts and configuration",
+      "reason": "Static identity IDs, names, policy metadata, chart tree traversal, and feature configuration have no durable transition lifecycle. Validate one immutable process policy; configuration readiness is represented by explicit ready/blocked/disabled results."
+    }
+  ]
+}

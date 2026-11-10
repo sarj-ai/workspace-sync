@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { contractorAuthorityGroup } from "../identity-provisioning/employee-entitlement-policy.ts";
 import { normalizeIdentityEmail as normalizeEmail } from "../identity-sync/normalize-identity-email.ts";
+import { providerWrite } from "../runtime/provider-write.ts";
 import { logEvent } from "../shared/log-event.ts";
 import {
   type GoogleGroupIdentity,
@@ -197,8 +198,7 @@ export class GoogleGroupMembershipWriter
       parentAuthority.assertFreshPlan();
     }
     onMutationStart?.();
-    let mutationError: Error | undefined;
-    try {
+    const outcome = await providerWrite(async () => {
       const response = await this.#requestDirectory(
         this.#memberUrl(target.groupId, target.memberId),
         token,
@@ -215,9 +215,7 @@ export class GoogleGroupMembershipWriter
         );
       }
       await response.body?.cancel();
-    } catch (error) {
-      mutationError = error instanceof Error ? error : new Error(String(error));
-    }
+    });
 
     const readback = await this.#readMemberIfPresent(
       target.groupId,
@@ -230,7 +228,7 @@ export class GoogleGroupMembershipWriter
       await this.#assertExactGroup(target, token, runId, deadlineAt);
       return { wrote: true };
     }
-    if (mutationError !== undefined) throw mutationError;
+    if (outcome.kind === "uncertain") throw outcome.error;
     throw new Error(
       "Google group member remained after direct-membership removal",
     );
@@ -254,8 +252,7 @@ export class GoogleGroupMembershipWriter
       runId,
       deadlineAt,
     );
-    let mutationError: Error | undefined;
-    try {
+    const outcome = await providerWrite(async () => {
       const response = await this.#requestDirectory(
         this.#memberUrl(target.groupId, target.memberId),
         token,
@@ -272,9 +269,7 @@ export class GoogleGroupMembershipWriter
         );
       }
       await response.body?.cancel();
-    } catch (error) {
-      mutationError = error instanceof Error ? error : new Error(String(error));
-    }
+    });
     const readback = await this.#readMemberIfPresent(
       target.groupId,
       target.memberId,
@@ -286,7 +281,7 @@ export class GoogleGroupMembershipWriter
       await this.#assertExactGroup(target, token, runId, deadlineAt);
       return { wrote: true };
     }
-    if (mutationError !== undefined) throw mutationError;
+    if (outcome.kind === "uncertain") throw outcome.error;
     throw new Error("Google privileged group member remained after removal");
   }
 

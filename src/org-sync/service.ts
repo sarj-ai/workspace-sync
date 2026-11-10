@@ -4,6 +4,7 @@ import {
   type IdentityWriteBudget,
   reserveIdentityWriteBudget,
 } from "../identity-provisioning/identity-budget-contracts.ts";
+import { providerWrite } from "../runtime/provider-write.ts";
 import { sha256 } from "../runtime/sha256.ts";
 import { logEvent } from "../shared/log-event.ts";
 import type { IGoogleDirectoryClient } from "./google-directory-client.ts";
@@ -416,17 +417,14 @@ export class OrgSyncService
       identityBudget,
       profile.googleUserId ?? undefined,
     );
-    let failure: { error: unknown } | undefined;
-    try {
+    const outcome = await providerWrite(async () => {
       await this.#slack.setProfile(
         profile.slackUserId,
         payload,
         runId,
         deadlineAt,
       );
-    } catch (error) {
-      failure = { error };
-    }
+    });
     const readback = await this.#slack.getProfile(
       profile.slackUserId,
       runId,
@@ -438,7 +436,7 @@ export class OrgSyncService
       fieldIds,
     );
     if (remaining.length > 0) {
-      if (failure !== undefined) throw failure.error;
+      if (outcome.kind === "uncertain") throw outcome.error;
       throw new Error(
         `Slack read-back mismatch for fields: ${remaining.join(",")}`,
       );
