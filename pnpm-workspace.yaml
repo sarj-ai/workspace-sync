@@ -176,7 +176,7 @@ minimumReleaseAgeExclude:
   - "mdn-data@2.37.2"
   - "oxc-parser@0.148.0"
   - "tinypool@2.2.0"
-  - "@sarj/eslint-plugin@19.7.0"
+  - "@sarj/eslint-plugin@19.12.0"
 # Exact tested Standards peers; registry integrity is reviewed before resolution.
 trustPolicyExclude:
   - "@oxfmt/binding-android-arm-eabi@0.76.0"
@@ -217,7 +217,6 @@ trustPolicyExclude:
   - "@oxlint/binding-win32-arm64-msvc@1.91.0"
   - "@oxlint/binding-win32-ia32-msvc@1.91.0"
   - "@oxlint/binding-win32-x64-msvc@1.91.0"
-  - "@sarj/eslint-plugin@19.0.2"
   - "@tsrs/darwin-arm64@0.23.0-ts7.1.0-beta"
   - "@tsrs/darwin-x64@0.23.0-ts7.1.0-beta"
   - "@tsrs/linux-arm64-gnu@0.23.0-ts7.1.0-beta"

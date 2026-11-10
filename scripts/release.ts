@@ -466,6 +466,26 @@ async function scanSecrets(targets: readonly string[]) {
 }
 
 switch (process.argv[2] ?? "") {
+  case "repository-standards":
+    execFileSync(
+      "uvx",
+      [
+        "--no-config",
+        "--isolated",
+        "--python",
+        "3.14",
+        "--from",
+        "repo-standards==6.22.3",
+        "repo-standards",
+        "check",
+        ".",
+        "--staged",
+        "--mode",
+        "strict",
+      ],
+      { cwd: root, stdio: "inherit" },
+    );
+    break;
   case "check":
     await checkDistribution();
     break;
@@ -480,6 +500,6 @@ switch (process.argv[2] ?? "") {
     break;
   default:
     throw new Error(
-      "Usage: node scripts/release.ts check|smoke|qualify|scan [paths...]",
+      "Usage: node scripts/release.ts check|repository-standards|smoke|qualify|scan [paths...]",
     );
 }

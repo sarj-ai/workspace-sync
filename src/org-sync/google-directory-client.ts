@@ -43,9 +43,7 @@ const DIRECTORY_SCHEMA_WRITE_SCOPE =
   "https://www.googleapis.com/auth/admin.directory.userschema";
 export const DIRECTORY_READONLY_SCOPE =
   "https://www.googleapis.com/auth/admin.directory.user.readonly";
-// Temporary, identity-specific exception: this already-deleted record reuses the email of its
-// active replacement and would otherwise block every authority projection until Google purges it.
-// Keep active users and every other deleted user fully visible and fail-closed.
+// Filter only configured deleted IDs; active identities remain authoritative.
 function ignoredDeletedGoogleUserIds(): ReadonlySet<string> {
   return new Set(getWorkspaceSyncPolicy().ignoredDeletedGoogleUserIds);
 }

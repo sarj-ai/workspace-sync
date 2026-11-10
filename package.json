@@ -535,7 +535,7 @@
     "test": "vitest run",
     "security": "node scripts/release.ts check",
     "security:scan": "node scripts/release.ts scan",
-    "verify": "pnpm lint && pnpm verify:application",
+    "verify": "pnpm lint && pnpm standards:repository && pnpm verify:application",
     "prepack": "pnpm build",
     "format": "oxfmt",
     "format:check": "oxfmt --check",
@@ -543,7 +543,8 @@
     "docs:check": "node scripts/documentation.ts --check",
     "site:build": "node scripts/documentation.ts --site && pnpm --dir site build",
     "site:deploy": "wrangler deploy --strict",
-    "verify:application": "pnpm build && pnpm docs:check && pnpm check && pnpm test && pnpm security && pnpm audit --audit-level low"
+    "verify:application": "pnpm build && pnpm docs:check && pnpm check && pnpm test && pnpm security && pnpm audit --audit-level low",
+    "standards:repository": "node scripts/release.ts repository-standards"
   },
   "dependencies": {
     "@cloudflare/workers-types": "5.20261108.1",
@@ -557,7 +558,7 @@
     "@types/node": "26.6.6",
     "typescript": "npm:@typescript/typescript6@6.0.2",
     "vitest": "5.1.0",
-    "@sarj/eslint-plugin": "19.7.0",
+    "@sarj/eslint-plugin": "19.12.0",
     "eslint-plugin-zod": "5.2.2",
     "oxfmt": "0.76.0",
     "oxlint": "1.91.0",
