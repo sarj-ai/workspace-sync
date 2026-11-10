@@ -8,23 +8,14 @@ const SCOPE = ["TEXAMPLE", "CLEDGER", "BEXAMPLE"] as const;
 
 function database(): DatabaseSync {
   const db = new DatabaseSync(":memory:");
-  db.exec(`CREATE TABLE workspace_directory_ledger_history (
-      team_id TEXT, channel_id TEXT, bot_id TEXT, revision INTEGER,
+  db.exec(`CREATE TABLE slack_ledger_history (
+      ledger TEXT, team_id TEXT, channel_id TEXT, bot_id TEXT, revision INTEGER,
       synced_through_ts TEXT, scan_newest_ts TEXT, scan_before_ts TEXT,
-      PRIMARY KEY(team_id, channel_id, bot_id)
+      PRIMARY KEY(ledger, team_id, channel_id, bot_id)
     );
-    CREATE TABLE workspace_directory_ledger_message (
-      team_id TEXT, channel_id TEXT, bot_id TEXT, change_key TEXT, message_ts TEXT,
-      PRIMARY KEY(team_id, channel_id, bot_id, change_key, message_ts)
-    );
-    CREATE TABLE access_guard_ledger_history (
-      team_id TEXT, channel_id TEXT, bot_id TEXT, revision INTEGER,
-      synced_through_ts TEXT, scan_newest_ts TEXT, scan_before_ts TEXT,
-      PRIMARY KEY(team_id, channel_id, bot_id)
-    );
-    CREATE TABLE access_guard_ledger_message (
-      team_id TEXT, channel_id TEXT, bot_id TEXT, change_key TEXT, message_ts TEXT,
-      PRIMARY KEY(team_id, channel_id, bot_id, change_key, message_ts)
+    CREATE TABLE slack_ledger_message (
+      ledger TEXT, team_id TEXT, channel_id TEXT, bot_id TEXT, change_key TEXT, message_ts TEXT,
+      PRIMARY KEY(ledger, team_id, channel_id, bot_id, change_key, message_ts)
     );`);
   return db;
 }
@@ -79,6 +70,13 @@ describe("shared ledger SQL", () => {
         timestamp: "1.000000",
       });
       expect(db.prepare(access.find).get(...SCOPE, "change")).toBeUndefined();
+      db.prepare(access.record).run(...SCOPE, "change", "9.000000");
+      expect(db.prepare(access.find).get(...SCOPE, "change")).toMatchObject({
+        timestamp: "9.000000",
+      });
+      expect(db.prepare(workspace.find).get(...SCOPE, "change")).toMatchObject({
+        timestamp: "1.000000",
+      });
       expect(
         db.prepare(workspace.find).get("TOTHER", SCOPE[1], SCOPE[2], "change"),
       ).toBeUndefined();
