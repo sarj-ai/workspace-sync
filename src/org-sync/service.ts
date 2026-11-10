@@ -7,7 +7,6 @@ import {
 import { sha256 } from "../runtime/sha256.ts";
 import { logEvent } from "../shared/log-event.ts";
 import type { IGoogleDirectoryClient } from "./google-directory-client.ts";
-import type { Sleep } from "./http.ts";
 import {
   buildOrgProjectionPlan,
   changedManagedFields,
@@ -114,7 +113,6 @@ export interface OrgSyncServiceOptions {
   config: OrgSyncConfig;
   google: IGoogleDirectoryClient;
   slack: IOrgSlackClient;
-  sleep?: Sleep;
 }
 
 export interface OrgSyncServiceContract {
