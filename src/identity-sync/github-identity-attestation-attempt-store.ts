@@ -50,8 +50,8 @@ export interface IdentityAttestationAttempt {
   } | null;
   snapshot: z.output<typeof AttemptSchema>;
 }
-const SELECT_ATTEMPT = `SELECT attempt.attempt_id, attempt.plan_hash, attempt.google_user_id, attempt.snapshot_json, attempt.attempted_at_ms, resolution.kind, resolution.evidence_json
-FROM google_identity_attestation_attempt AS attempt LEFT JOIN google_identity_attestation_resolution AS resolution USING(attempt_id)`;
+const SELECT_ATTEMPT = `SELECT attempt_id, plan_hash, google_user_id, snapshot_json, attempted_at_ms, kind, evidence_json
+FROM google_identity_attestation`;
 
 /** Append-only attempted writes remain admission debt until an exact provider observation is durably attached. */
 interface ResolveIdentityAttemptInput {
@@ -110,9 +110,9 @@ export class GitHubIdentityAttestationAttemptStore implements IGitHubIdentityAtt
       attemptedAtMs: now,
     });
     const result = await this.#db
-      .prepare(`INSERT INTO google_identity_attestation_attempt (attempt_id,plan_hash,google_user_id,snapshot_json,attempted_at_ms)
+      .prepare(`INSERT INTO google_identity_attestation (attempt_id,plan_hash,google_user_id,snapshot_json,attempted_at_ms)
 SELECT ?1,?2,?3,?4,?5 WHERE EXISTS (SELECT 1 FROM automation_singleton_lease WHERE lease_key=?6 AND owner_id=?7 AND generation=?8 AND expires_at_ms>=?9)
-AND NOT EXISTS (SELECT 1 FROM google_identity_attestation_unresolved)`)
+AND NOT EXISTS (SELECT 1 FROM google_identity_attestation WHERE kind IS NULL)`)
       .bind(
         attemptId,
         plan.planHash,
@@ -131,14 +131,14 @@ AND NOT EXISTS (SELECT 1 FROM google_identity_attestation_unresolved)`)
   async latest(): Promise<IdentityAttestationAttempt | null> {
     return this.#parse(
       await this.#db
-        .prepare(`${SELECT_ATTEMPT} ORDER BY attempt.rowid DESC LIMIT 1`)
+        .prepare(`${SELECT_ATTEMPT} ORDER BY rowid DESC LIMIT 1`)
         .first(),
     );
   }
   async read(attemptId: string): Promise<IdentityAttestationAttempt> {
     const found = await this.#parse(
       await this.#db
-        .prepare(`${SELECT_ATTEMPT} WHERE attempt.attempt_id=?1`)
+        .prepare(`${SELECT_ATTEMPT} WHERE attempt_id=?1`)
         .bind(DigestSchema.parse(attemptId))
         .first(),
     );
@@ -167,8 +167,8 @@ AND NOT EXISTS (SELECT 1 FROM google_identity_attestation_unresolved)`)
     if ((input.kind === "write-verified") !== (changeHash === null))
       throw conflict();
     const result = await this.#db
-      .prepare(`INSERT INTO google_identity_attestation_resolution (attempt_id,kind,evidence_json,change_hash,resolved_at_ms)
-SELECT ?1,?2,?3,?4,?5 WHERE EXISTS (SELECT 1 FROM google_identity_attestation_unresolved WHERE attempt_id=?1)
+      .prepare(`UPDATE google_identity_attestation SET kind=?2, evidence_json=?3, change_hash=?4, resolved_at_ms=?5
+WHERE attempt_id=?1 AND kind IS NULL
 AND EXISTS(SELECT 1 FROM automation_singleton_lease WHERE lease_key=?6 AND owner_id=?7 AND generation=?8 AND expires_at_ms>=?9)`)
       .bind(
         input.attemptId,

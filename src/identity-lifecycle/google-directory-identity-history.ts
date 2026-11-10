@@ -115,11 +115,10 @@ export class D1GoogleDirectoryIdentityHistory implements IGoogleDirectoryIdentit
       return user;
     const raw = await this.#db
       .withSession("first-primary")
-      .prepare(`SELECT attempt.attempt_id, resolution.resolved_at_ms
-      FROM google_identity_attestation_attempt AS attempt
-      LEFT JOIN google_identity_attestation_resolution AS resolution USING (attempt_id)
-      WHERE attempt.google_user_id = ?1
-      ORDER BY attempt.attempted_at_ms DESC, attempt.attempt_id DESC LIMIT 1`)
+      .prepare(`SELECT attempt_id, resolved_at_ms
+      FROM google_identity_attestation
+      WHERE google_user_id = ?1
+      ORDER BY attempted_at_ms DESC, attempt_id DESC LIMIT 1`)
       .bind(user.id)
       .first();
     if (raw === null) return user;
