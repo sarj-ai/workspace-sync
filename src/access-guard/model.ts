@@ -4,7 +4,6 @@ import {
   GitHubLoginSchema,
   GitHubUserIdSchema,
 } from "../catalog/identity-authority.ts";
-import { normalizeIdentityEmail } from "../identity-sync/normalize-identity-email.ts";
 import { ProviderReadinessContextSchema } from "../provider-readiness.ts";
 
 const GitHubAccountTypeSchema = z.enum(["Bot", "User"]);
@@ -267,6 +266,4 @@ export type LinearAccessManagedSlice = z.output<
   typeof LinearAccessManagedSliceSchema
 >;
 
-export function normalizeEmail(value: string): string {
-  return normalizeIdentityEmail(value);
-}
+export { normalizeIdentityEmail as normalizeEmail } from "../identity-sync/normalize-identity-email.ts";
