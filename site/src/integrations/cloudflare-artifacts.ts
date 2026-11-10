@@ -71,7 +71,7 @@ export default function cloudflareArtifacts(
         );
         await writeFile(
           new URL("_headers", assetRoot),
-          `/*\n  Content-Security-Policy: ${header}\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: no-referrer\n  Permissions-Policy: camera=(), microphone=(), geolocation=()\n`,
+          `/*\n  Content-Security-Policy: ${header}\n  X-Content-Type-Options: nosniff\n  Cross-Origin-Opener-Policy: same-origin\n  Referrer-Policy: no-referrer\n  Permissions-Policy: camera=(), microphone=(), geolocation=()\n`,
         );
         const urls = paths
           .filter((path) => path.endsWith("index.html"))
