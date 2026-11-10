@@ -3,8 +3,6 @@ import { z } from "zod";
 import { sha256 } from "../runtime/sha256.ts";
 import { type JsonValue, JsonValueSchema } from "./schemas.ts";
 
-const JsonScalarSchema = z.union([z.null(), z.boolean(), z.string()]);
-const JsonNumberSchema = z.number();
 const JsonObjectSchema = z.record(z.string(), z.unknown());
 
 export function canonicalJson(value: JsonValue): string {
@@ -34,19 +32,8 @@ export function hexToBytes(value: string): null | Uint8Array {
 }
 
 function serialize(value: JsonValue): string {
-  const scalar = JsonScalarSchema.safeParse(value);
-  if (scalar.success) {
-    return JSON.stringify(scalar.data);
-  }
-  const number = JsonNumberSchema.safeParse(value);
-  if (number.success) {
-    if (!Number.isFinite(number.data))
-      throw new TypeError("Canonical JSON cannot contain non-finite numbers");
-    return JSON.stringify(number.data);
-  }
   if (Array.isArray(value)) return `[${value.map(serialize).join(",")}]`;
-  if (!isJsonObject(value))
-    throw new TypeError("Canonical JSON must contain JSON values");
+  if (!isJsonObject(value)) return JSON.stringify(value);
   return `{${Object.entries(value)
     .toSorted(([left], [right]) => left.localeCompare(right))
     .map(([key, child]) => `${JSON.stringify(key)}:${serialize(child)}`)
