@@ -15,6 +15,25 @@ const expected = (value: string): string =>
   createHash("sha256").update(value, "utf8").digest("hex");
 
 describe("shared SHA-256", () => {
+  it("preserves canonical keys and JSON scalar encoding", () => {
+    expect(
+      canonicalJson({
+        z: 'line\n"quoted"',
+        a: [null, false, true, -0, 1.25, ""],
+      }),
+    ).toBe(
+      String.raw`{"a":[null,false,true,0,1.25,""],"z":"line\n\"quoted\""}`,
+    );
+  });
+
+  it.each([NaN, -Infinity, Infinity])(
+    "rejects nonfinite JSON values: %s",
+    (value) => {
+      expect(() => canonicalJson(value)).toThrow();
+      expect(() => canonicalJson({ nested: [value] })).toThrow();
+    },
+  );
+
   it.each(["", "abc", "人员 → profile 🔐", "first\nsecond"])(
     "preserves UTF-8 bytes: %j",
     async (value) => {

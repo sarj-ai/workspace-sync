@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { normalizeIdentityEmail as normalizeEmail } from "../identity-sync/normalize-identity-email.ts";
 import type { JsonValue } from "../operations/schemas.ts";
 import { JsonValueSchema } from "../operations/schemas.ts";
 import type { GoogleDelegatedAuthContract } from "./google-delegated-auth.ts";
@@ -89,8 +90,4 @@ export class GoogleGroupsSettingsClient implements GoogleGroupSettingsReader {
       settings,
     };
   }
-}
-
-function normalizeEmail(value: string): string {
-  return value.trim().toLowerCase();
 }
