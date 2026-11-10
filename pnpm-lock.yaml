@@ -183,8 +183,8 @@ importers:
         version: 4.6.7
     devDependencies:
       '@sarj/eslint-plugin':
-        specifier: 19.7.0
-        version: 19.7.0(@typescript/typescript6@6.0.2)(tsrs@0.23.0-ts7.1.0-beta)
+        specifier: 19.12.0
+        version: 19.12.0(@typescript/typescript6@6.0.2)(tsrs@0.23.0-ts7.1.0-beta)
       '@types/d3-hierarchy':
         specifier: 3.1.7
         version: 3.1.7
@@ -1476,8 +1476,8 @@ packages:
       '@astrojs/starlight': '>=0.41.7 <0.42'
       astro: '>=7.2.3 <8'
 
-  '@sarj/eslint-plugin@19.7.0':
-    resolution: {integrity: sha512-AiHLyTe/GiArwwaRHfxaNuyubo87TWqRa4yWUMoUYpV1VTxTeqj2tk28hWpWpwPK6uGG7BToXhdXcgG14jErFw==}
+  '@sarj/eslint-plugin@19.12.0':
+    resolution: {integrity: sha512-n3s97JH4vbtTwvTAVxLEaWv651ATJNvt4w977dPUrpqTzFfsSoih3ZKcLql8BHkYvHVpGfrzFfsWe8TvNIi+EQ==}
     engines: {node: ^22.22.2 || >=24.15.0}
     peerDependencies:
       tsrs: '>=0.23.0-ts7.1.0-beta'
@@ -4157,7 +4157,7 @@ snapshots:
       astro: 7.4.2(@types/node@26.6.6)(esbuild@0.28.2)(yaml@2.9.1)
       diff: 8.0.4
 
-  '@sarj/eslint-plugin@19.7.0(@typescript/typescript6@6.0.2)(tsrs@0.23.0-ts7.1.0-beta)':
+  '@sarj/eslint-plugin@19.12.0(@typescript/typescript6@6.0.2)(tsrs@0.23.0-ts7.1.0-beta)':
     dependencies:
       '@eslint/css-tree': 4.1.2
       change-case: 5.4.4
