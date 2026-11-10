@@ -34,7 +34,10 @@ export default defineConfig({
       ],
       scriptDirective: { resources: [{ resource: "'self'", kind: "element" }] },
       styleDirective: {
-        resources: [{ resource: "'unsafe-inline'", kind: "attribute" }],
+        resources: [
+          { resource: "'self'", kind: "element" },
+          { resource: "'unsafe-inline'", kind: "attribute" },
+        ],
       },
     },
   },
@@ -44,12 +47,6 @@ export default defineConfig({
       title: "Workspace Sync",
       description: metadata.description,
       favicon: "/favicon.ico",
-      logo: {
-        alt: "Sarj",
-        dark: "./public/sarj-logo-dark.webp",
-        light: "./public/sarj-logo-light.webp",
-        replacesTitle: true,
-      },
       disable404Route: true,
       customCss: ["@sarj/design/starlight.css", "./src/styles/global.css"],
       sidebar: SIDEBAR,
@@ -64,6 +61,7 @@ export default defineConfig({
       tableOfContents: false,
       credits: false,
       components: {
+        Head: "./src/components/engineering-head.astro",
         Search: "./src/components/disabled-feature.astro",
         TableOfContents: "./src/components/disabled-feature.astro",
         MobileTableOfContents: "./src/components/disabled-feature.astro",
