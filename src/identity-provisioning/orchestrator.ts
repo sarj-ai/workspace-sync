@@ -60,7 +60,6 @@ export type IdentityProvisioningExecutionResult =
       readonly operationKey: string;
       readonly providerId: ProvisioningProviderId;
       readonly reasonCode:
-        | "approval_invalid"
         | "bounded_policy_rejected"
         | "connector_action_not_managed"
         | "kill_switch_engaged";
@@ -134,7 +133,7 @@ export class IdentityProvisioningOrchestrator implements IdentityProvisioningRec
     const policy = IdentityProvisioningExecutionPolicySchema.parse(rawPolicy);
     if (
       policy.kind === "bounded-automatic-deprovision" &&
-      rawSubjects.length > policy.maxSubjects
+      rawSubjects.length > 1
     ) {
       throw new IdentityProvisioningSafetyPolicyError(
         "automatic_subject_cap_exceeded",
@@ -265,57 +264,23 @@ export class IdentityProvisioningOrchestrator implements IdentityProvisioningRec
         "kill_switch_engaged",
       );
     }
-    if (policy.kind === "bounded-automatic-deprovision") {
-      if (
-        operation.kind !== "deprovision" ||
-        operation.target.providerId !== policy.enabledProviders[0]
-      ) {
-        return providerDisabledExecution(
-          operation,
-          identity,
-          "bounded_policy_rejected",
-        );
-      }
-      const claimed =
-        await this.#dependencies.repository.claimAutomaticDeprovisionOperation(
-          { operation, planHash, policy },
-          this.#dependencies.claimOwnerId(),
-          this.#dependencies.clock(),
-          this.#dependencies.claimDurationMs,
-        );
-      if (claimed.kind === "unavailable")
-        return { ...identity, kind: "claim-unavailable" };
-      return this.#applyAndVerify(
-        connector,
+    if (
+      operation.kind !== "deprovision" ||
+      operation.target.providerId !== "github"
+    ) {
+      return providerDisabledExecution(
         operation,
-        claimed.claim,
         identity,
+        "bounded_policy_rejected",
       );
     }
-    const nowMs = this.#dependencies.clock();
-    if (
-      policy.approval.planHash !== planHash ||
-      policy.approval.approvedAtMs > nowMs ||
-      policy.approval.expiresAtMs <= nowMs ||
-      !policy.enabledProviders.includes(operation.target.providerId)
-    ) {
-      return providerDisabledExecution(operation, identity, "approval_invalid");
-    }
-
-    return this.#executeClaimed(connector, operation, identity);
-  }
-
-  async #executeClaimed(
-    connector: Extract<IdentityProviderConnector, { execution: "managed" }>,
-    operation: ExecutablePlan,
-    identity: ReturnType<typeof executionIdentity>,
-  ): Promise<IdentityProvisioningExecutionResult> {
-    const claimed = await this.#dependencies.repository.claimOperation(
-      operation.idempotencyKey,
-      this.#dependencies.claimOwnerId(),
-      this.#dependencies.clock(),
-      this.#dependencies.claimDurationMs,
-    );
+    const claimed =
+      await this.#dependencies.repository.claimAutomaticDeprovisionOperation(
+        { operation, planHash, policy },
+        this.#dependencies.claimOwnerId(),
+        this.#dependencies.clock(),
+        this.#dependencies.claimDurationMs,
+      );
     if (claimed.kind === "unavailable")
       return { ...identity, kind: "claim-unavailable" };
     return this.#applyAndVerify(connector, operation, claimed.claim, identity);
@@ -333,14 +298,10 @@ export class IdentityProvisioningOrchestrator implements IdentityProvisioningRec
           "protected_google_identity",
         );
       }
-      const receipt = ProviderApplyReceiptSchema.parse(
-        await connector.apply(operation),
-      );
-      if (receipt.idempotencyKey !== operation.idempotencyKey) {
-        throw new Error("provider_receipt_idempotency_mismatch");
-      }
       const verification = ProviderVerificationSchema.parse(
-        await connector.verify(operation, receipt),
+        claim.phase === "recovering"
+          ? await connector.recover(operation)
+          : await this.#applyFresh(connector, operation, claim),
       );
       if (verification.kind === "mismatch") {
         await this.#dependencies.repository.retryOperation(
@@ -377,6 +338,24 @@ export class IdentityProvisioningOrchestrator implements IdentityProvisioningRec
         kind: "failed",
       };
     }
+  }
+  async #applyFresh(
+    connector: Extract<IdentityProviderConnector, { execution: "managed" }>,
+    operation: ExecutablePlan,
+    claim: Extract<IdentityReconciliationOperationClaim, { phase: "claimed" }>,
+  ) {
+    const receipt = ProviderApplyReceiptSchema.parse(
+      await connector.apply(operation, () =>
+        this.#dependencies.repository.markDispatching(
+          claim,
+          this.#dependencies.clock(),
+        ),
+      ),
+    );
+    if (receipt.idempotencyKey !== operation.idempotencyKey) {
+      throw new Error("provider_receipt_idempotency_mismatch");
+    }
+    return connector.verify(operation, receipt);
   }
 }
 

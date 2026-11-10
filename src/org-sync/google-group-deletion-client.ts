@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { sameJson } from "../operations/canonical.ts";
 import { JsonValueSchema } from "../operations/schemas.ts";
+import { providerWrite } from "../runtime/provider-write.ts";
 import {
   GoogleGroupIdentitySchema,
   type GoogleGroupMemberSchema,
@@ -151,8 +152,7 @@ export class GoogleGroupDeletionClient implements IGoogleGroupDeletionClient {
       runId,
       deadlineAt,
     );
-    let mutationError: Error | undefined;
-    try {
+    const outcome = await providerWrite(async () => {
       const response = await this.#request(
         `${DIRECTORY_GROUPS_ENDPOINT}/${encodeURIComponent(target.googleGroupId)}`,
         token,
@@ -169,12 +169,10 @@ export class GoogleGroupDeletionClient implements IGoogleGroupDeletionClient {
         );
       }
       await response.body?.cancel();
-    } catch (error) {
-      mutationError = error instanceof Error ? error : new Error(String(error));
-    }
+    });
     const after = await this.readSnapshot(target, runId, deadlineAt);
     if (after.state === "absent") return;
-    if (mutationError !== undefined) throw mutationError;
+    if (outcome.kind === "uncertain") throw outcome.error;
     throw new Error("Google group remained after exact deletion");
   }
 
