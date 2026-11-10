@@ -1,6 +1,6 @@
 {
   "name": "@sarj-ai/workspace-sync",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "description": "Sync profiles and access from Google Workspace",
   "license": "MIT",
@@ -526,7 +526,11 @@
       "types": "./dist/workspace-directory/workspace-deployment-fence-repository.d.ts",
       "import": "./dist/workspace-directory/workspace-deployment-fence-repository.js"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./identity-authority": {
+      "types": "./dist/catalog/identity-authority.d.ts",
+      "import": "./dist/catalog/identity-authority.js"
+    }
   },
   "scripts": {
     "build": "node scripts/build.ts",

@@ -45,7 +45,6 @@ export const IdentityReconciliationRunIdSchema = z
 const RunIdSchema = IdentityReconciliationRunIdSchema;
 const OperationKeySchema = ProvisioningIdempotencyKeySchema;
 const ClaimOwnerIdSchema = z.uuid().brand<"IdentityProvisioningClaimOwnerId">();
-const ApprovalIdSchema = z.uuid().brand<"IdentityPlanApprovalId">();
 const ClaimGenerationSchema = z
   .number()
   .int()
@@ -69,12 +68,6 @@ const ErrorCodeSchema = z
   .string()
   .regex(/^[a-z][a-z0-9_.-]{0,127}$/u)
   .brand<"IdentityProvisioningErrorCode">();
-const ApproverSchema = z
-  .string()
-  .min(1)
-  .max(200)
-  .brand<"IdentityPlanApprover">();
-
 export const IdentityLifecycleEventInputSchema = z.strictObject({
   authorityState: AuthorityStateSchema,
   eventKey: EventKeySchema,
@@ -155,19 +148,8 @@ const ReconciliationOperationInputSchema = z
       path: ["operationKey"],
     },
   );
-const PlanApprovalInputSchema = z
-  .strictObject({
-    approvalId: ApprovalIdSchema,
-    approvedAtMs: EpochMillisecondsSchema,
-    approvedBy: ApproverSchema,
-    expiresAtMs: EpochMillisecondsSchema,
-    planHash: Sha256Schema,
-  })
-  .refine(({ approvedAtMs, expiresAtMs }) => expiresAtMs > approvedAtMs, {
-    message: "expiresAtMs must be after approvedAtMs",
-    path: ["expiresAtMs"],
-  });
 const OperationClaimRowSchema = z.strictObject({
+  state: z.enum(["claimed", "recovering"]),
   action: ActionSchema,
   "claim_expires_at_ms": EpochMillisecondsSchema,
   "claim_generation": ClaimGenerationSchema,
@@ -178,7 +160,7 @@ const OperationClaimRowSchema = z.strictObject({
   provider: ProviderSchema,
   "run_id": RunIdSchema,
 });
-const OperationClaimSchema = z.strictObject({
+const OperationClaimBaseSchema = z.strictObject({
   action: ActionSchema,
   desiredStateHash: Sha256Schema,
   expiresAtMs: EpochMillisecondsSchema,
@@ -189,6 +171,20 @@ const OperationClaimSchema = z.strictObject({
   provider: ProviderSchema,
   runId: RunIdSchema,
 });
+
+const FreshOperationClaimSchema = OperationClaimBaseSchema.extend({
+  phase: z.literal("claimed"),
+}).readonly();
+const RecoveringOperationClaimSchema = OperationClaimBaseSchema.extend({
+  phase: z.literal("recovering"),
+}).readonly();
+const OperationClaimSchema = z.discriminatedUnion("phase", [
+  FreshOperationClaimSchema,
+  RecoveringOperationClaimSchema,
+]);
+export type FreshIdentityOperationClaim = z.output<
+  typeof FreshOperationClaimSchema
+>;
 
 export type IdentityLifecycleEventInput = z.output<
   typeof IdentityLifecycleEventInputSchema
@@ -203,9 +199,6 @@ export type IdentityReconciliationRunInput = z.output<
 export type IdentityReconciliationRunId = z.output<typeof RunIdSchema>;
 export type IdentityReconciliationOperationInput = z.output<
   typeof ReconciliationOperationInputSchema
->;
-export type IdentityPlanApprovalInput = z.output<
-  typeof PlanApprovalInputSchema
 >;
 export type IdentityReconciliationOperationClaim = z.output<
   typeof OperationClaimSchema
@@ -269,19 +262,16 @@ export interface IdentityLifecycleEventStore {
 }
 
 export interface IdentityReconciliationStore {
-  approvePlan(input: IdentityPlanApprovalInput): Promise<void>;
   claimAutomaticDeprovisionOperation(
     authorization: AutomaticDeprovisionAuthorization,
     ownerId: string,
     nowMs: number,
     durationMs: number,
   ): Promise<IdentityProvisioningClaim<IdentityReconciliationOperationClaim>>;
-  claimOperation(
-    operationKey: string,
-    ownerId: string,
+  markDispatching(
+    claim: FreshIdentityOperationClaim,
     nowMs: number,
-    durationMs: number,
-  ): Promise<IdentityProvisioningClaim<IdentityReconciliationOperationClaim>>;
+  ): Promise<void>;
   completeOperation(
     claim: IdentityReconciliationOperationClaim,
     resultHash: string,
@@ -300,7 +290,7 @@ export interface IdentityReconciliationStore {
 export type IdentityReconciliationExecutionStore = Pick<
   IdentityReconciliationStore,
   | "claimAutomaticDeprovisionOperation"
-  | "claimOperation"
+  | "markDispatching"
   | "completeOperation"
   | "createPlan"
   | "retryOperation"
@@ -357,6 +347,7 @@ function lifecycleClaim(row: z.output<typeof LifecycleClaimRowSchema>) {
 
 function operationClaim(row: z.output<typeof OperationClaimRowSchema>) {
   return OperationClaimSchema.parse({
+    phase: row.state,
     action: row.action,
     desiredStateHash: row["desired_state_hash"],
     expiresAtMs: row["claim_expires_at_ms"],
@@ -522,7 +513,8 @@ export class D1IdentityProvisioningRepository
              candidate.occurred_at_ms, candidate.event_key LIMIT 1
          )
          UPDATE identity_lifecycle_event
-         SET state = 'claimed', claim_owner_id = ?1, claim_expires_at_ms = ?2,
+         SET state = CASE WHEN state IN ('dispatching', 'uncertain', 'recovering') THEN 'recovering' ELSE 'claimed' END,
+           claim_owner_id = ?1, claim_expires_at_ms = ?2,
              claim_generation = claim_generation + 1, attempt_count = attempt_count + 1,
              error_code = NULL,
              last_attempt_at_ms = MAX(COALESCE(last_attempt_at_ms, ?3), ?3),
@@ -948,79 +940,6 @@ export class D1IdentityProvisioningRepository
     }
   }
 
-  async approvePlan(
-    rawInput: z.input<typeof PlanApprovalInputSchema>,
-  ): Promise<void> {
-    const input = PlanApprovalInputSchema.parse(rawInput);
-    try {
-      await this.#db
-        .prepare(
-          `INSERT INTO identity_plan_approval
-             (approval_id, plan_hash, approved_by, approved_at_ms, expires_at_ms)
-           VALUES (?1, ?2, ?3, ?4, ?5)
-           ON CONFLICT (approval_id) DO UPDATE SET
-             approval_id = CASE
-               WHEN plan_hash = excluded.plan_hash
-                 AND approved_by = excluded.approved_by
-                 AND approved_at_ms = excluded.approved_at_ms
-                 AND expires_at_ms = excluded.expires_at_ms
-               THEN excluded.approval_id ELSE NULL END`,
-        )
-        .bind(
-          input.approvalId,
-          input.planHash,
-          input.approvedBy,
-          input.approvedAtMs,
-          input.expiresAtMs,
-        )
-        .run();
-    } catch (error) {
-      if (error instanceof Error && /constraint/iu.test(error.message)) {
-        throw identityProvisioningIdempotencyCollision(error);
-      }
-      throw error;
-    }
-  }
-
-  async claimOperation(
-    rawOperationKey: string,
-    rawOwnerId: string,
-    rawNowMs: number,
-    rawDurationMs: number,
-  ): Promise<IdentityProvisioningClaim<IdentityReconciliationOperationClaim>> {
-    const operationKey = OperationKeySchema.parse(rawOperationKey);
-    const ownerId = ClaimOwnerIdSchema.parse(rawOwnerId);
-    const nowMs = EpochMillisecondsSchema.parse(rawNowMs);
-    const durationMs = PositiveDurationSchema.parse(rawDurationMs);
-    const expiresAtMs = EpochMillisecondsSchema.parse(nowMs + durationMs);
-    const raw = await this.#db
-      .prepare(
-        `UPDATE identity_reconciliation_operation
-         SET state = 'claimed', claim_owner_id = ?1, claim_expires_at_ms = ?2,
-             claim_generation = claim_generation + 1, attempt_count = attempt_count + 1,
-             error_code = NULL
-         WHERE operation_key = ?3
-           AND (state = 'pending' OR (state = 'claimed' AND claim_expires_at_ms <= ?4))
-           AND EXISTS (
-             SELECT 1
-             FROM identity_reconciliation_run AS run
-             JOIN identity_plan_approval AS approval ON approval.plan_hash = run.plan_hash
-             WHERE run.run_id = identity_reconciliation_operation.run_id
-               AND run.state IN ('planned', 'applying')
-               AND approval.approved_at_ms <= ?4 AND approval.expires_at_ms > ?4
-           )
-         RETURNING operation_key, run_id, google_user_id, provider, action,
-                   desired_state_hash, claim_owner_id, claim_generation, claim_expires_at_ms`,
-      )
-      .bind(ownerId, expiresAtMs, operationKey, nowMs)
-      .first();
-    if (!raw) return { kind: "unavailable" };
-    return {
-      kind: "acquired",
-      claim: operationClaim(OperationClaimRowSchema.parse(raw)),
-    };
-  }
-
   // Automatic authority is separate from the reviewed approval claim path.
   async claimAutomaticDeprovisionOperation(
     authorization: AutomaticDeprovisionAuthorization,
@@ -1037,7 +956,7 @@ export class D1IdentityProvisioningRepository
     if (
       policy.kind !== "bounded-automatic-deprovision" ||
       operation.kind !== "deprovision" ||
-      operation.target.providerId !== policy.enabledProviders[0] ||
+      operation.target.providerId !== "github" ||
       protectedIdentityBlocker(operation.subject) !== undefined
     )
       return { kind: "unavailable" };
@@ -1050,17 +969,17 @@ export class D1IdentityProvisioningRepository
     const raw = await this.#db
       .prepare(
         `UPDATE identity_reconciliation_operation
-       SET state = 'claimed', claim_owner_id = ?1, claim_expires_at_ms = ?2,
+       SET state = CASE WHEN state IN ('dispatching', 'uncertain', 'recovering') THEN 'recovering' ELSE 'claimed' END,
+           claim_owner_id = ?1, claim_expires_at_ms = ?2,
            claim_generation = claim_generation + 1, attempt_count = attempt_count + 1,
            error_code = NULL
        WHERE operation_key = ?3 AND google_user_id = ?4 AND provider = ?5
          AND action = 'deprovision'
-         AND (state = 'pending' OR (state = 'claimed' AND claim_expires_at_ms <= ?6))
+         AND (state IN ('pending', 'uncertain') OR (state IN ('claimed', 'dispatching', 'recovering') AND claim_expires_at_ms <= ?6))
          AND EXISTS (
            SELECT 1 FROM identity_reconciliation_run AS run
            WHERE run.run_id = identity_reconciliation_operation.run_id
              AND run.plan_hash = ?7 AND run.authority_revision = ?8
-             AND run.state IN ('planned', 'applying')
              AND NOT EXISTS (
                SELECT 1 FROM identity_reconciliation_operation AS sibling
                WHERE sibling.run_id = run.run_id
@@ -1068,7 +987,7 @@ export class D1IdentityProvisioningRepository
                       OR sibling.action != 'deprovision')
              )
          )
-       RETURNING operation_key, run_id, google_user_id, provider, action,
+       RETURNING state, operation_key, run_id, google_user_id, provider, action,
                  desired_state_hash, claim_owner_id, claim_generation, claim_expires_at_ms`,
       )
       .bind(
@@ -1089,6 +1008,24 @@ export class D1IdentityProvisioningRepository
     };
   }
 
+  async markDispatching(
+    rawClaim: FreshIdentityOperationClaim,
+    rawNowMs: number,
+  ): Promise<void> {
+    const claim = FreshOperationClaimSchema.parse(rawClaim);
+    const nowMs = EpochMillisecondsSchema.parse(rawNowMs);
+    const row = await this.#db
+      .prepare(
+        `UPDATE identity_reconciliation_operation SET state = 'dispatching'
+       WHERE operation_key = ?1 AND state = 'claimed'
+         AND claim_owner_id = ?2 AND claim_generation = ?3 AND claim_expires_at_ms > ?4
+       RETURNING operation_key`,
+      )
+      .bind(claim.operationKey, claim.ownerId, claim.generation, nowMs)
+      .first();
+    if (row === null) throw new IdentityProvisioningFenceError();
+  }
+
   async completeOperation(
     rawClaim: z.input<typeof OperationClaimSchema>,
     rawResultHash: string,
@@ -1102,7 +1039,7 @@ export class D1IdentityProvisioningRepository
         `UPDATE identity_reconciliation_operation
          SET state = 'succeeded', result_hash = ?1, completed_at_ms = ?2,
              claim_owner_id = NULL, claim_expires_at_ms = NULL
-         WHERE operation_key = ?3 AND state = 'claimed'
+         WHERE operation_key = ?3 AND state IN ('claimed', 'dispatching', 'recovering')
            AND claim_owner_id = ?4 AND claim_generation = ?5
          RETURNING operation_key`,
       )
@@ -1126,9 +1063,9 @@ export class D1IdentityProvisioningRepository
     const row = await this.#db
       .prepare(
         `UPDATE identity_reconciliation_operation
-         SET state = 'pending', error_code = ?1,
+         SET state = CASE WHEN state = 'claimed' THEN 'pending' ELSE 'uncertain' END, error_code = ?1,
              claim_owner_id = NULL, claim_expires_at_ms = NULL
-         WHERE operation_key = ?2 AND state = 'claimed'
+         WHERE operation_key = ?2 AND state IN ('claimed', 'dispatching', 'recovering')
            AND claim_owner_id = ?3 AND claim_generation = ?4
          RETURNING operation_key`,
       )

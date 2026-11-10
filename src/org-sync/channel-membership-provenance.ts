@@ -398,51 +398,44 @@ async function removeOneProvenanceQualifiedChannelMembership(
     if (!matchesRemovalChannelPolicy(latestChannel, candidate)) return false;
     await input.assertWriteAuthority?.();
   }
-  const { ambiguousKickError, members: after } =
-    await kickWithMandatoryReadback(input.slack, candidate, input.runId);
-  assertRemovedFromChannel(after, candidate.slackUserId, ambiguousKickError);
+  await kickWithMandatoryReadback(input.slack, candidate, input.runId);
   await input.repository.markRemoved(candidate, input.runId);
   return true;
 }
 
-function assertRemovedFromChannel(
-  members: readonly string[],
-  slackUserId: string,
-  ambiguousKickError?: SlackWriteOutcomeUnknownError,
-): void {
-  if (!members.includes(slackUserId)) return;
-  if (ambiguousKickError !== undefined) throw ambiguousKickError;
-  throw new Error("Slack channel membership removal readback failed");
-}
+type ChannelKickOutcome =
+  | { readonly kind: "acknowledged" }
+  | {
+      readonly kind: "uncertain";
+      readonly error: SlackWriteOutcomeUnknownError;
+    };
 
 async function kickWithMandatoryReadback(
   slack: ChannelRemovalSlackPort,
   candidate: ChannelMembershipRemovalCandidate,
   runId: string,
-): Promise<{
-  ambiguousKickError?: SlackWriteOutcomeUnknownError;
-  members: string[];
-}> {
-  let ambiguousKickError: SlackWriteOutcomeUnknownError | undefined;
+): Promise<void> {
+  let outcome: ChannelKickOutcome = { kind: "acknowledged" };
   try {
     await slack.kick(candidate.channelId, candidate.slackUserId, runId);
   } catch (error) {
     if (!(error instanceof SlackWriteOutcomeUnknownError)) throw error;
-    ambiguousKickError = error;
+    outcome = { kind: "uncertain", error };
   }
+  let members: string[];
   try {
-    return {
-      ...(!(ambiguousKickError === undefined) && { ambiguousKickError }),
-      members: await slack.listChannelMembers(candidate.channelId, runId),
-    };
+    members = await slack.listChannelMembers(candidate.channelId, runId);
   } catch (readbackError) {
-    if (ambiguousKickError === undefined) throw readbackError;
+    if (outcome.kind === "acknowledged") throw readbackError;
     throw new AggregateError(
-      [ambiguousKickError, readbackError],
+      [outcome.error, readbackError],
       "Slack channel membership removal outcome and readback are both unavailable",
       { cause: readbackError },
     );
   }
+  if (!members.includes(candidate.slackUserId)) return;
+  if (outcome.kind === "uncertain") throw outcome.error;
+  throw new Error("Slack channel membership removal readback failed");
 }
 
 function matchesRemovalChannelPolicy(

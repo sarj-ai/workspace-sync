@@ -7,12 +7,9 @@ import {
 import type {
   IdentityProviderConnector,
   IdentityProviderPlanningContext,
-  ProviderLifecycleAction,
-  ProviderLifecycleProtocol,
 } from "../src/identity-provisioning/contracts.ts";
 import {
   IdentityProvisioningExecutionPolicySchema,
-  identityProvisioningApproval,
   identityProvisioningSha256,
   ProviderLifecycleProtocolSchema,
   ProviderObservationSchema,
@@ -133,7 +130,6 @@ describe("identity provider boundary contracts", () => {
     ).toBe(false);
     expect(
       IdentityProvisioningExecutionPolicySchema.safeParse({
-        enabledProviders: ["github"],
         kind: "bounded-automatic-deprovision",
         maxSubjects: 2,
       }).success,
@@ -425,7 +421,7 @@ describe("identity provisioning orchestrator", () => {
       claimAutomaticDeprovisionOperation: vi
         .fn()
         .mockResolvedValue({ kind: "unavailable" }),
-      claimOperation: vi.fn(),
+      markDispatching: vi.fn(),
       completeOperation: vi.fn(),
       createPlan: vi.fn(),
       retryOperation: vi.fn(),
@@ -463,6 +459,7 @@ describe("identity provisioning orchestrator", () => {
     const github: IdentityProviderConnector = {
       apply: vi.fn(),
       execution: "managed",
+      recover: vi.fn(),
       observe,
       plan: (authority, observation) =>
         new DesiredIdentityStatePlanner().plan(
@@ -478,7 +475,7 @@ describe("identity provisioning orchestrator", () => {
       claimAutomaticDeprovisionOperation: vi
         .fn()
         .mockResolvedValue({ kind: "unavailable" }),
-      claimOperation: vi.fn(),
+      markDispatching: vi.fn(),
       completeOperation: vi.fn(),
       createPlan: vi.fn(),
       retryOperation: vi.fn(),
@@ -494,9 +491,7 @@ describe("identity provisioning orchestrator", () => {
 
     await expect(
       orchestrator.reconcile([subject("suspended"), subject("deleted")], {
-        enabledProviders: ["github"],
         kind: "bounded-automatic-deprovision",
-        maxSubjects: 1,
       }),
     ).rejects.toBeInstanceOf(IdentityProvisioningSafetyPolicyError);
     expect(observe).not.toHaveBeenCalled();
@@ -507,6 +502,7 @@ describe("identity provisioning orchestrator", () => {
     const github: IdentityProviderConnector = {
       apply,
       execution: "managed",
+      recover: vi.fn(),
       observe: vi.fn().mockResolvedValue({
         account: GITHUB_ACCOUNT,
         kind: "present",
@@ -522,12 +518,11 @@ describe("identity provisioning orchestrator", () => {
       providerId: "github",
       verify: vi.fn(),
     };
-    const claimOperation = vi.fn().mockResolvedValue({ kind: "unavailable" });
     const repository = {
       claimAutomaticDeprovisionOperation: vi
         .fn()
         .mockResolvedValue({ kind: "unavailable" }),
-      claimOperation,
+      markDispatching: vi.fn(),
       completeOperation: vi.fn(),
       createPlan: vi
         .fn()
@@ -543,9 +538,7 @@ describe("identity provisioning orchestrator", () => {
       runId: () => "11111111-1111-4111-8111-111111111111",
     });
     const policy = {
-      enabledProviders: ["github"] as const,
       kind: "bounded-automatic-deprovision" as const,
-      maxSubjects: 1 as const,
     };
 
     const active = await orchestrator.reconcile([subject("active")], policy);
@@ -561,78 +554,9 @@ describe("identity provisioning orchestrator", () => {
         providerId: "github",
       }),
     ]);
-    expect(claimOperation).not.toHaveBeenCalled();
     expect(
       repository.claimAutomaticDeprovisionOperation,
     ).toHaveBeenCalledOnce();
-    expect(apply).not.toHaveBeenCalled();
-  });
-
-  it("rejects an approved provision before claim when the connector manages only deprovision", async () => {
-    const planner = plannerWithCompleteAuthority();
-    const apply = vi.fn();
-    const managedActions: ProviderLifecycleAction[] = ["deprovision"];
-    const mutableProtocol = {
-      ...GITHUB_DEPROVISION_PROTOCOL,
-      managedActions,
-    } satisfies ProviderLifecycleProtocol;
-    const github: IdentityProviderConnector = {
-      apply,
-      execution: "managed",
-      observe: vi
-        .fn()
-        .mockResolvedValue({ kind: "absent", providerId: "github" }),
-      plan: (authority, observation) => planner.plan(authority, observation),
-      protocol: mutableProtocol,
-      providerId: "github",
-      verify: vi.fn(),
-    };
-    const claimOperation = vi.fn();
-    const repository = {
-      claimAutomaticDeprovisionOperation: vi
-        .fn()
-        .mockResolvedValue({ kind: "unavailable" }),
-      claimOperation,
-      completeOperation: vi.fn(),
-      createPlan: vi
-        .fn()
-        .mockResolvedValue("11111111-1111-4111-8111-111111111111"),
-      retryOperation: vi.fn(),
-    } satisfies IdentityReconciliationExecutionStore;
-    const orchestrator = new IdentityProvisioningOrchestrator({
-      claimDurationMs: 30_000,
-      claimOwnerId: () => "22222222-2222-4222-8222-222222222222",
-      clock: () => 1_000,
-      connectors: [github],
-      repository,
-      runId: () => "11111111-1111-4111-8111-111111111111",
-    });
-    managedActions.push("provision");
-    const audit = await orchestrator.reconcile([subject("active")], {
-      kind: "audit-only",
-    });
-    if (audit.planHash === null) throw new Error("expected_identity_plan");
-
-    const result = await orchestrator.reconcile([subject("active")], {
-      approval: identityProvisioningApproval({
-        approvalId: "33333333-3333-4333-8333-333333333333",
-        approvedAtMs: 900,
-        approvedBy: "permissions-admin@company.test",
-        expiresAtMs: 2_000,
-        planHash: audit.planHash,
-      }),
-      enabledProviders: ["github"],
-      kind: "approved-apply",
-    });
-
-    expect(result.executions).toEqual([
-      expect.objectContaining({
-        kind: "provider-disabled",
-        providerId: "github",
-        reasonCode: "connector_action_not_managed",
-      }),
-    ]);
-    expect(claimOperation).not.toHaveBeenCalled();
     expect(apply).not.toHaveBeenCalled();
   });
 
@@ -663,7 +587,7 @@ describe("identity provisioning orchestrator", () => {
       claimAutomaticDeprovisionOperation: vi
         .fn()
         .mockResolvedValue({ kind: "unavailable" }),
-      claimOperation: vi.fn(),
+      markDispatching: vi.fn(),
       completeOperation: vi.fn(),
       createPlan: vi
         .fn()
@@ -734,7 +658,7 @@ describe("identity provisioning orchestrator", () => {
       claimAutomaticDeprovisionOperation: vi
         .fn()
         .mockResolvedValue({ kind: "unavailable" }),
-      claimOperation: vi.fn(),
+      markDispatching: vi.fn(),
       completeOperation: vi.fn(),
       createPlan: vi
         .fn()
@@ -763,100 +687,5 @@ describe("identity provisioning orchestrator", () => {
     expect(result.executions).toEqual([
       expect.objectContaining({ kind: "audit-only", providerId: "github" }),
     ]);
-  });
-
-  it("cannot persist its caller-supplied approval and requires an independently approved plan", async () => {
-    const planner = plannerWithCompleteAuthority();
-    const apply = vi.fn();
-    const github: IdentityProviderConnector = {
-      apply,
-      execution: "managed",
-      observe: vi.fn().mockResolvedValue({
-        account: GITHUB_ACCOUNT,
-        kind: "present",
-        providerId: "github",
-      }),
-      plan: (authority, observation) => planner.plan(authority, observation),
-      protocol: GITHUB_DEPROVISION_PROTOCOL,
-      providerId: "github",
-      verify: vi.fn(),
-    };
-    const claimOperation = vi.fn().mockResolvedValue({ kind: "unavailable" });
-    const repository = {
-      claimAutomaticDeprovisionOperation: vi
-        .fn()
-        .mockResolvedValue({ kind: "unavailable" }),
-      claimOperation,
-      completeOperation: vi.fn(),
-      createPlan: vi
-        .fn()
-        .mockResolvedValue("11111111-1111-4111-8111-111111111111"),
-      retryOperation: vi.fn(),
-    } satisfies IdentityReconciliationExecutionStore;
-    const orchestrator = new IdentityProvisioningOrchestrator({
-      claimDurationMs: 30_000,
-      claimOwnerId: () => "22222222-2222-4222-8222-222222222222",
-      clock: () => 1_000,
-      connectors: [github],
-      repository,
-      runId: () => "11111111-1111-4111-8111-111111111111",
-    });
-    const audit = await orchestrator.reconcile([subject("suspended")], {
-      kind: "audit-only",
-    });
-    if (audit.planHash === null) throw new Error("expected_identity_plan");
-
-    const expired = await orchestrator.reconcile([subject("suspended")], {
-      approval: identityProvisioningApproval({
-        approvalId: "33333333-3333-4333-8333-333333333333",
-        approvedAtMs: 800,
-        approvedBy: "permissions-admin@company.test",
-        expiresAtMs: 1_000,
-        planHash: audit.planHash,
-      }),
-      enabledProviders: ["github"],
-      kind: "approved-apply",
-    });
-
-    expect(expired.executions).toEqual([
-      expect.objectContaining({
-        kind: "provider-disabled",
-        providerId: "github",
-      }),
-    ]);
-    expect(claimOperation).not.toHaveBeenCalled();
-
-    const result = await orchestrator.reconcile([subject("suspended")], {
-      approval: identityProvisioningApproval({
-        approvalId: "33333333-3333-4333-8333-333333333333",
-        approvedAtMs: 900,
-        approvedBy: "permissions-admin@company.test",
-        expiresAtMs: 2_000,
-        planHash: audit.planHash,
-      }),
-      enabledProviders: ["github"],
-      kind: "approved-apply",
-    });
-
-    expect(claimOperation).toHaveBeenCalledOnce();
-    expect(apply).not.toHaveBeenCalled();
-    expect(result.executions).toEqual([
-      expect.objectContaining({
-        kind: "claim-unavailable",
-        providerId: "github",
-      }),
-    ]);
-  });
-
-  it("rejects an approval whose expiry does not follow its approval time", () => {
-    expect(() =>
-      identityProvisioningApproval({
-        approvalId: "33333333-3333-4333-8333-333333333333",
-        approvedAtMs: 1_000,
-        approvedBy: "permissions-admin@company.test",
-        expiresAtMs: 1_000,
-        planHash: HASH,
-      }),
-    ).toThrow();
   });
 });

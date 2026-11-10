@@ -95,6 +95,10 @@ function provisionPlan(): Extract<
   return plan;
 }
 
+function dispatchReceipt() {
+  return vi.fn<() => Promise<void>>().mockResolvedValue(undefined);
+}
+
 function json(value: unknown): Response {
   return Response.json(value);
 }
@@ -156,7 +160,7 @@ describe("GitHub post-reservation provider authority", () => {
           fetchImpl,
           { required: true, reserve },
           readGoogleAuthority,
-        ).apply(deprovisionPlan()),
+        ).apply(deprovisionPlan(), dispatchReceipt()),
       ).rejects.toThrow("github_deprovision_google_authority_changed");
       expect(readGoogleAuthority).toHaveBeenCalledExactlyOnceWith(
         GOOGLE_USER_ID,
@@ -181,7 +185,7 @@ describe("GitHub post-reservation provider authority", () => {
     await expect(
       connector(fetchImpl, undefined, async () => {
         throw failure;
-      }).apply(deprovisionPlan()),
+      }).apply(deprovisionPlan(), dispatchReceipt()),
     ).rejects.toBe(failure);
     expect(
       fetchImpl.mock.calls.every(([, init]) => init?.method !== "DELETE"),
@@ -197,6 +201,7 @@ describe("GitHub post-reservation provider authority", () => {
     await expect(
       connector(fetchImpl, { required: true, reserve }).apply(
         deprovisionPlan(),
+        dispatchReceipt(),
       ),
     ).rejects.toBeInstanceOf(GitHubUnsafeMutationError);
     expect(reserve).not.toHaveBeenCalled();
@@ -228,6 +233,7 @@ describe("GitHub post-reservation provider authority", () => {
       await expect(
         connector(fetchImpl, { required: true, reserve }).apply(
           deprovisionPlan(),
+          dispatchReceipt(),
         ),
       ).rejects.toThrow();
       expect(reserve).toHaveBeenCalledExactlyOnceWith(GOOGLE_USER_ID);
@@ -297,9 +303,9 @@ describe("GitHub managed deprovision connector", () => {
       ).resolves.toMatchObject({
         kind: "unsupported",
       });
-      await expect(managed.apply(deprovisionPlan())).rejects.toBeInstanceOf(
-        GitHubIdentityMismatchError,
-      );
+      await expect(
+        managed.apply(deprovisionPlan(), dispatchReceipt()),
+      ).rejects.toBeInstanceOf(GitHubIdentityMismatchError);
       expect(
         fetchImpl.mock.calls.every(([, init]) => init?.method !== "DELETE"),
       ).toBe(true);
@@ -375,6 +381,7 @@ describe("GitHub managed deprovision connector", () => {
     await expect(
       connector(fetchImpl, undefined, undefined, residualFetch).apply(
         deprovisionPlan(),
+        dispatchReceipt(),
       ),
     ).rejects.toBeInstanceOf(GitHubReadbackMismatchError);
     expect(
@@ -394,6 +401,7 @@ describe("GitHub managed deprovision connector", () => {
     await expect(
       connector(fetchImpl, { required: true, reserve }).apply(
         deprovisionPlan(),
+        dispatchReceipt(),
       ),
     ).rejects.toBe(rejected);
     expect(reserve).toHaveBeenCalledExactlyOnceWith(GOOGLE_USER_ID);
@@ -427,6 +435,7 @@ describe("GitHub managed deprovision connector", () => {
     await expect(
       connector(fetchImpl, { required: true, reserve }).apply(
         deprovisionPlan(),
+        dispatchReceipt(),
       ),
     ).rejects.toThrow("github_membership_delete_http_503");
     expect(order).toEqual(["budget", "write"]);
@@ -459,14 +468,36 @@ describe("GitHub managed deprovision connector", () => {
     const managed = connector(fetchImpl);
     const plan = deprovisionPlan();
 
-    await expect(managed.apply(plan)).resolves.toMatchObject({
-      idempotencyKey: plan.idempotencyKey,
-      providerReceiptId: `github:${ORGANIZATION_ID}:${GITHUB_USER_ID}:absent`,
-    });
+    await expect(managed.apply(plan, dispatchReceipt())).resolves.toMatchObject(
+      {
+        idempotencyKey: plan.idempotencyKey,
+        providerReceiptId: `github:${ORGANIZATION_ID}:${GITHUB_USER_ID}:absent`,
+      },
+    );
     expect(
       fetchImpl.mock.calls.every(([, init]) => init?.method !== "DELETE"),
     ).toBe(true);
   });
+
+  it.each([true, false])(
+    "recovers an uncertain dispatch through readback without another DELETE (%s)",
+    async (absent) => {
+      let count = 0;
+      const fetchImpl = vi.fn<typeof fetch>(async (_input, init) => {
+        if (init?.method === "DELETE")
+          throw new Error("recovery must never write");
+        count += 1;
+        if (count % 3 === 1) return organization();
+        if (count % 3 === 2) return user();
+        return absent ? new Response(null, { status: 404 }) : membership();
+      });
+      const recovered = await connector(fetchImpl).recover(deprovisionPlan());
+      expect(recovered.kind).toBe(absent ? "verified" : "mismatch");
+      expect(
+        fetchImpl.mock.calls.every(([, init]) => init?.method !== "DELETE"),
+      ).toBe(true);
+    },
+  );
 
   it("fails closed when the immutable account ID differs from Google authority", async () => {
     let callCount = 0;
@@ -476,9 +507,9 @@ describe("GitHub managed deprovision connector", () => {
     });
     const managed = connector(fetchImpl);
 
-    await expect(managed.apply(deprovisionPlan())).rejects.toBeInstanceOf(
-      GitHubIdentityMismatchError,
-    );
+    await expect(
+      managed.apply(deprovisionPlan(), dispatchReceipt()),
+    ).rejects.toBeInstanceOf(GitHubIdentityMismatchError);
   });
 
   it("rejects a deprovision target that is not the exact Google authority mapping", async () => {
@@ -491,9 +522,9 @@ describe("GitHub managed deprovision connector", () => {
     if (mismatched.kind === "blocked")
       throw new Error("expected_executable_plan");
 
-    await expect(connector(fetchImpl).apply(mismatched)).rejects.toBeInstanceOf(
-      GitHubIdentityMismatchError,
-    );
+    await expect(
+      connector(fetchImpl).apply(mismatched, dispatchReceipt()),
+    ).rejects.toBeInstanceOf(GitHubIdentityMismatchError);
     expect(fetchImpl).not.toHaveBeenCalled();
   });
 
@@ -522,8 +553,8 @@ describe("GitHub managed deprovision connector", () => {
     const managed = connector(fetchImpl);
     const plan = deprovisionPlan("archived");
 
-    const first = await managed.apply(plan);
-    const second = await managed.apply(plan);
+    const first = await managed.apply(plan, dispatchReceipt());
+    const second = await managed.apply(plan, dispatchReceipt());
 
     expect(second).toEqual(first);
     expect(deleteCount).toBe(1);
@@ -543,7 +574,7 @@ describe("GitHub managed deprovision connector", () => {
     });
 
     await expect(
-      connector(fetchImpl).apply(deprovisionPlan("deleted")),
+      connector(fetchImpl).apply(deprovisionPlan("deleted"), dispatchReceipt()),
     ).resolves.toMatchObject({
       providerReceiptId: `github:${ORGANIZATION_ID}:${GITHUB_USER_ID}:absent`,
     });
@@ -560,7 +591,7 @@ describe("GitHub managed deprovision connector", () => {
     });
 
     await expect(
-      connector(fetchImpl).apply(deprovisionPlan()),
+      connector(fetchImpl).apply(deprovisionPlan(), dispatchReceipt()),
     ).rejects.toBeInstanceOf(GitHubReadbackMismatchError);
   });
 
@@ -573,7 +604,7 @@ describe("GitHub managed deprovision connector", () => {
     });
     const managed = connector(fetchImpl);
     const plan = deprovisionPlan();
-    const receipt = await managed.apply(plan);
+    const receipt = await managed.apply(plan, dispatchReceipt());
 
     await expect(managed.verify(plan, receipt)).resolves.toMatchObject({
       kind: "verified",
@@ -611,9 +642,9 @@ describe("GitHub managed deprovision connector", () => {
     expect(
       fetchImpl.mock.calls.every(([, init]) => init?.method !== "DELETE"),
     ).toBe(true);
-    await expect(managed.apply(provisionPlan())).rejects.toBeInstanceOf(
-      GitHubUnsafeMutationError,
-    );
+    await expect(
+      managed.apply(provisionPlan(), dispatchReceipt()),
+    ).rejects.toBeInstanceOf(GitHubUnsafeMutationError);
     expect(fetchImpl).toHaveBeenCalledTimes(3);
   });
 
@@ -670,9 +701,9 @@ describe("GitHub managed deprovision connector", () => {
     await expect(managed.plan(active, observation)).resolves.toMatchObject({
       kind: "blocked",
     });
-    await expect(managed.apply(provisionPlan())).rejects.toBeInstanceOf(
-      GitHubUnsafeMutationError,
-    );
+    await expect(
+      managed.apply(provisionPlan(), dispatchReceipt()),
+    ).rejects.toBeInstanceOf(GitHubUnsafeMutationError);
     expect(
       fetchImpl.mock.calls.every(([, init]) => init?.method !== "DELETE"),
     ).toBe(true);

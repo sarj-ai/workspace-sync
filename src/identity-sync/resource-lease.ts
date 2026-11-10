@@ -65,6 +65,10 @@ export type ResourceLeaseExecution<Result> =
   | { readonly kind: "busy" }
   | { readonly kind: "completed"; readonly result: Result };
 
+type OperationOutcome<Result> =
+  | { readonly kind: "returned"; readonly result: Result }
+  | { readonly kind: "threw"; readonly error: unknown };
+
 export class ResourceLeaseFencedError extends Error {
   readonly generation: ResourceLeaseGeneration;
   readonly resourceKey: ResourceLeaseKey;
@@ -96,19 +100,16 @@ export async function withResourceLease<Result>(
   const acquisition = await repository.acquire(resourceKey, durationMs);
   if (acquisition.kind === "busy") return acquisition;
 
-  let operationFailed = false;
-  let operationError: unknown;
-  let result!: Result;
+  let outcome: OperationOutcome<Result>;
   try {
-    result = await operation(acquisition.lease);
+    outcome = { kind: "returned", result: await operation(acquisition.lease) };
   } catch (error) {
-    operationFailed = true;
-    operationError = error;
+    outcome = { kind: "threw", error };
   }
   try {
     await repository.release(acquisition.lease);
   } catch (releaseError) {
-    if (!operationFailed) throw releaseError;
+    if (outcome.kind === "returned") throw releaseError;
     logEvent("resource_lease.release_failed", {
       error:
         releaseError instanceof Error
@@ -118,8 +119,8 @@ export async function withResourceLease<Result>(
       "resource_key": acquisition.lease.resourceKey,
     });
   }
-  if (operationFailed) throw operationError;
-  return { kind: "completed", result };
+  if (outcome.kind === "threw") throw outcome.error;
+  return { kind: "completed", result: outcome.result };
 }
 
 export const SLACK_USER_GROUPS_RESOURCE_LEASE_KEY = resourceLeaseKey(

@@ -9,6 +9,7 @@ import {
 } from "../catalog/identity-authority.ts";
 import { runtimeFetch } from "../clients/runtime-fetch.ts";
 import { fetchPort } from "../runtime/fetch-port.ts";
+import { providerWrite } from "../runtime/provider-write.ts";
 import { sha256 } from "../runtime/sha256.ts";
 import type {
   IdentityProviderPlanner,
@@ -196,7 +197,10 @@ export class GitHubManagedDeprovisionConnector implements ManagedIdentityProvide
     );
   }
 
-  async apply(rawPlan: ExecutablePlan): Promise<ProviderApplyReceipt> {
+  async apply(
+    rawPlan: ExecutablePlan,
+    beforeDispatch: () => Promise<void>,
+  ): Promise<ProviderApplyReceipt> {
     const plan = DesiredProvisioningPlanSchema.parse(rawPlan);
     if (
       plan.kind !== "deprovision" ||
@@ -217,7 +221,14 @@ export class GitHubManagedDeprovisionConnector implements ManagedIdentityProvide
       throw new GitHubIdentityMismatchError();
     }
 
-    return this.#removeMembership(plan);
+    return this.#removeMembership(plan, beforeDispatch);
+  }
+
+  async recover(plan: ExecutablePlan): Promise<ProviderVerification> {
+    // Recovery is read-only. A timed-out DELETE does not authorize another write.
+    if (plan.kind !== "deprovision")
+      return { kind: "mismatch", errorCode: "github_unsafe_mutation" };
+    return this.verify(plan, receiptFor(plan, this.#organizationId));
   }
 
   async verify(
@@ -259,6 +270,7 @@ export class GitHubManagedDeprovisionConnector implements ManagedIdentityProvide
 
   async #removeMembership(
     plan: Extract<ExecutablePlan, { kind: "deprovision" }>,
+    beforeDispatch: () => Promise<void>,
   ): Promise<ProviderApplyReceipt> {
     if (plan.target.providerId !== "github")
       throw new GitHubUnsafeMutationError();
@@ -278,39 +290,32 @@ export class GitHubManagedDeprovisionConnector implements ManagedIdentityProvide
       throw new GitHubIdentityMismatchError();
     }
     await this.#assertGoogleAuthority(plan);
-    let writeFailure: unknown;
-    try {
-      const response = await this.#fetchImpl(
-        this.#membershipUrl(plan.target.githubLogin),
-        {
-          headers: this.#headers(),
-          method: "DELETE",
-        },
-      );
+    await beforeDispatch();
+    const login = plan.target.githubLogin;
+    const outcome = await providerWrite(async () => {
+      const response = await this.#fetchImpl(this.#membershipUrl(login), {
+        headers: this.#headers(),
+        method: "DELETE",
+      });
       await response.body?.cancel();
       if (response.status !== 204 && response.status !== 404) {
-        writeFailure = new Error(
+        throw new Error(
           `github_membership_delete_http_${String(response.status)}`,
         );
       }
-    } catch (error) {
-      writeFailure = error;
-    }
+    });
 
     let readback: ProviderObservation;
     try {
       readback = await this.observe(plan.subject);
     } catch (readbackFailure) {
-      if (writeFailure === undefined) throw normalizeError(readbackFailure);
-      throw ambiguousMutationError(writeFailure, readbackFailure);
+      if (outcome.kind === "acknowledged")
+        throw normalizeError(readbackFailure);
+      throw ambiguousMutationError(outcome.error, readbackFailure);
     }
     if (readback.kind === "absent")
       return receiptFor(plan, this.#organizationId);
-    if (writeFailure !== undefined) {
-      throw writeFailure instanceof Error
-        ? writeFailure
-        : new Error("github_membership_delete_failed");
-    }
+    if (outcome.kind === "uncertain") throw outcome.error;
     throw new GitHubReadbackMismatchError();
   }
 

@@ -16,27 +16,6 @@ const Sha256Schema = z
   .string()
   .regex(/^[a-f0-9]{64}$/u)
   .brand<"IdentityProvisioningSha256">();
-const ApprovalIdSchema = z.uuid().brand<"IdentityProvisioningApprovalId">();
-const ApproverSchema = z
-  .string()
-  .trim()
-  .min(1)
-  .max(200)
-  .brand<"IdentityProvisioningApprover">();
-export const IdentityProvisioningApprovalSchema = z
-  .strictObject({
-    approvalId: ApprovalIdSchema,
-    approvedAtMs: z.number().int().nonnegative(),
-    approvedBy: ApproverSchema,
-    expiresAtMs: z.number().int().positive(),
-    planHash: Sha256Schema,
-  })
-  .refine(({ approvedAtMs, expiresAtMs }) => expiresAtMs > approvedAtMs, {
-    message: "expiresAtMs must be after approvedAtMs",
-    path: ["expiresAtMs"],
-  })
-  .readonly();
-
 export type IdentityProvisioningSha256 = z.output<typeof Sha256Schema>;
 
 const ProviderObservationStructureSchema = z.discriminatedUnion("kind", [
@@ -179,6 +158,7 @@ export interface IdentityProviderPlanningContext {
 export interface IdentityProviderApplier {
   apply(
     plan: Exclude<DesiredProvisioningPlan, { kind: "blocked" }>,
+    beforeDispatch: () => Promise<void>,
   ): Promise<ProviderApplyReceipt>;
 }
 
@@ -205,6 +185,9 @@ export interface AuditOnlyIdentityProviderConnector extends IdentityProviderConn
 export interface ManagedIdentityProviderConnector
   extends IdentityProviderConnectorBase, IdentityProviderApplier {
   readonly execution: "managed";
+  recover(
+    plan: Exclude<DesiredProvisioningPlan, { kind: "blocked" }>,
+  ): Promise<ProviderVerification>;
 }
 
 export type IdentityProviderConnector =
@@ -222,22 +205,7 @@ export const IdentityProvisioningExecutionPolicySchema = z.discriminatedUnion(
   [
     z
       .strictObject({
-        enabledProviders: z.tuple([z.literal("github")]).readonly(),
         kind: z.literal("bounded-automatic-deprovision"),
-        maxSubjects: z.literal(1),
-      })
-      .readonly(),
-    z
-      .strictObject({
-        approval: IdentityProvisioningApprovalSchema,
-        enabledProviders: z
-          .tuple([ProvisioningProviderIdSchema])
-          .rest(ProvisioningProviderIdSchema)
-          .readonly()
-          .refine((providers) => new Set(providers).size === providers.length, {
-            message: "enabledProviders must not contain duplicates",
-          }),
-        kind: z.literal("approved-apply"),
       })
       .readonly(),
     z.strictObject({ kind: z.literal("audit-only") }).readonly(),
@@ -258,17 +226,4 @@ export function identityProvisioningSha256(
   value: string,
 ): IdentityProvisioningSha256 {
   return Sha256Schema.parse(value);
-}
-
-export function identityProvisioningApproval(input: {
-  readonly approvalId: string;
-  readonly approvedAtMs: number;
-  readonly approvedBy: string;
-  readonly expiresAtMs: number;
-  readonly planHash: string;
-}): Extract<
-  IdentityProvisioningExecutionPolicy,
-  { kind: "approved-apply" }
->["approval"] {
-  return IdentityProvisioningApprovalSchema.parse(input);
 }

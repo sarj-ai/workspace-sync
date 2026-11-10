@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { sameJson } from "../operations/canonical.ts";
 import { type JsonValue, JsonValueSchema } from "../operations/schemas.ts";
+import { providerWrite } from "../runtime/provider-write.ts";
 import {
   GoogleGroupIdentitySchema,
   GoogleGroupMemberSchema,
@@ -200,8 +201,7 @@ export class GoogleGroupRenameClient implements IGoogleGroupRenameClient {
       "directory-write-auth",
       this.#auth.accessToken(DIRECTORY_GROUP_WRITE_SCOPE, runId, deadlineAt),
     );
-    let mutationError: Error | undefined;
-    try {
+    const outcome = await providerWrite(async () => {
       const response = await sourceStage(
         "group-write",
         this.#request(
@@ -225,14 +225,12 @@ export class GoogleGroupRenameClient implements IGoogleGroupRenameClient {
         );
       }
       await response.body?.cancel();
-    } catch (error) {
-      mutationError = error instanceof Error ? error : new Error(String(error));
-    }
+    });
 
     // Resolve an ambiguous PATCH only through an exact post-write provider readback.
     const after = await this.readSnapshot(input, runId, deadlineAt);
     if (isExactRenameReadback(input, expectedBefore, after)) return;
-    if (mutationError !== undefined) throw mutationError;
+    if (outcome.kind === "uncertain") throw outcome.error;
     throw new Error(
       "Google group rename did not preserve the reviewed snapshot",
     );
