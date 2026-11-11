@@ -1,6 +1,7 @@
 import type { WorkspaceSyncPolicy } from "../src/configuration.ts";
 
 export const TEST_POLICY: WorkspaceSyncPolicy = {
+  execution: null,
   contractorAuthorityGroup: {
     acceptedEmails: [
       "team-contractors@company.test",

@@ -20,7 +20,7 @@ export function sameJson(left: JsonValue, right: JsonValue): boolean {
 
 export { bytesToHex } from "../runtime/sha256.ts";
 
-export function hexToBytes(value: string): null | Uint8Array {
+export function hexToBytes(value: string): null | Uint8Array<ArrayBuffer> {
   if (!/^[a-f0-9]+$/.test(value) || value.length % 2 !== 0) return null;
   const bytes = new Uint8Array(value.length / 2);
   for (let index = 0; index < value.length; index += 2) {

@@ -4,13 +4,14 @@
 
 Report vulnerabilities through [private advisories](https://github.com/sarj-ai/workspace-sync/security/advisories/new)
 with the affected version and a synthetic reproduction. Keep credentials and
-employee data out of public issues. Supported series: 0.4.
+employee data out of public issues. Supported series: 0.5.
 
 Use one immutable policy per process or Worker isolate. Isolate tenant storage
 and credentials; keep secrets out of policy and logs.
 
-The trusted host owns authentication, scheduling, migrations, persistence,
-signed-plan approval and audit retention. Untrusted callers must not supply
+The package owns scheduling, durable execution, reconciliation and repository
+transitions. The trusted host owns authentication, credentials, SDK bindings,
+migrations, signed-plan authorization and audit retention. Untrusted callers must not supply
 policy, credentials or provider ports. Directory access defaults to read-only;
 writes require explicit scopes, narrow grants and authority guards.
 
