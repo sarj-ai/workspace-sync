@@ -5,21 +5,19 @@ import { Code } from "@astrojs/starlight/components";
 
 import ArchitectureFlow from "../components/architecture-flow";
 import ReferencePage from "../components/reference-page.astro";
-import { architecture, architectureMermaid } from "../lib/architecture";
+import { architectureMermaid, integrations, apiHref } from "../lib/architecture";
 import { siteHref } from "../lib/reference";
 ---
 
-<ReferencePage title="Architecture">
-  <p class="command-help">Google Workspace supplies the people and teams. Each provider compares its current state, prepares changes and applies the approved result.</p>
-  <ArchitectureFlow client:visible />
-  <p class="command-help">Pan or zoom to explore. Your application owns approval.</p>
+<ReferencePage title="Architecture" wide>
+  <p class="command-help">Google Workspace supplies identity authority. Your application owns credentials, policy and approval. Explore how each integration uses them.</p>
+  <ArchitectureFlow client:load />
+  <noscript><p>Enable JavaScript to explore the diagram. The workflow summary and API links below work without it.</p></noscript>
   <details>
-    <summary>Data flow and source</summary>
-    <ol>{architecture.nodes.map((node) => <li><a href={siteHref(`api/${node.module}/`)}>{node.label}</a> — {node.detail}.</li>)}</ol>
+    <summary>All integrations and API references</summary>
+    <ul>{integrations.map((provider) => <li><a href={apiHref(provider.module)}>{provider.label}</a> — {provider.scope} {provider.guard}</li>)}</ul>
   </details>
-  <h2>Plan, review, apply</h2>
-  <p>Preview changes first. Applying checks that the data still matches the plan, makes the change, and reads the result back. If the data changed, review a new plan.</p>
-  <p><a href={siteHref("plan-and-apply/")}>SlackProfileSync</a> updates one profile per apply. Other integrations expose their own modules above. <a href={siteHref("storage/")}>Storage</a> is optional for basic profile sync.</p>
+  <p class="command-help"><a href={siteHref("plan-and-apply/")}>Try a Slack plan/apply example</a> · <a href={siteHref("storage/")}>When a workflow needs storage</a></p>
   <details>
     <summary>Mermaid source (11.3+)</summary>
     <Code code={architectureMermaid()} lang="text" />

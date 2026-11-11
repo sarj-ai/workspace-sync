@@ -5,12 +5,13 @@ import { REFERENCE, SIDEBAR } from "../lib/reference";
 
 interface Props {
   title: string;
+  wide?: boolean;
 }
-const { title } = Astro.props;
+const { title, wide = false } = Astro.props;
 ---
 
 <SharedReferencePage title={title} description={REFERENCE.description} sidebar={SIDEBAR}>
-  <article class="reference-page">
+  <article class:list={["reference-page", { "reference-page-wide": wide }]}>
     <h1>{title}</h1>
     <slot />
   </article>
