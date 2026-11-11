@@ -42,7 +42,7 @@ export const providers = [
     id: "pagerduty",
     label: "PagerDuty",
     icon: "pagerduty.svg",
-    module: "workspace-directory/pagerduty-team-sync",
+    module: "execution/pager-duty-team-service",
     detail: "Pinned team memberships",
     scope:
       "Plan membership changes for explicitly mapped Google groups and PagerDuty teams.",
@@ -135,7 +135,6 @@ export function workflowFor(id: IntegrationId): readonly FlowStage[] {
   if (id === "github") return githubWorkflow(provider);
   if (id === "attio") return attioWorkflow(provider);
   const slack = id === "slack";
-  const hostApplies = id === "pagerduty";
   return [
     googleStage(),
     {
@@ -173,27 +172,22 @@ export function workflowFor(id: IntegrationId): readonly FlowStage[] {
     },
     {
       id: "apply",
-      label: hostApplies ? "Host checks & writes" : "Recheck before writing",
+      label: "Recheck before writing",
       detail: "Fresh data must match approval",
       kind: "write",
       icon: null,
-      module: hostApplies
-        ? "workspace-directory/pagerduty-team-client"
-        : provider.module,
+      module: provider.module,
       input: `The reviewed plan and fresh ${provider.label} evidence.`,
       actions: [
-        hostApplies
-          ? "The host checks fresh evidence against the approved plan and action preconditions."
-          : "Recheck the plan and the selected target before the provider operation.",
+        "The package rechecks the plan and selected target before the provider operation.",
         slack
           ? "Apply at most one profile; an optional identity budget shares the person limit across workflows."
           : "Use this integration’s write authority, action limits and retry contract.",
       ],
       output:
         "The approved action is allowed to reach the provider, or execution stops.",
-      guard: hostApplies
-        ? "The planner does not apply changes. The host must enforce approval and preconditions when using the provider client."
-        : "If the approved evidence no longer matches, stop and review a new plan.",
+      guard:
+        "If the approved evidence no longer matches, stop and review a new plan.",
     },
     {
       id: "provider",
@@ -340,7 +334,7 @@ function attioWorkflow(provider: Integration): readonly FlowStage[] {
       input: "The stored authority snapshot.",
       actions: [
         "Supply this evidence to a separate reviewed deprovisioning workflow.",
-        "Keep approval, provider writes and operational state in the consuming application.",
+        "The package owns reviewed execution; the host supplies approval, credentials and storage bindings.",
       ],
       output: "Fresh evidence for review, with no Attio account mutation.",
       guard: provider.guard,
