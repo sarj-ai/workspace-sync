@@ -1,6 +1,6 @@
 {
   "name": "@sarj-ai/workspace-sync",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "private": true,
   "description": "Sync profiles and access from Google Workspace",
   "license": "MIT",
@@ -358,10 +358,6 @@
       "types": "./dist/org-sync/google-org-chart-drive-client.d.ts",
       "import": "./dist/org-sync/google-org-chart-drive-client.js"
     },
-    "./org-sync/google-group-deletion-client": {
-      "types": "./dist/org-sync/google-group-deletion-client.d.ts",
-      "import": "./dist/org-sync/google-group-deletion-client.js"
-    },
     "./org-sync/google-group-rename-client": {
       "types": "./dist/org-sync/google-group-rename-client.d.ts",
       "import": "./dist/org-sync/google-group-rename-client.js"
@@ -530,6 +526,518 @@
     "./identity-authority": {
       "types": "./dist/catalog/identity-authority.d.ts",
       "import": "./dist/catalog/identity-authority.js"
+    },
+    "./execution/flow": {
+      "types": "./dist/execution/flow.d.ts",
+      "import": "./dist/execution/flow.js"
+    },
+    "./operations/registry": {
+      "types": "./dist/operations/registry.d.ts",
+      "import": "./dist/operations/registry.js"
+    },
+    "./operations/kernel": {
+      "types": "./dist/operations/kernel.d.ts",
+      "import": "./dist/operations/kernel.js"
+    },
+    "./operations/preflight-diagnostic": {
+      "types": "./dist/operations/preflight-diagnostic.d.ts",
+      "import": "./dist/operations/preflight-diagnostic.js"
+    },
+    "./operations/workflow-status": {
+      "types": "./dist/operations/workflow-status.d.ts",
+      "import": "./dist/operations/workflow-status.js"
+    },
+    "./execution/read-workspace-directory-managed-slice": {
+      "types": "./dist/execution/read-workspace-directory-managed-slice.d.ts",
+      "import": "./dist/execution/read-workspace-directory-managed-slice.js"
+    },
+    "./execution/slack-groups-channels-managed-slice": {
+      "types": "./dist/execution/slack-groups-channels-managed-slice.d.ts",
+      "import": "./dist/execution/slack-groups-channels-managed-slice.js"
+    },
+    "./execution/google-identity-attestation-maintenance-fence": {
+      "types": "./dist/execution/google-identity-attestation-maintenance-fence.d.ts",
+      "import": "./dist/execution/google-identity-attestation-maintenance-fence.js"
+    },
+    "./execution/workspace-branch-result-error": {
+      "types": "./dist/execution/workspace-branch-result-error.d.ts",
+      "import": "./dist/execution/workspace-branch-result-error.js"
+    },
+    "./execution/ordered-branch-receipt-set-digest": {
+      "types": "./dist/execution/ordered-branch-receipt-set-digest.d.ts",
+      "import": "./dist/execution/ordered-branch-receipt-set-digest.js"
+    },
+    "./execution/resolved-branch-attempt-match-sql": {
+      "types": "./dist/execution/resolved-branch-attempt-match-sql.d.ts",
+      "import": "./dist/execution/resolved-branch-attempt-match-sql.js"
+    },
+    "./execution/create-workspace-runtime-identity-budgets": {
+      "types": "./dist/execution/create-workspace-runtime-identity-budgets.d.ts",
+      "import": "./dist/execution/create-workspace-runtime-identity-budgets.js"
+    },
+    "./execution/execute-workspace-directory-branch": {
+      "types": "./dist/execution/execute-workspace-directory-branch.d.ts",
+      "import": "./dist/execution/execute-workspace-directory-branch.js"
+    },
+    "./execution/workspace-schedule-health-repository": {
+      "types": "./dist/execution/workspace-schedule-health-repository.d.ts",
+      "import": "./dist/execution/workspace-schedule-health-repository.js"
+    },
+    "./execution/create-workspace-linear-parent-context": {
+      "types": "./dist/execution/create-workspace-linear-parent-context.d.ts",
+      "import": "./dist/execution/create-workspace-linear-parent-context.js"
+    },
+    "./execution/reviewed-slack-lifecycle-admission": {
+      "types": "./dist/execution/reviewed-slack-lifecycle-admission.d.ts",
+      "import": "./dist/execution/reviewed-slack-lifecycle-admission.js"
+    },
+    "./execution/create-workspace-directory-workflow-executor": {
+      "types": "./dist/execution/create-workspace-directory-workflow-executor.d.ts",
+      "import": "./dist/execution/create-workspace-directory-workflow-executor.js"
+    },
+    "./execution/linear-profile-service": {
+      "types": "./dist/execution/linear-profile-service.d.ts",
+      "import": "./dist/execution/linear-profile-service.js"
+    },
+    "./execution/reconstruct-verified-failed-workflow-result": {
+      "types": "./dist/execution/reconstruct-verified-failed-workflow-result.d.ts",
+      "import": "./dist/execution/reconstruct-verified-failed-workflow-result.js"
+    },
+    "./execution/workflow": {
+      "types": "./dist/execution/workflow.d.ts",
+      "import": "./dist/execution/workflow.js"
+    },
+    "./execution/assert-workspace-execution-resume": {
+      "types": "./dist/execution/assert-workspace-execution-resume.d.ts",
+      "import": "./dist/execution/assert-workspace-execution-resume.js"
+    },
+    "./execution/reviewed-action-context": {
+      "types": "./dist/execution/reviewed-action-context.d.ts",
+      "import": "./dist/execution/reviewed-action-context.js"
+    },
+    "./execution/contracts": {
+      "types": "./dist/execution/contracts.d.ts",
+      "import": "./dist/execution/contracts.js"
+    },
+    "./execution/reviewed-provider-admission": {
+      "types": "./dist/execution/reviewed-provider-admission.d.ts",
+      "import": "./dist/execution/reviewed-provider-admission.js"
+    },
+    "./execution/bind-workspace-linear-parent-context": {
+      "types": "./dist/execution/bind-workspace-linear-parent-context.d.ts",
+      "import": "./dist/execution/bind-workspace-linear-parent-context.js"
+    },
+    "./execution/workspace-database": {
+      "types": "./dist/execution/workspace-database.d.ts",
+      "import": "./dist/execution/workspace-database.js"
+    },
+    "./execution/drive-org-chart-artifact": {
+      "types": "./dist/execution/drive-org-chart-artifact.d.ts",
+      "import": "./dist/execution/drive-org-chart-artifact.js"
+    },
+    "./execution/create-google-identity-attestation-recovery-operation": {
+      "types": "./dist/execution/create-google-identity-attestation-recovery-operation.d.ts",
+      "import": "./dist/execution/create-google-identity-attestation-recovery-operation.js"
+    },
+    "./execution/canary-resolution-match-sql": {
+      "types": "./dist/execution/canary-resolution-match-sql.d.ts",
+      "import": "./dist/execution/canary-resolution-match-sql.js"
+    },
+    "./execution/is-scheduled-git-hub-access": {
+      "types": "./dist/execution/is-scheduled-git-hub-access.d.ts",
+      "import": "./dist/execution/is-scheduled-git-hub-access.js"
+    },
+    "./execution/create-privileged-google-group-cleanup-operation": {
+      "types": "./dist/execution/create-privileged-google-group-cleanup-operation.d.ts",
+      "import": "./dist/execution/create-privileged-google-group-cleanup-operation.js"
+    },
+    "./execution/profile-contracts": {
+      "types": "./dist/execution/profile-contracts.d.ts",
+      "import": "./dist/execution/profile-contracts.js"
+    },
+    "./execution/branch-attempt-contracts": {
+      "types": "./dist/execution/branch-attempt-contracts.d.ts",
+      "import": "./dist/execution/branch-attempt-contracts.js"
+    },
+    "./execution/read-workspace-source-fingerprint": {
+      "types": "./dist/execution/read-workspace-source-fingerprint.d.ts",
+      "import": "./dist/execution/read-workspace-source-fingerprint.js"
+    },
+    "./execution/github-access-managed": {
+      "types": "./dist/execution/github-access-managed.d.ts",
+      "import": "./dist/execution/github-access-managed.js"
+    },
+    "./execution/change-ledger": {
+      "types": "./dist/execution/change-ledger.d.ts",
+      "import": "./dist/execution/change-ledger.js"
+    },
+    "./execution/reviewed-linear-suspension": {
+      "types": "./dist/execution/reviewed-linear-suspension.d.ts",
+      "import": "./dist/execution/reviewed-linear-suspension.js"
+    },
+    "./execution/selected-slack-membership-user-id": {
+      "types": "./dist/execution/selected-slack-membership-user-id.d.ts",
+      "import": "./dist/execution/selected-slack-membership-user-id.js"
+    },
+    "./execution/operation": {
+      "types": "./dist/execution/operation.d.ts",
+      "import": "./dist/execution/operation.js"
+    },
+    "./execution/execute-scheduled-workspace-branch": {
+      "types": "./dist/execution/execute-scheduled-workspace-branch.d.ts",
+      "import": "./dist/execution/execute-scheduled-workspace-branch.js"
+    },
+    "./execution/change-ledger-contracts": {
+      "types": "./dist/execution/change-ledger-contracts.d.ts",
+      "import": "./dist/execution/change-ledger-contracts.js"
+    },
+    "./execution/create-workspace-identity-write-budget": {
+      "types": "./dist/execution/create-workspace-identity-write-budget.d.ts",
+      "import": "./dist/execution/create-workspace-identity-write-budget.js"
+    },
+    "./execution/reviewed-sentry-workspace": {
+      "types": "./dist/execution/reviewed-sentry-workspace.d.ts",
+      "import": "./dist/execution/reviewed-sentry-workspace.js"
+    },
+    "./execution/workspace-branch-source-identity": {
+      "types": "./dist/execution/workspace-branch-source-identity.d.ts",
+      "import": "./dist/execution/workspace-branch-source-identity.js"
+    },
+    "./execution/workspace-identity-budget-parent-key": {
+      "types": "./dist/execution/workspace-identity-budget-parent-key.d.ts",
+      "import": "./dist/execution/workspace-identity-budget-parent-key.js"
+    },
+    "./execution/reviewed-google-group-cleanup": {
+      "types": "./dist/execution/reviewed-google-group-cleanup.d.ts",
+      "import": "./dist/execution/reviewed-google-group-cleanup.js"
+    },
+    "./execution/create-workspace-slack-lifecycle-parent-context": {
+      "types": "./dist/execution/create-workspace-slack-lifecycle-parent-context.d.ts",
+      "import": "./dist/execution/create-workspace-slack-lifecycle-parent-context.js"
+    },
+    "./execution/is-scheduled-linear-suspension": {
+      "types": "./dist/execution/is-scheduled-linear-suspension.d.ts",
+      "import": "./dist/execution/is-scheduled-linear-suspension.js"
+    },
+    "./execution/assert-workspace-branch-claim-fresh": {
+      "types": "./dist/execution/assert-workspace-branch-claim-fresh.d.ts",
+      "import": "./dist/execution/assert-workspace-branch-claim-fresh.js"
+    },
+    "./execution/zero-change-plan-message": {
+      "types": "./dist/execution/zero-change-plan-message.d.ts",
+      "import": "./dist/execution/zero-change-plan-message.js"
+    },
+    "./execution/reviewed-slack-lifecycle-intent": {
+      "types": "./dist/execution/reviewed-slack-lifecycle-intent.d.ts",
+      "import": "./dist/execution/reviewed-slack-lifecycle-intent.js"
+    },
+    "./execution/create-workspace-identity-parent-context": {
+      "types": "./dist/execution/create-workspace-identity-parent-context.d.ts",
+      "import": "./dist/execution/create-workspace-identity-parent-context.js"
+    },
+    "./execution/schedule-health-contracts": {
+      "types": "./dist/execution/schedule-health-contracts.d.ts",
+      "import": "./dist/execution/schedule-health-contracts.js"
+    },
+    "./execution/reviewed-name-plan": {
+      "types": "./dist/execution/reviewed-name-plan.d.ts",
+      "import": "./dist/execution/reviewed-name-plan.js"
+    },
+    "./execution/create-google-group-retirement-readiness-operation": {
+      "types": "./dist/execution/create-google-group-retirement-readiness-operation.d.ts",
+      "import": "./dist/execution/create-google-group-retirement-readiness-operation.js"
+    },
+    "./execution/observation-carrier": {
+      "types": "./dist/execution/observation-carrier.d.ts",
+      "import": "./dist/execution/observation-carrier.js"
+    },
+    "./execution/workspace-provider-result-error": {
+      "types": "./dist/execution/workspace-provider-result-error.d.ts",
+      "import": "./dist/execution/workspace-provider-result-error.js"
+    },
+    "./execution/run-reviewed-slack-lifecycle-intent": {
+      "types": "./dist/execution/run-reviewed-slack-lifecycle-intent.d.ts",
+      "import": "./dist/execution/run-reviewed-slack-lifecycle-intent.js"
+    },
+    "./execution/create-reviewed-slack-lifecycle-executor": {
+      "types": "./dist/execution/create-reviewed-slack-lifecycle-executor.d.ts",
+      "import": "./dist/execution/create-reviewed-slack-lifecycle-executor.js"
+    },
+    "./execution/reviewed-pagerduty-team": {
+      "types": "./dist/execution/reviewed-pagerduty-team.d.ts",
+      "import": "./dist/execution/reviewed-pagerduty-team.js"
+    },
+    "./execution/sentry-workspace-authority-pins": {
+      "types": "./dist/execution/sentry-workspace-authority-pins.d.ts",
+      "import": "./dist/execution/sentry-workspace-authority-pins.js"
+    },
+    "./execution/observe-original-slack-membership-target": {
+      "types": "./dist/execution/observe-original-slack-membership-target.d.ts",
+      "import": "./dist/execution/observe-original-slack-membership-target.js"
+    },
+    "./execution/create-exact-google-group-rename-operation": {
+      "types": "./dist/execution/create-exact-google-group-rename-operation.d.ts",
+      "import": "./dist/execution/create-exact-google-group-rename-operation.js"
+    },
+    "./execution/google-identity-attestation-recovery": {
+      "types": "./dist/execution/google-identity-attestation-recovery.d.ts",
+      "import": "./dist/execution/google-identity-attestation-recovery.js"
+    },
+    "./execution/create-workspace-github-parent-context": {
+      "types": "./dist/execution/create-workspace-github-parent-context.d.ts",
+      "import": "./dist/execution/create-workspace-github-parent-context.js"
+    },
+    "./execution/workspace-directory-slack-manifest": {
+      "types": "./dist/execution/workspace-directory-slack-manifest.d.ts",
+      "import": "./dist/execution/workspace-directory-slack-manifest.js"
+    },
+    "./execution/workspace-directory-operation-diagnostics": {
+      "types": "./dist/execution/workspace-directory-operation-diagnostics.d.ts",
+      "import": "./dist/execution/workspace-directory-operation-diagnostics.js"
+    },
+    "./execution/create-workspace-scheduled-terminal-receipt-verifier": {
+      "types": "./dist/execution/create-workspace-scheduled-terminal-receipt-verifier.d.ts",
+      "import": "./dist/execution/create-workspace-scheduled-terminal-receipt-verifier.js"
+    },
+    "./execution/slack-name-service": {
+      "types": "./dist/execution/slack-name-service.d.ts",
+      "import": "./dist/execution/slack-name-service.js"
+    },
+    "./execution/workspace-directory-announced-changes": {
+      "types": "./dist/execution/workspace-directory-announced-changes.d.ts",
+      "import": "./dist/execution/workspace-directory-announced-changes.js"
+    },
+    "./execution/scheduled-slack-membership-addition": {
+      "types": "./dist/execution/scheduled-slack-membership-addition.d.ts",
+      "import": "./dist/execution/scheduled-slack-membership-addition.js"
+    },
+    "./execution/canary-branch-resolution-store": {
+      "types": "./dist/execution/canary-branch-resolution-store.d.ts",
+      "import": "./dist/execution/canary-branch-resolution-store.js"
+    },
+    "./execution/coordinate-slack-identity-budget": {
+      "types": "./dist/execution/coordinate-slack-identity-budget.d.ts",
+      "import": "./dist/execution/coordinate-slack-identity-budget.js"
+    },
+    "./execution/sentry-workspace-parent-config": {
+      "types": "./dist/execution/sentry-workspace-parent-config.d.ts",
+      "import": "./dist/execution/sentry-workspace-parent-config.js"
+    },
+    "./execution/google-group-mutation-resource-lease-key": {
+      "types": "./dist/execution/google-group-mutation-resource-lease-key.d.ts",
+      "import": "./dist/execution/google-group-mutation-resource-lease-key.js"
+    },
+    "./execution/workspace-status": {
+      "types": "./dist/execution/workspace-status.d.ts",
+      "import": "./dist/execution/workspace-status.js"
+    },
+    "./execution/trycomp-status": {
+      "types": "./dist/execution/trycomp-status.d.ts",
+      "import": "./dist/execution/trycomp-status.js"
+    },
+    "./execution/github-deprovision-operation": {
+      "types": "./dist/execution/github-deprovision-operation.d.ts",
+      "import": "./dist/execution/github-deprovision-operation.js"
+    },
+    "./execution/attio-deprovision-operation": {
+      "types": "./dist/execution/attio-deprovision-operation.d.ts",
+      "import": "./dist/execution/attio-deprovision-operation.js"
+    },
+    "./execution/github-identity-admin-attestation-operation": {
+      "types": "./dist/execution/github-identity-admin-attestation-operation.d.ts",
+      "import": "./dist/execution/github-identity-admin-attestation-operation.js"
+    },
+    "./execution/github-inactive-identity-attestation-operation": {
+      "types": "./dist/execution/github-inactive-identity-attestation-operation.d.ts",
+      "import": "./dist/execution/github-inactive-identity-attestation-operation.js"
+    },
+    "./execution/read-ashby-offboarding-accounts": {
+      "types": "./dist/execution/read-ashby-offboarding-accounts.d.ts",
+      "import": "./dist/execution/read-ashby-offboarding-accounts.js"
+    },
+    "./execution/offboarding-status": {
+      "types": "./dist/execution/offboarding-status.d.ts",
+      "import": "./dist/execution/offboarding-status.js"
+    },
+    "./execution/trycomp-offboarding-accounts": {
+      "types": "./dist/execution/trycomp-offboarding-accounts.d.ts",
+      "import": "./dist/execution/trycomp-offboarding-accounts.js"
+    },
+    "./execution/writer-readiness": {
+      "types": "./dist/execution/writer-readiness.d.ts",
+      "import": "./dist/execution/writer-readiness.js"
+    },
+    "./execution/policy": {
+      "types": "./dist/execution/policy.d.ts",
+      "import": "./dist/execution/policy.js"
+    },
+    "./execution/runtime-contract": {
+      "types": "./dist/execution/runtime-contract.d.ts",
+      "import": "./dist/execution/runtime-contract.js"
+    },
+    "./operations/workflow-executor": {
+      "types": "./dist/operations/workflow-executor.d.ts",
+      "import": "./dist/operations/workflow-executor.js"
+    },
+    "./shared/sanitize-error": {
+      "types": "./dist/shared/sanitize-error.d.ts",
+      "import": "./dist/shared/sanitize-error.js"
+    },
+    "./execution/managed-slices": {
+      "types": "./dist/execution/managed-slices.d.ts",
+      "import": "./dist/execution/managed-slices.js"
+    },
+    "./execution/access-guard-settings-schema": {
+      "types": "./dist/execution/access-guard-settings-schema.d.ts",
+      "import": "./dist/execution/access-guard-settings-schema.js"
+    },
+    "./execution/sentry-deprovision": {
+      "types": "./dist/execution/sentry-deprovision.d.ts",
+      "import": "./dist/execution/sentry-deprovision.js"
+    },
+    "./execution/google-group-cleanup-service": {
+      "types": "./dist/execution/google-group-cleanup-service.d.ts",
+      "import": "./dist/execution/google-group-cleanup-service.js"
+    },
+    "./execution/pager-duty-team-service": {
+      "types": "./dist/execution/pager-duty-team-service.d.ts",
+      "import": "./dist/execution/pager-duty-team-service.js"
+    },
+    "./execution/sentry-workspace-service": {
+      "types": "./dist/execution/sentry-workspace-service.d.ts",
+      "import": "./dist/execution/sentry-workspace-service.js"
+    },
+    "./execution/provider-execution": {
+      "types": "./dist/execution/provider-execution.d.ts",
+      "import": "./dist/execution/provider-execution.js"
+    },
+    "./execution/reviewed-google-group-cleanup-adapter": {
+      "types": "./dist/execution/reviewed-google-group-cleanup-adapter.d.ts",
+      "import": "./dist/execution/reviewed-google-group-cleanup-adapter.js"
+    },
+    "./execution/reviewed-pager-duty-team-adapter": {
+      "types": "./dist/execution/reviewed-pager-duty-team-adapter.d.ts",
+      "import": "./dist/execution/reviewed-pager-duty-team-adapter.js"
+    },
+    "./execution/reviewed-sentry-workspace-adapter": {
+      "types": "./dist/execution/reviewed-sentry-workspace-adapter.d.ts",
+      "import": "./dist/execution/reviewed-sentry-workspace-adapter.js"
+    },
+    "./execution/reviewed-workspace-name-adapter": {
+      "types": "./dist/execution/reviewed-workspace-name-adapter.d.ts",
+      "import": "./dist/execution/reviewed-workspace-name-adapter.js"
+    },
+    "./execution/create-workspace-name-parent-context": {
+      "types": "./dist/execution/create-workspace-name-parent-context.d.ts",
+      "import": "./dist/execution/create-workspace-name-parent-context.js"
+    },
+    "./execution/capture-workspace-name-branches": {
+      "types": "./dist/execution/capture-workspace-name-branches.d.ts",
+      "import": "./dist/execution/capture-workspace-name-branches.js"
+    },
+    "./execution/runtime": {
+      "types": "./dist/execution/runtime.d.ts",
+      "import": "./dist/execution/runtime.js"
+    },
+    "./execution/runtime-configuration": {
+      "types": "./dist/execution/runtime-configuration.d.ts",
+      "import": "./dist/execution/runtime-configuration.js"
+    },
+    "./execution/provider-runtime-ports": {
+      "types": "./dist/execution/provider-runtime-ports.d.ts",
+      "import": "./dist/execution/provider-runtime-ports.js"
+    },
+    "./execution/trycomp-adapter": {
+      "types": "./dist/execution/trycomp-adapter.d.ts",
+      "import": "./dist/execution/trycomp-adapter.js"
+    },
+    "./execution/bindings": {
+      "types": "./dist/execution/bindings.d.ts",
+      "import": "./dist/execution/bindings.js"
+    },
+    "./execution/slack-plan-apply-ledger": {
+      "types": "./dist/execution/slack-plan-apply-ledger.d.ts",
+      "import": "./dist/execution/slack-plan-apply-ledger.js"
+    },
+    "./execution/workflow-ledger": {
+      "types": "./dist/execution/workflow-ledger.d.ts",
+      "import": "./dist/execution/workflow-ledger.js"
+    },
+    "./execution/execute-workspace-workflow-with-health": {
+      "types": "./dist/execution/execute-workspace-workflow-with-health.d.ts",
+      "import": "./dist/execution/execute-workspace-workflow-with-health.js"
+    },
+    "./execution/workspace-directory-has-audit-only-findings": {
+      "types": "./dist/execution/workspace-directory-has-audit-only-findings.d.ts",
+      "import": "./dist/execution/workspace-directory-has-audit-only-findings.js"
+    },
+    "./execution/workspace-receipt": {
+      "types": "./dist/execution/workspace-receipt.d.ts",
+      "import": "./dist/execution/workspace-receipt.js"
+    },
+    "./execution/read-workspace-trycomp-verified-member-id": {
+      "types": "./dist/execution/read-workspace-trycomp-verified-member-id.d.ts",
+      "import": "./dist/execution/read-workspace-trycomp-verified-member-id.js"
+    },
+    "./execution/trycomp-apply": {
+      "types": "./dist/execution/trycomp-apply.d.ts",
+      "import": "./dist/execution/trycomp-apply.js"
+    },
+    "./execution/scheduled": {
+      "types": "./dist/execution/scheduled.d.ts",
+      "import": "./dist/execution/scheduled.js"
+    },
+    "./execution/run-workflow": {
+      "types": "./dist/execution/run-workflow.d.ts",
+      "import": "./dist/execution/run-workflow.js"
+    },
+    "./execution/alert-port": {
+      "types": "./dist/execution/alert-port.d.ts",
+      "import": "./dist/execution/alert-port.js"
+    },
+    "./execution/with-offboarding-parent-health": {
+      "types": "./dist/execution/with-offboarding-parent-health.d.ts",
+      "import": "./dist/execution/with-offboarding-parent-health.js"
+    },
+    "./execution/read-runtime-offboarding-status": {
+      "types": "./dist/execution/read-runtime-offboarding-status.d.ts",
+      "import": "./dist/execution/read-runtime-offboarding-status.js"
+    },
+    "./execution/inactive-identity-evidence": {
+      "types": "./dist/execution/inactive-identity-evidence.d.ts",
+      "import": "./dist/execution/inactive-identity-evidence.js"
+    },
+    "./execution/identity-seed-preview": {
+      "types": "./dist/execution/identity-seed-preview.d.ts",
+      "import": "./dist/execution/identity-seed-preview.js"
+    },
+    "./org-sync/normalize-private-key": {
+      "types": "./dist/org-sync/normalize-google-private-key.d.ts",
+      "import": "./dist/org-sync/normalize-google-private-key.js"
+    },
+    "./execution/identity-provisioning-runtime": {
+      "types": "./dist/execution/identity-provisioning-runtime.d.ts",
+      "import": "./dist/execution/identity-provisioning-runtime.js"
+    },
+    "./execution/create-workspace-access-audit-providers": {
+      "types": "./dist/execution/create-workspace-access-audit-providers.d.ts",
+      "import": "./dist/execution/create-workspace-access-audit-providers.js"
+    },
+    "./org-sync/derive-org-channel-removal-policy": {
+      "types": "./dist/org-sync/derive-org-channel-removal-policy.d.ts",
+      "import": "./dist/org-sync/derive-org-channel-removal-policy.js"
+    },
+    "./execution/notification-recovery": {
+      "types": "./dist/execution/notification-recovery.d.ts",
+      "import": "./dist/execution/notification-recovery.js"
+    },
+    "./shared/stable-slack-client-message-id": {
+      "types": "./dist/shared/stable-slack-client-message-id.d.ts",
+      "import": "./dist/shared/stable-slack-client-message-id.js"
+    },
+    "./execution/get-workspace-execution-policy": {
+      "types": "./dist/execution/get-workspace-execution-policy.d.ts",
+      "import": "./dist/execution/get-workspace-execution-policy.js"
     }
   },
   "scripts": {

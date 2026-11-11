@@ -1,5 +1,5 @@
 {
-  "scope": "Workspace Sync 0.4.0 and its consuming Automations storage contract",
+  "scope": "Workspace Sync 0.5.0: authority, scheduling, durable execution, provider effects, recovery, and consuming storage contract.",
   "discovery": "All tracked source files were scanned for status/phase/state, optional fields, counters, timestamps, leases, retries, provider effects and ordering; migration readers/writers are inventoried in the consuming app. Inventory entries group one authoritative model, not filename keywords.",
   "persistenceOwner": "sarj-ai/automations; migration 0088_explicit_identity_execution.sql",
   "machines": [
@@ -445,6 +445,128 @@
       ],
       "terminalStates": [],
       "recovery": "Write requests are never assumed absent after timeout; response cleanup preserves original errors."
+    },
+    {
+      "id": "parent-workflow",
+      "oldRepresentation": "approval/wait/lease/provider checkpoints; implementation and transport were mixed across the legacy Automations sync trees",
+      "authoritativeReplacement": "WorkspaceDirectoryWorkflowParamsSchema / WorkspaceDirectoryWorkflowResultSchema, WorkflowProviderStatus, WorkspaceScheduleTickSchema and durable Cloudflare steps, driven only by execution/run-workflow.ts",
+      "events": [
+        "start",
+        "authority refresh",
+        "approval",
+        "child completion",
+        "timeout",
+        "cancel"
+      ],
+      "guards": [
+        "exact deployment identity",
+        "parent lease",
+        "signed approval identity",
+        "runtime schemas",
+        "commit/readback barrier"
+      ],
+      "recovery": "Resumption uses durable step receipts; pending or unknown external write requires readback.",
+      "decision": "consolidate",
+      "sources": [
+        "src/execution/run-workflow.ts",
+        "src/execution/contracts.ts",
+        "src/execution/workflow.ts",
+        "src/execution/assert-workspace-execution-resume.ts"
+      ]
+    },
+    {
+      "id": "child-workflow-and-operation-ledger",
+      "oldRepresentation": "parent generation, child ticks and provider outcomes; implementation and transport were mixed across the legacy Automations sync trees",
+      "authoritativeReplacement": "WorkspaceBranchAttemptSchema, WorkspaceScheduleTickSchema and owner/generation CAS transitions in the canonical repositories; parent ledger owns new receipts",
+      "events": ["claim", "renew", "dispatch", "readback", "complete", "retry"],
+      "guards": [
+        "resource leases",
+        "fenced deployment",
+        "exact before/after identity",
+        "provider mutation budget"
+      ],
+      "recovery": "Never infer an external write absent because a child failed; retained recovery evidence is authoritative.",
+      "decision": "consolidate",
+      "sources": [
+        "src/execution/branch-attempt-contracts.ts",
+        "src/execution/schedule-health-contracts.ts",
+        "src/execution/workspace-schedule-health-repository.ts",
+        "src/execution/change-ledger.ts",
+        "src/execution/slack-plan-apply-ledger.ts"
+      ]
+    },
+    {
+      "id": "sync-admission-and-cancellation",
+      "oldRepresentation": "routing flags, worker events, signal and workflow instance status; implementation and transport were mixed across the legacy Automations sync trees",
+      "authoritativeReplacement": "One scheduled parent with explicit managed/audit provider execution and parent-only reviewed contexts; no standalone HTTP writer or supplemental scheduling fallback. Identity-event admission remains the canonical durable lifecycle orchestrator.",
+      "events": [
+        "webhook",
+        "scheduled full inventory",
+        "queue delivery",
+        "abort",
+        "deadline"
+      ],
+      "guards": [
+        "immutable provider notification IDs",
+        "generation checks",
+        "bounded delivery",
+        "exact child ownership"
+      ],
+      "recovery": "Duplicate messages reuse persisted keys; abort stops owned I/O and retains uncertain effects.",
+      "decision": "consolidate",
+      "sources": [
+        "src/execution/scheduled.ts",
+        "src/execution/provider-execution.ts",
+        "src/execution/reviewed-action-context.ts",
+        "src/identity-lifecycle/webhook-handler.ts"
+      ]
+    },
+    {
+      "id": "operational-recovery-evidence",
+      "oldRepresentation": "historical incidents, resolutions and retained SQL views; implementation and transport were mixed across the legacy Automations sync trees",
+      "authoritativeReplacement": "Canonical exact-attempt recovery and typed validated CanaryResolutionPins; tenant incident pins and immutable evidence remain private host input",
+      "events": [
+        "observe failed attempt",
+        "verify readback",
+        "record resolution"
+      ],
+      "guards": [
+        "immutable original evidence",
+        "exact provider/attempt/hash binding",
+        "no general bypass"
+      ],
+      "recovery": "Historical receipts and unresolved provider problems are preserved. Completed fixed oneoff entry points were retired previously; evidence remains active recovery input.",
+      "decision": "consolidate",
+      "sources": [
+        "src/execution/canary-branch-resolution-store.ts",
+        "src/execution/reconstruct-verified-failed-workflow-result.ts",
+        "src/execution/execute-workspace-workflow-with-health.ts"
+      ]
+    },
+    {
+      "id": "legacy-notification-recovery",
+      "sources": ["src/execution/notification-recovery.ts"],
+      "decision": "consolidate",
+      "oldRepresentation": "Trycomp standalone notification producer and recovery code mixed into Automations scheduling",
+      "authoritativeReplacement": "Canonical pending / claimed / delivered outbox and started / completed / failed / lease_busy schedule-attempt transitions; owner/generation claims preserve accepted-but-unverified Slack receipts",
+      "events": [
+        "claim",
+        "renew",
+        "accept",
+        "readback",
+        "defer",
+        "complete",
+        "abandoned-attempt-recovery"
+      ],
+      "guards": [
+        "exact destination",
+        "bounded history",
+        "owner/generation/expiry CAS",
+        "content and metadata match",
+        "immutable linked outcome"
+      ],
+      "terminalStates": ["delivered"],
+      "recovery": "Only recovery of existing standalone attempt/notification records remains active. Missing or incomplete provider history never proves a write absent. New Trycomp synchronization is produced by the parent Workflow."
     }
   ],
   "justifiedRepresentationExceptions": [
@@ -459,6 +581,7 @@
     {
       "scope": "Immutable facts and configuration",
       "reason": "Static identity IDs, names, policy metadata, chart tree traversal, and feature configuration have no durable transition lifecycle. Validate one immutable process policy; configuration readiness is represented by explicit ready/blocked/disabled results."
-    }
+    },
+    "Private fixed incident evidence and migrations stay with the deployment; validated immutable pins enter the canonical recovery model. No generic bypass or standalone mutation route is retained."
   ]
 }
