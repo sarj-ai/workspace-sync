@@ -54,7 +54,7 @@ function Stage({ data }: NodeProps<StageNode>) {
         data-flow-step={data.stage.id}
       >
         <span className="flow-stage-number">{data.number}</span>
-        {data.stage.icon && (
+        {data.stage.icon !== null && (
           <img
             src={providerIcon(data.stage.icon)}
             alt=""
@@ -78,7 +78,7 @@ function Stage({ data }: NodeProps<StageNode>) {
   );
 }
 
-const NODE_TYPES = { stage: Stage };
+const NODE_TYPES = { stage: Stage } as const;
 const POSITIONS = [
   { x: 0, y: 0 },
   { x: 300, y: 0 },
@@ -86,13 +86,13 @@ const POSITIONS = [
   { x: 900, y: 0 },
   { x: 900, y: 260 },
   { x: 600, y: 260 },
-];
+] as const;
 const GITHUB_POSITIONS = [
   { x: 0, y: 0 },
   { x: 0, y: 260 },
   { x: 300, y: 130 },
   { x: 600, y: 130 },
-];
+] as const;
 
 function arrangeViewport(
   flow: ReactFlowInstance<StageNode>,
@@ -106,19 +106,21 @@ function arrangeViewport(
   const graphWidth = Math.max(...nodes.map((node) => node.position.x)) + 224;
   const graphHeight = Math.max(...nodes.map((node) => node.position.y)) + 164;
   const zoom = width < 900 ? 1 : Math.min(1, (width - 64) / graphWidth);
-  void flow.setViewport(
-    width < 900
-      ? {
-          x: width / 2 - (active.position.x + 112),
-          y: height / 2 - (active.position.y + 82),
-          zoom,
-        }
-      : {
-          x: (width - graphWidth * zoom) / 2,
-          y: (height - graphHeight * zoom) / 2,
-          zoom,
-        },
-  );
+  flow
+    .setViewport(
+      width < 900
+        ? {
+            x: width / 2 - (active.position.x + 112),
+            y: height / 2 - (active.position.y + 82),
+            zoom,
+          }
+        : {
+            x: (width - graphWidth * zoom) / 2,
+            y: (height - graphHeight * zoom) / 2,
+            zoom,
+          },
+    )
+    .catch(reportError);
 }
 
 export default function ArchitectureFlow() {
@@ -142,11 +144,13 @@ export default function ArchitectureFlow() {
   }, [instance]);
   const selected = stages[step];
   const selectStep = (index: number): void => {
-    if (!stages[index]) return;
+    if (index < 0 || index >= stages.length) return;
     setStep(index);
     const position = positions[index];
     if (position && canvas.current && canvas.current.clientWidth < 900) {
-      void instance?.setCenter(position.x + 112, position.y + 82, { zoom: 1 });
+      instance
+        ?.setCenter(position.x + 112, position.y + 82, { zoom: 1 })
+        .catch(reportError);
     }
   };
   const nodes: StageNode[] = stages.map((stage, index) => ({

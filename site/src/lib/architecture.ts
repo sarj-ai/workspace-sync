@@ -366,12 +366,12 @@ export function workflowEdges(id: IntegrationId) {
           to: index + 1,
           label: labels[index] ?? "",
         }));
-  return connections.flatMap(({ from, to, label }) => {
+  return connections.map(({ from, to, label }) => {
     const source = stages[from];
     const target = stages[to];
-    return source && target
-      ? [{ source: source.id, target: target.id, from, to, label }]
-      : [];
+    if (!source || !target)
+      throw new RangeError("Workflow edge references a missing stage");
+    return { source: source.id, target: target.id, from, to, label };
   });
 }
 
