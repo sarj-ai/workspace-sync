@@ -8,5 +8,4 @@ export const SIDEBAR: ReferenceSidebar = [
   { label: "API", link: "/api/" },
   { label: "Storage", link: "/storage/" },
   { label: "Development", link: "/development/" },
-  { label: "Security", link: "/security/" },
 ];

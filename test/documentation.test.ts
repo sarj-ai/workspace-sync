@@ -6,8 +6,10 @@ import { z } from "zod";
 import { profilePlan } from "../examples/profile-plan.ts";
 import metadata from "../package.json" with { type: "json" };
 import {
-  architecture,
   architectureMermaid,
+  integrations,
+  workflowEdges,
+  workflowFor,
 } from "../site/src/lib/architecture.ts";
 
 describe("documentation examples", () => {
@@ -51,8 +53,6 @@ describe("documentation examples", () => {
   });
 
   it("keeps diagram edges and source links within the public API", () => {
-    const ids = new Set<string>(architecture.nodes.map((node) => node.id));
-    expect(ids.size).toBe(architecture.nodes.length);
     const modules = new Set(
       Object.values(metadata.exports).flatMap((target) => {
         const result = z.object({ import: z.string() }).safeParse(target);
@@ -61,14 +61,18 @@ describe("documentation examples", () => {
           : [];
       }),
     );
-    for (const node of architecture.nodes)
-      expect(modules.has(node.module)).toBe(true);
-    for (const edge of architecture.edges) {
-      expect(ids.has(edge.source)).toBe(true);
-      expect(ids.has(edge.target)).toBe(true);
-      expect(architectureMermaid()).toContain(
-        `${edge.source} --> ${edge.target}`,
-      );
+    for (const provider of integrations) {
+      const nodes = workflowFor(provider.id);
+      const ids = new Set(nodes.map((node) => node.id));
+      expect(ids.size).toBe(nodes.length);
+      for (const node of nodes) expect(modules.has(node.module)).toBe(true);
+      for (const edge of workflowEdges(provider.id)) {
+        expect(ids.has(edge.source)).toBe(true);
+        expect(ids.has(edge.target)).toBe(true);
+        expect(architectureMermaid()).toContain(
+          `${provider.id}_${edge.source} -->|${edge.label}| ${provider.id}_${edge.target}`,
+        );
+      }
     }
   });
 });
