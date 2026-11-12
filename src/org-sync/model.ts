@@ -57,6 +57,7 @@ export interface GoogleDirectoryCustomSchemas {
         linkedinDigestOptOut?: boolean | undefined;
       }
     | undefined;
+  WorkspaceAccount?: { isBot?: boolean | undefined } | undefined;
 }
 
 export interface GoogleDirectoryUser {
@@ -231,8 +232,20 @@ export function buildOrgProjectionPlan(input: {
   const errors: string[] = [];
   const warnings: string[] = [];
   const excludedGoogleUserIds = new Set(input.excludedGoogleUserIds);
+  const botEmails = new Set(
+    input.googleUsers
+      .filter(isBotGoogleDirectoryUser)
+      .flatMap((user) =>
+        [
+          user.primaryEmail,
+          ...(user.aliases ?? []),
+          ...(user.nonEditableAliases ?? []),
+        ].map(normalizeEmail),
+      ),
+  );
   const includedGoogleUsers = input.googleUsers.filter(
-    (user) => !excludedGoogleUserIds.has(user.id),
+    (user) =>
+      !excludedGoogleUserIds.has(user.id) && !isBotGoogleDirectoryUser(user),
   );
   const googleUsersById = new Map(
     includedGoogleUsers.map((user) => [user.id, user]),
@@ -298,6 +311,7 @@ export function buildOrgProjectionPlan(input: {
     if (!activeSlackHuman(slackUser)) continue;
     const identity = normalizeEmail(slackUser.profile.email ?? "");
     if (!identity.endsWith(domainSuffix)) continue;
+    if (botEmails.has(identity)) continue;
     profiles.push(projectSlackProfile(slackUser, input.fieldIds, context));
   }
 
@@ -331,6 +345,11 @@ export function buildOrgProjectionPlan(input: {
     unplacedGoogle,
     warnings: [...new Set(warnings)].toSorted((a, b) => a.localeCompare(b)),
   };
+}
+
+// WorkspaceAccount.isBot is administrator-managed; it does not change access authority.
+export function isBotGoogleDirectoryUser(user: GoogleDirectoryUser): boolean {
+  return user.customSchemas?.WorkspaceAccount?.isBot === true;
 }
 
 export function googleLinkedInUrl(user: GoogleDirectoryUser): null | string {
