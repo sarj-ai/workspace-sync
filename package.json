@@ -1,6 +1,6 @@
 {
   "name": "@sarj-ai/workspace-sync",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "private": true,
   "description": "Sync profiles and access from Google Workspace",
   "license": "MIT",

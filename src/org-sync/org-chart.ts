@@ -8,6 +8,7 @@ import {
   googleGitHubProfile,
   googleLinkedInUrl,
   isActiveGoogleDirectoryUser,
+  isBotGoogleDirectoryUser,
   ORG_SYNC_DEPARTMENTS,
 } from "./model.ts";
 
@@ -181,7 +182,10 @@ export function orgChartParticipants(
     }
   }
   const active = users.filter(
-    (user) => isActiveGoogleDirectoryUser(user) && !excluded.has(user.id),
+    (user) =>
+      isActiveGoogleDirectoryUser(user) &&
+      !isBotGoogleDirectoryUser(user) &&
+      !excluded.has(user.id),
   );
   if (active.length < policy.minimumGoogleParticipants) {
     throw new Error(

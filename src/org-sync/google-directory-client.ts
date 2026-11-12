@@ -64,6 +64,10 @@ const GoogleCustomSchemasSchema = z
       })
       .catchall(JsonValueSchema)
       .optional(),
+    WorkspaceAccount: z
+      .object({ isBot: z.boolean().optional() })
+      .catchall(JsonValueSchema)
+      .optional(),
     SocialBot: z
       .object({
         linkedinDigestPreferenceActionTs: z
@@ -587,8 +591,9 @@ export class GoogleDirectoryClient
     runId: string,
     deadlineAt?: number,
   ): Promise<GoogleDirectoryUser[]> {
+    // Full projection also works before the optional WorkspaceAccount schema exists.
+    // Keep the response mask narrow so unrelated top-level profile data is not fetched.
     return this.#listUsers(false, runId, deadlineAt, {
-      customFieldMask: "SocialBot",
       fields:
         "nextPageToken,users(id,name,primaryEmail,suspended,archived,deletionTime,websites,customSchemas)",
     });
@@ -894,7 +899,7 @@ export class GoogleDirectoryClient
     showDeleted: boolean,
     runId: string,
     deadlineAt?: number,
-    responseMask?: { customFieldMask: string; fields: string },
+    responseMask?: { customFieldMask?: string; fields: string },
   ): Promise<GoogleDirectoryUser[]> {
     const token = await this.#auth.accessToken(this.#scope, runId, deadlineAt);
     const users: GoogleDirectoryUser[] = [];
@@ -916,11 +921,14 @@ export class GoogleDirectoryClient
         customer: "my_customer",
         maxResults: "500",
         orderBy: "email",
-        projection: responseMask === undefined ? "full" : "custom",
+        projection:
+          responseMask?.customFieldMask === undefined ? "full" : "custom",
         showDeleted: String(showDeleted),
       });
       if (responseMask) {
-        query.set("customFieldMask", responseMask.customFieldMask);
+        if (responseMask.customFieldMask !== undefined) {
+          query.set("customFieldMask", responseMask.customFieldMask);
+        }
         query.set("fields", responseMask.fields);
       }
       if (pageToken) query.set("pageToken", pageToken);

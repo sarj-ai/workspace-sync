@@ -57,6 +57,7 @@ describe("Google Directory LinkedIn digest preferences", () => {
                 githubUserId: "583231",
                 unrelatedIdentity: "preserved",
               },
+              WorkspaceAccount: { isBot: true },
               SocialBot: {
                 linkedinDigestOptOut: true,
                 unrelatedSetting: "preserved",
@@ -81,6 +82,7 @@ describe("Google Directory LinkedIn digest preferences", () => {
         githubUserId: "583231",
         unrelatedIdentity: "preserved",
       },
+      WorkspaceAccount: { isBot: true },
       SocialBot: { linkedinDigestOptOut: true, unrelatedSetting: "preserved" },
       UnrelatedSchema: { nested: { enabled: true }, value: "preserved" },
     });
@@ -266,7 +268,7 @@ describe("Google Directory LinkedIn digest preferences", () => {
     expect(user).not.toHaveProperty("aliases");
   });
 
-  it("verifies the private schema and lists only digest roster fields", async () => {
+  it("verifies preferences and reads roster flags without requiring the optional bot schema", async () => {
     const directoryUrls: URL[] = [];
     const directory = await client(async (input) => {
       const url = requestUrl(input);
@@ -316,7 +318,8 @@ describe("Google Directory LinkedIn digest preferences", () => {
     const usersUrl = directoryUrls.find((url) =>
       url.pathname.endsWith("/users"),
     );
-    expect(usersUrl?.searchParams.get("customFieldMask")).toBe("SocialBot");
+    expect(usersUrl?.searchParams.get("customFieldMask")).toBeNull();
+    expect(usersUrl?.searchParams.get("projection")).toBe("full");
     expect(usersUrl?.searchParams.get("fields")).toBe(
       "nextPageToken,users(id,name,primaryEmail,suspended,archived,deletionTime,websites,customSchemas)",
     );
