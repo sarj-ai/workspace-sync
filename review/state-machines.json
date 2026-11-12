@@ -1,5 +1,5 @@
 {
-  "scope": "Workspace Sync 0.5.0: authority, scheduling, durable execution, provider effects, recovery, and consuming storage contract.",
+  "scope": "Workspace Sync 0.5.1: authority, scheduling, durable execution, provider effects, recovery, and consuming storage contract.",
   "discovery": "All tracked source files were scanned for status/phase/state, optional fields, counters, timestamps, leases, retries, provider effects and ordering; migration readers/writers are inventoried in the consuming app. Inventory entries group one authoritative model, not filename keywords.",
   "persistenceOwner": "sarj-ai/automations; migration 0088_explicit_identity_execution.sql",
   "machines": [
@@ -582,6 +582,18 @@
       "scope": "Immutable facts and configuration",
       "reason": "Static identity IDs, names, policy metadata, chart tree traversal, and feature configuration have no durable transition lifecycle. Validate one immutable process policy; configuration readiness is represented by explicit ready/blocked/disabled results."
     },
-    "Private fixed incident evidence and migrations stay with the deployment; validated immutable pins enter the canonical recovery model. No generic bypass or standalone mutation route is retained."
-  ]
+    "Private fixed incident evidence and migrations stay with the deployment; validated immutable pins enter the canonical recovery model. No generic bypass or standalone mutation route is retained.",
+    {
+      "scope": "WorkspaceAccount.isBot",
+      "reason": "Independent Google-owned account classification, not an execution lifecycle. The native boundary validates the optional boolean and the canonical isBotGoogleDirectoryUser predicate excludes flagged accounts from charts, Slack profile updates and digest roster reads. Administration/identity authority still sees the same immutable account.",
+      "sources": [
+        "src/org-sync/model.ts",
+        "src/org-sync/google-directory-client.ts",
+        "src/org-sync/org-chart.ts",
+        "test/bot-account.test.ts"
+      ]
+    }
+  ],
+  "reviewedUpstreamHead": "8f46acb69b2fca33031a6606cc546747991be37b",
+  "ownedApplicationTables": []
 }
