@@ -1,0 +1,1542 @@
+[
+  {
+    "path": ".github/workflows/ci.yml",
+    "sha256": "885425a6b6e8b7acf0fb9a2c2869aa3860c3e02e1819e6ba09c104ee65462f0c"
+  },
+  {
+    "path": ".github/workflows/commit-policy.yml",
+    "sha256": "f952477cb652ce12558a276307e02119263ed19691001b0bb670f16c3fede1b2"
+  },
+  {
+    "path": ".github/workflows/standards.yml",
+    "sha256": "d5aeef6ca137f55dbe345e47746409c5e58738c4345c94913a87b29f15bb7df0"
+  },
+  {
+    "path": ".markdownlint.yaml",
+    "sha256": "7013b76c14b86ab4c1f6a9ce9403b47bf6999efdedd1b6c75a237e5258f2739b"
+  },
+  {
+    "path": ".mise.toml",
+    "sha256": "2ec63553cfd71bb65bb8d63459da47eacab0322936599be5b67e0b29347f0cf9"
+  },
+  {
+    "path": ".pre-commit-config.yaml",
+    "sha256": "4d75d8d98aeba797e5bc50a64e5492be46be16e1eb9d4d53d313193ee4c52ca4"
+  },
+  {
+    "path": ".repo-standards/repository.toml",
+    "sha256": "176cf36dd28849d813c6e6313cae8498d54cb3395ebaa279b1d743fd6a355a5e"
+  },
+  {
+    "path": ".sarj-standards.toml",
+    "sha256": "c08d1b1a29a2994d64a5dbdc698bdd0d938a00f6553a30744a97e57273dd4454"
+  },
+  {
+    "path": ".taplo.toml",
+    "sha256": "e996e9584018f487bcbc41dc90dbc94a2ef2586311b9747c4eb386c8bf5e76a8"
+  },
+  {
+    "path": ".yamllint.yaml",
+    "sha256": "28c8e3ef9632057f984e7ae937c7c67315c13802b42d555f415d02cd9fd44408"
+  },
+  {
+    "path": "doctor.config.json",
+    "sha256": "45613154e0339ab8e8f4539c7daf14ec5c33e758c5f9ebd1ae0dd4d7fd863270"
+  },
+  {
+    "path": "examples/audit-directory.ts",
+    "sha256": "92c4d695017460eaa33768eb313fd8a3ba9b168f2458e802e1ebf39fba1bd8b2"
+  },
+  {
+    "path": "examples/policy.example.json",
+    "sha256": "389175a42ad3759f78bd4d073a2f25cd612a212cc64a9a224982b7e9760ed9db"
+  },
+  {
+    "path": "examples/profile-plan.ts",
+    "sha256": "4a10d01b75fc9c56f95da5bc89205e592d417fd005908277a2b8dbc8fd6bb6fd"
+  },
+  {
+    "path": "examples/sync-profiles.ts",
+    "sha256": "55fd1cafabf8a1e5fe78bd07eba871ac33dced1728f0e4b844a65e1738327088"
+  },
+  {
+    "path": "oxfmt.config.mts",
+    "sha256": "a6d3cbbc3d157baa81c6be3a13615d8b612563cdfc1abcf146bf6fb427987149"
+  },
+  {
+    "path": "oxfmt.strict.mts",
+    "sha256": "713572df4efaeebf7dde564b3e6be0449b8b04cad928889ec8eb85787989ad44"
+  },
+  {
+    "path": "oxlint.config.mts",
+    "sha256": "035d87b0e82e6eda66c5720c1b8050fd05418a802836fe3e785569a685bf169c"
+  },
+  {
+    "path": "oxlint.strict.mts",
+    "sha256": "a6d92f97ebe1dcaf8191d85a3c6cce538877c7a131a1b4cb93b3c765d06ac940"
+  },
+  {
+    "path": "package.json",
+    "sha256": "b569c4f529c6785152034fc7569852c15d2cc94ab436610b150a90799ec8dae7"
+  },
+  {
+    "path": "pnpm-workspace.yaml",
+    "sha256": "6786bd38b9793edc084c623d22085140abe5d0ef4a9f73c84ba80c34f4dfb77e"
+  },
+  {
+    "path": "scripts/build.ts",
+    "sha256": "e771d6e63dcc0e5d7c01bc094cbb4caed998e00b83a9979002a40811767f77d9"
+  },
+  {
+    "path": "scripts/derive-documentation-reference.ts",
+    "sha256": "3f29f48aee5e2cb565da29f21f66baab30c9b0d96dec64446b2b15671c2b5731"
+  },
+  {
+    "path": "scripts/documentation.ts",
+    "sha256": "dd0a0e391ef7517f79b59d9b218c3131aaa55e451e86c397f6ef7a58b71d43d1"
+  },
+  {
+    "path": "scripts/release.ts",
+    "sha256": "5f8fccc26f7dcd16bba2ebbc50cfa28c5a68007554f0858eda8d4cfea7d04667"
+  },
+  {
+    "path": "site/astro.config.ts",
+    "sha256": "db81a8ab1df9e6c33a8b01b37060b6d4379da2d081d47d55a6c0bdb10cfa7978"
+  },
+  {
+    "path": "site/package.json",
+    "sha256": "8ca31c1a18a4ce877148c74d536ae10e514111097f5f6eeb13e642ef87e9af24"
+  },
+  {
+    "path": "site/src/components/architecture-flow.tsx",
+    "sha256": "18644a9b7aa520269420200f81ae242b120c79c744a61a1e80f6d3cdf18d8901"
+  },
+  {
+    "path": "site/src/integrations/cloudflare-artifacts.ts",
+    "sha256": "2512bc980767583367bf684a967a845b3ad0538b8537078a3dbae5e831143631"
+  },
+  {
+    "path": "site/src/lib/architecture.ts",
+    "sha256": "245aaa3c27ce86459c6759113f509de9482872f237ed6205425a70900ae25a6f"
+  },
+  {
+    "path": "site/src/lib/reference.ts",
+    "sha256": "8d07196c9248de928669a977d64de4bae2cbf0fa8cb82d1bd153bda9c9c69fc1"
+  },
+  {
+    "path": "site/src/lib/sidebar.ts",
+    "sha256": "b9dcc48f4775f7844386a32e217e74738338bd15b301664f393c39fc3b930d28"
+  },
+  {
+    "path": "site/tsconfig.json",
+    "sha256": "3bbbabe6a22f0f2a91a9ed1979980153fa434958a3f8b124fc996187da433800"
+  },
+  {
+    "path": "site/worker.ts",
+    "sha256": "6e3a9f85a602ee0c39a12d6f48b77f727e7026a2691e49021ea241b18a7ef16c"
+  },
+  {
+    "path": "src/access-guard/access-guard-service.ts",
+    "sha256": "ad80e0541aa0999a6501d5012587e6474f6d88630b3062fb1beb319961c432eb"
+  },
+  {
+    "path": "src/access-guard/compute.ts",
+    "sha256": "5fbd9d2c8740e466540d72a3480c041c1208c8685efb81e714e235e229288e27"
+  },
+  {
+    "path": "src/access-guard/issue-set.ts",
+    "sha256": "e8921f35d48018d419933432eeb519e184cf8e247d8a4e14918aa596b30ad5d6"
+  },
+  {
+    "path": "src/access-guard/linear-provider.ts",
+    "sha256": "d7ea5b10d0bd7fea1a43ee107a15c9cbba4866f1437736d13bf28b1a12fbddff"
+  },
+  {
+    "path": "src/access-guard/model.ts",
+    "sha256": "6dcae2eb4ca672c8575488ebacd118f41bc88cb6eaaa524b879be84712dc10c8"
+  },
+  {
+    "path": "src/access-guard/provider.ts",
+    "sha256": "c94530cff7a2b920cd985d8aabfc5b4ab9f64c244e08949195798bb6cc6fefd0"
+  },
+  {
+    "path": "src/access-guard/read-access-guard-anchor.ts",
+    "sha256": "727a839e42f4f73161b2b1aec4f8f5db526aa8d65b058935dd5e7d38f327c525"
+  },
+  {
+    "path": "src/access-guard/slack-access-client.ts",
+    "sha256": "8e8e7c24bd9dd99073cc1411fa921984a18f5587f3e8d10559c646b11994b2b6"
+  },
+  {
+    "path": "src/access-guard/workspace-providers.ts",
+    "sha256": "c2511897f658e5a6696f4b80854474a90ca04eece726c27b3d660315e3b47021"
+  },
+  {
+    "path": "src/catalog/identity-authority.ts",
+    "sha256": "56f5476415eebd39fc3dc1533d0f8efbbf01db8e2ea603ed6d54b55ddf7f28d7"
+  },
+  {
+    "path": "src/clients/github-conditional-read-fetch.ts",
+    "sha256": "c3866f917aa8f14cd6b8c166f1b1d956ce8276904ab7e76d1b942e273ac59a33"
+  },
+  {
+    "path": "src/clients/runtime-fetch.ts",
+    "sha256": "e4e5742c132af55d8273351d96d8f090eaecfe18afc39726db52b1aad6715b8d"
+  },
+  {
+    "path": "src/configuration.ts",
+    "sha256": "c1800b3edbd7336203aca5bd73094995d2742598469c4d3f0d7dbf7420c75006"
+  },
+  {
+    "path": "src/execution/access-guard-settings-schema.ts",
+    "sha256": "47aff4845f59ddd6f9551cebf96294572a0700b55f185c2a7b2a801c85f927da"
+  },
+  {
+    "path": "src/execution/alert-port.ts",
+    "sha256": "4a75adf7185cf652223b85b16e78ae5d07d3f3ca1e32549a2329e82451301275"
+  },
+  {
+    "path": "src/execution/assert-workspace-branch-claim-fresh.ts",
+    "sha256": "104a1734d71510f8dd7ab20528c8d2b01154980b4f15815019ca3637dadb5244"
+  },
+  {
+    "path": "src/execution/assert-workspace-execution-resume.ts",
+    "sha256": "9f9d2d2254260599612a9e504c8f02fccfdc84bba1dcff3f5a130b547525b7d0"
+  },
+  {
+    "path": "src/execution/attio-deprovision-operation.ts",
+    "sha256": "e1fa105309b68ecab716d389b0e78b87174576e6d5e2e470b0583f7e066dea78"
+  },
+  {
+    "path": "src/execution/bind-workspace-linear-parent-context.ts",
+    "sha256": "3063f50ff5004ed34416f9aa0d7cb26f4f6d2ec64bd6b543b1f390fb854cacf9"
+  },
+  {
+    "path": "src/execution/bindings.ts",
+    "sha256": "9edbcc6408e77e226db21015d882613b68d79ef1027b0ccffe2acb464d791162"
+  },
+  {
+    "path": "src/execution/branch-attempt-contracts.ts",
+    "sha256": "19d4989bbadb2d5c8b6dabf7b47a748c83224cb273778f614e2b008f742ac705"
+  },
+  {
+    "path": "src/execution/canary-branch-resolution-store.ts",
+    "sha256": "bede2f8146b88f69d29ac3fdb5c8531db84d930667cd32002dfc5ee634959f05"
+  },
+  {
+    "path": "src/execution/canary-resolution-match-sql.ts",
+    "sha256": "6f93c15b8af5d2e61dca15afa24909fe61aeb9d76f939bba05e5fb2ee85a22a9"
+  },
+  {
+    "path": "src/execution/capture-workspace-name-branches.ts",
+    "sha256": "101c74ac85b453be5722666b4062d802b09979b35946745c354d3c19552dabd8"
+  },
+  {
+    "path": "src/execution/change-ledger-contracts.ts",
+    "sha256": "05c5d8b990cdc557bdc58eb14d1705e6f9551ed7f06bf793dc790e0377bce722"
+  },
+  {
+    "path": "src/execution/change-ledger.ts",
+    "sha256": "e909f315c8963a85210f24d15af2d0d5ff6ae703ad9ba8f6db4c70cf5c163bd7"
+  },
+  {
+    "path": "src/execution/contracts.ts",
+    "sha256": "2e2cabfb6ff7d6a1a3abe1084c4209dfc82511e526ddf59635fa8d2c66e38be6"
+  },
+  {
+    "path": "src/execution/coordinate-slack-identity-budget.ts",
+    "sha256": "825f9bed5ea56821d732520690cc8760794f416405456ba918d44a171836cfbc"
+  },
+  {
+    "path": "src/execution/create-exact-google-group-rename-operation.ts",
+    "sha256": "95ef230108c86763c75924410f2bbfdcedf40874ec2d7260a9d4f05d27974afe"
+  },
+  {
+    "path": "src/execution/create-google-group-retirement-readiness-operation.ts",
+    "sha256": "f6ba9ae1467ceb233c1563efba9e8f71d8aa501b1e94ca774153f2c68e030c97"
+  },
+  {
+    "path": "src/execution/create-google-identity-attestation-recovery-operation.ts",
+    "sha256": "83b36e7f06ae5e07506267d9b1eb79346137b0b0466813cc2e5d3316da54340a"
+  },
+  {
+    "path": "src/execution/create-privileged-google-group-cleanup-operation.ts",
+    "sha256": "0ba74514ad08b916424c8e28440c384983ec4ce260e640c6bde51417ddb26edd"
+  },
+  {
+    "path": "src/execution/create-reviewed-slack-lifecycle-executor.ts",
+    "sha256": "e431305efa1f164ffdd448c1f1cdf8c115932410ce7f218e659048cefce0145d"
+  },
+  {
+    "path": "src/execution/create-workspace-access-audit-providers.ts",
+    "sha256": "661c80357d7700e57fb27d7ed78b31b2a9d0348993c07a86c4cbbf61735ae5ba"
+  },
+  {
+    "path": "src/execution/create-workspace-directory-workflow-executor.ts",
+    "sha256": "e6f02ec7d2667cb165fc3175b0c48e2115e37a5264f2a3fe8d21ed03095d7395"
+  },
+  {
+    "path": "src/execution/create-workspace-github-parent-context.ts",
+    "sha256": "265bf2a76422034d9b18a3316cf906d94a85d4b7e580e1a23683d4bb7b03fd63"
+  },
+  {
+    "path": "src/execution/create-workspace-identity-parent-context.ts",
+    "sha256": "cbfe1911ccb2bfda00c8ed993cf109dc246e92dff706a6fb6003558e684b724e"
+  },
+  {
+    "path": "src/execution/create-workspace-identity-write-budget.ts",
+    "sha256": "7a0130dd4089422dfd3eb73804b346204cde2bae14b1cac6bf66683333064032"
+  },
+  {
+    "path": "src/execution/create-workspace-linear-parent-context.ts",
+    "sha256": "5921f28a0875a0ba0863c1c8627011390ab0169be1ed47ca938684d2966fdc92"
+  },
+  {
+    "path": "src/execution/create-workspace-name-parent-context.ts",
+    "sha256": "e0c2934c02b364a3376a0428eb87174b391016cd90621e7637e958f67b89b240"
+  },
+  {
+    "path": "src/execution/create-workspace-runtime-identity-budgets.ts",
+    "sha256": "57ae7ffd920ac7e27ec86c9d5b64653ec3b7528c1b20829edeab1c89d66491ff"
+  },
+  {
+    "path": "src/execution/create-workspace-scheduled-terminal-receipt-verifier.ts",
+    "sha256": "0ee4164f335e7950e0e7a01390ef4c095af30ddce42518b9a9ea02f85d27b147"
+  },
+  {
+    "path": "src/execution/create-workspace-slack-lifecycle-parent-context.ts",
+    "sha256": "71bf19945de62d00088dc6d60a1d762e9142b46c440edf291d4330ebb496aec1"
+  },
+  {
+    "path": "src/execution/drive-org-chart-artifact.ts",
+    "sha256": "fc2babef83ecea8c01e1b7e02cf047360a066325da26bfdedc6ecbc5d2375886"
+  },
+  {
+    "path": "src/execution/execute-scheduled-workspace-branch.ts",
+    "sha256": "814c6f5084369d0731b94f1077302c7fa1f41dab76a74322749e9e191ab74dfa"
+  },
+  {
+    "path": "src/execution/execute-workspace-directory-branch.ts",
+    "sha256": "f92f54004fef099694a1819bce82db99317524d4bfb958517232489de019337f"
+  },
+  {
+    "path": "src/execution/execute-workspace-workflow-with-health.ts",
+    "sha256": "566491535bbd9e7cd750b0497a973b51f8fef26b83f4e17907e928a9f68d985b"
+  },
+  {
+    "path": "src/execution/flow.ts",
+    "sha256": "5580743c48550a9f796c4a1c9cd40de95c4e09f169bf16657dc207fd7c554ff0"
+  },
+  {
+    "path": "src/execution/get-workspace-execution-policy.ts",
+    "sha256": "e841657d2a64c088041483621145fe6e0988895187e474481fbf90c322236d06"
+  },
+  {
+    "path": "src/execution/github-access-managed.ts",
+    "sha256": "6056f8bbc520771c922774e2b963c798675ab6962f72b4c7b3eb953985030002"
+  },
+  {
+    "path": "src/execution/github-deprovision-operation.ts",
+    "sha256": "ba62f1dc2aa19ae905bc3fa7ff058ffbb7979f1f75944a31c7fd31a2e8729432"
+  },
+  {
+    "path": "src/execution/github-identity-admin-attestation-operation.ts",
+    "sha256": "beed8a38a7394194bc4efcdf8e4889d4e27f39c08afc100f93449f29d381d7a3"
+  },
+  {
+    "path": "src/execution/github-inactive-identity-attestation-operation.ts",
+    "sha256": "d7ce1e4b25616f455714aa09b40bfcf069eea49fb92dc30060beeb244a315fe2"
+  },
+  {
+    "path": "src/execution/google-group-cleanup-service.ts",
+    "sha256": "b95b31a008a34f342be640b7ba34d00744ea587811fcdb0f25ebd594bda16f03"
+  },
+  {
+    "path": "src/execution/google-group-mutation-resource-lease-key.ts",
+    "sha256": "e73a206e7660f8b31d65fcb241f7a9948d6e69299088623a77c893f74cd9864a"
+  },
+  {
+    "path": "src/execution/google-identity-attestation-maintenance-fence.ts",
+    "sha256": "317332659656c9c8cc78dfafe718bf97340f6556859bce6723b173cdecbc1c92"
+  },
+  {
+    "path": "src/execution/google-identity-attestation-recovery.ts",
+    "sha256": "1628bdcdfbbcfac2b3639fb363cef6ee6bf6bc21b78ba0cdf2c083d2ea636697"
+  },
+  {
+    "path": "src/execution/identity-provisioning-runtime.ts",
+    "sha256": "562ebba18fe5647ec7d6f1a6fd13eec2e53a6fdf541eb48de60814112642298b"
+  },
+  {
+    "path": "src/execution/identity-seed-preview.ts",
+    "sha256": "4e04aff2e3009226a5ab49be2f2c5e79154f5664bf4aa7e42a0c53127133af4c"
+  },
+  {
+    "path": "src/execution/inactive-identity-evidence.ts",
+    "sha256": "1014fedec6e1a757e6b721dba7098140bf874f45915c239cb1522094d253bb32"
+  },
+  {
+    "path": "src/execution/is-scheduled-git-hub-access.ts",
+    "sha256": "afd53e24d148a66e24a2422b265dddc29173dd60f8b4f264d6300f76d62024e4"
+  },
+  {
+    "path": "src/execution/is-scheduled-linear-suspension.ts",
+    "sha256": "1f7fe98664e124371d19e4dd29148bc8a0dc81c39da889e1241d45de2c6565d4"
+  },
+  {
+    "path": "src/execution/linear-profile-service.ts",
+    "sha256": "6541cd1e160f480ad14e2bc1bb8314d7bacf70b1e45028ab9309792ae79b3682"
+  },
+  {
+    "path": "src/execution/managed-slices.ts",
+    "sha256": "10c46685f8d957a046a41debfee36ec56da5d2dd9a0a4d3096afb7737690163d"
+  },
+  {
+    "path": "src/execution/notification-recovery.ts",
+    "sha256": "51bf0d216aff1096e0678e517a8b0c9936e5fffd63b825ca4446a7741ff1fa40"
+  },
+  {
+    "path": "src/execution/observation-carrier.ts",
+    "sha256": "20a7c9e2b1b25be14328114c1525a6051b59ff65618331ca25049e83232bcd81"
+  },
+  {
+    "path": "src/execution/observe-original-slack-membership-target.ts",
+    "sha256": "70ca91426d736c95be460a83ded22b4392b158a5bfec22e7f1703fd74cbcdf99"
+  },
+  {
+    "path": "src/execution/offboarding-status.ts",
+    "sha256": "09103188b305135cee6a21d46229a083efe99af569b4d633fb45f1c3c7dbf307"
+  },
+  {
+    "path": "src/execution/operation.ts",
+    "sha256": "8722516065ba7cf1a09dd4f4d56036515b261eb857b05027c01201b3ae9eb6a4"
+  },
+  {
+    "path": "src/execution/ordered-branch-receipt-set-digest.ts",
+    "sha256": "cb4935495dda644f302c7969e6911ff7bb0498fc8b33b6da07cc8b42ad8b4158"
+  },
+  {
+    "path": "src/execution/pager-duty-team-service.ts",
+    "sha256": "c3e21b54e64f94b4141e92c828222314812ddb9a0a65f55a5a802888fe54ed56"
+  },
+  {
+    "path": "src/execution/policy.ts",
+    "sha256": "690469b7e938cec33367c9f7ad03e19b554c05ed8dfdf859492f36aef728d55c"
+  },
+  {
+    "path": "src/execution/profile-contracts.ts",
+    "sha256": "d3cbdab0b172296b81edcc64cd836e7343e672874f4e853549a39cdf378c7524"
+  },
+  {
+    "path": "src/execution/provider-execution.ts",
+    "sha256": "2ba6df8970087608f2ea52ed11e788f68e76d68bc43f251775ad84a0501c8e22"
+  },
+  {
+    "path": "src/execution/provider-runtime-ports.ts",
+    "sha256": "d8b321d9779ebbbc26dcb6704e64959958afcc8d501ac270601d76e780d4d8db"
+  },
+  {
+    "path": "src/execution/read-ashby-offboarding-accounts.ts",
+    "sha256": "607259ab7f3998636f7eb6b43c4474baa8117088d45b91ac9b1281aea5420532"
+  },
+  {
+    "path": "src/execution/read-runtime-offboarding-status.ts",
+    "sha256": "663cef6fe821b5cd5ec9a48b0e6290667199e1ad61e56a7d71c80d0bc0cec1dc"
+  },
+  {
+    "path": "src/execution/read-workspace-directory-managed-slice.ts",
+    "sha256": "ec5a6daec4928a583c20cf0d43355daa32013a49eeb97ca7ab4a4055c694d40c"
+  },
+  {
+    "path": "src/execution/read-workspace-source-fingerprint.ts",
+    "sha256": "2eda58fafc73a4478a4a5a188741ebbc7be2dfb7d45e8738e65d67fc234bda03"
+  },
+  {
+    "path": "src/execution/read-workspace-trycomp-verified-member-id.ts",
+    "sha256": "44ff6bc075e225f4ffaf2becf0413d76213dff8ac734a3b5896f88a65811c654"
+  },
+  {
+    "path": "src/execution/reconstruct-verified-failed-workflow-result.ts",
+    "sha256": "78aa49c3c59ce463d8a030ffb1732ae14a8265ee7210bb495f7a55eafc2ddb24"
+  },
+  {
+    "path": "src/execution/resolved-branch-attempt-match-sql.ts",
+    "sha256": "49f25be4fabebc2d60d60202725972abbc90f4c297e0f5fc04adc6daab07998d"
+  },
+  {
+    "path": "src/execution/reviewed-action-context.ts",
+    "sha256": "5f0ff510ff106387f96d398768f29f6bb9e113b2c8f6d9aa0e4b6f157512495c"
+  },
+  {
+    "path": "src/execution/reviewed-google-group-cleanup-adapter.ts",
+    "sha256": "53264f4bfe6ba4180fe68dddb49257f4aef4acfd4ded98561be10d598ca78120"
+  },
+  {
+    "path": "src/execution/reviewed-google-group-cleanup.ts",
+    "sha256": "8a0e3cd9379eeec3bf06298434abf18ad5e64c8365a9e581eeb0979f6354769c"
+  },
+  {
+    "path": "src/execution/reviewed-linear-suspension.ts",
+    "sha256": "82d128b11f11aa10065e73426770d16bf8d2d8210c6cb7c71387eedcb0b58a0a"
+  },
+  {
+    "path": "src/execution/reviewed-name-plan.ts",
+    "sha256": "d1fb1057910560427f2d61586fee4838634c94e9934e6c5034148dcc53e5f96e"
+  },
+  {
+    "path": "src/execution/reviewed-pager-duty-team-adapter.ts",
+    "sha256": "d0d4efa9e7842edc82f8dd4f2fe169bd0e750c565e1b49e35781bff6cf821f85"
+  },
+  {
+    "path": "src/execution/reviewed-pagerduty-team.ts",
+    "sha256": "dc00ceb414300898684f432b089dcbc4909c88d40b68ae004412ec0c0700e664"
+  },
+  {
+    "path": "src/execution/reviewed-provider-admission.ts",
+    "sha256": "e444f1d414656064e056f2c1d8161c72951e13378e88739b02a3cf2e2d55be27"
+  },
+  {
+    "path": "src/execution/reviewed-sentry-workspace-adapter.ts",
+    "sha256": "a66dd68ea7e7bc567ed1977dba92d561ce7e8fe0457e7599bb2c624ee4075757"
+  },
+  {
+    "path": "src/execution/reviewed-sentry-workspace.ts",
+    "sha256": "f4294b27b48e02b933318bfa8b6195795298084a75efb62a9a7adf69efc34388"
+  },
+  {
+    "path": "src/execution/reviewed-slack-lifecycle-admission.ts",
+    "sha256": "0f99340692556aa53d96c686401543a311d9529ea5e97e9f926d2b396cc6ca69"
+  },
+  {
+    "path": "src/execution/reviewed-slack-lifecycle-intent.ts",
+    "sha256": "eefb36b21b91bb1410cd6e65c3a42049c0687a09f7e00047d45bc6d858904341"
+  },
+  {
+    "path": "src/execution/reviewed-workspace-name-adapter.ts",
+    "sha256": "bcdba2534a0b3add11bf466079b2bc80904e136485f36c2c1665442b27264dcd"
+  },
+  {
+    "path": "src/execution/run-reviewed-slack-lifecycle-intent.ts",
+    "sha256": "4d59db7165ce7e41a69968fee2f29bca0ed8e8356e9d1c94fac3b816ba054028"
+  },
+  {
+    "path": "src/execution/run-workflow.ts",
+    "sha256": "082d4bece7b736832e9a57aff2dc9d7c5b5732f138a96df02bbe173006905d8e"
+  },
+  {
+    "path": "src/execution/runtime-configuration.ts",
+    "sha256": "990dc94992ad5a5fa02e3d6b7ff22f390472effe115896619575333ecbf5518e"
+  },
+  {
+    "path": "src/execution/runtime-contract.ts",
+    "sha256": "54ed30e10544b89379214c455272a130b6bc860c6f6f74f63fb3f2312be273c1"
+  },
+  {
+    "path": "src/execution/runtime.ts",
+    "sha256": "170c591492e7d92bcc92db9574f0ac3b89a45cec19966147133ccac73d565f0b"
+  },
+  {
+    "path": "src/execution/schedule-health-contracts.ts",
+    "sha256": "ecfa8c9e2dac5c69c29b1c2331f2019809ab7107e43c6563f401ca40002f02ab"
+  },
+  {
+    "path": "src/execution/scheduled-slack-membership-addition.ts",
+    "sha256": "a081f5d4c338d592510b939eaa77524fff8107233b53cd93799b1db6f1ab7bf2"
+  },
+  {
+    "path": "src/execution/scheduled.ts",
+    "sha256": "b9a905234873537229680631ac95761390d9aa702280bcc483dfb376caa33126"
+  },
+  {
+    "path": "src/execution/selected-slack-membership-user-id.ts",
+    "sha256": "8d1867064dd4ec45dc37125c78a3c13f7bc7d06bc42b814e524b793031a7ef3a"
+  },
+  {
+    "path": "src/execution/sentry-deprovision.ts",
+    "sha256": "0efe38f050bc48e44b88090f515bfbdec85bedebcbd735ddba50bfbff203585b"
+  },
+  {
+    "path": "src/execution/sentry-workspace-authority-pins.ts",
+    "sha256": "efb844bbb2df1de65394dc31f1437791cf16dc119b2e9bd588ff77ef546295eb"
+  },
+  {
+    "path": "src/execution/sentry-workspace-parent-config.ts",
+    "sha256": "c6018f120085fc8a422fe14a084adb302e964a9bdbea9faf74e20d2237b89251"
+  },
+  {
+    "path": "src/execution/sentry-workspace-service.ts",
+    "sha256": "c8bb424a97058ed459521ef14408262c8e2f115ac40c3bae076e40994883d52c"
+  },
+  {
+    "path": "src/execution/slack-groups-channels-managed-slice.ts",
+    "sha256": "4a9636c140146319e442f08e3bbd936e3f71a73592824add800f1a48cce46465"
+  },
+  {
+    "path": "src/execution/slack-name-service.ts",
+    "sha256": "377bacd54a3b8745df9a72b5e5b4778277a9622d690b93e4a2245c048bed8caf"
+  },
+  {
+    "path": "src/execution/slack-plan-apply-ledger.ts",
+    "sha256": "8f6f70fa615fca19e73ded45272022084b19528d66595cf1354ceb945195e387"
+  },
+  {
+    "path": "src/execution/trycomp-adapter.ts",
+    "sha256": "92daaf78705875ad4daa5b25319a502420429334bf42503a0a509c28b82eef20"
+  },
+  {
+    "path": "src/execution/trycomp-apply.ts",
+    "sha256": "4f4ba884199ac13b13f8c3e9275bde2a5aa9fafa71c455f8f05e2a0ad0ddc5ce"
+  },
+  {
+    "path": "src/execution/trycomp-offboarding-accounts.ts",
+    "sha256": "a9aa36caed391976b79f314a1860cc453344303f2234d611501c4872cbbeb050"
+  },
+  {
+    "path": "src/execution/trycomp-status.ts",
+    "sha256": "fe9d07b0372855de6bc85b0f54a1b8312cb0aca880f82e36865ce5904530a416"
+  },
+  {
+    "path": "src/execution/with-offboarding-parent-health.ts",
+    "sha256": "458e3cf29527daafd512dfcda1535fba0e269d9681343d94a8801f5b35263185"
+  },
+  {
+    "path": "src/execution/workflow-ledger.ts",
+    "sha256": "0d2298b793be256af13aea6afe0af475fdbb6dac04939b276fac7cab46d0a275"
+  },
+  {
+    "path": "src/execution/workflow.ts",
+    "sha256": "dbb215d93be6daf1d96413501d87428799b82ccf07501dc951b1c376d3bd25a9"
+  },
+  {
+    "path": "src/execution/workspace-branch-result-error.ts",
+    "sha256": "bae3045a9b11e3f36f5ed2ea0fbfad309564e8f1e15a3936dc07763e6fb54961"
+  },
+  {
+    "path": "src/execution/workspace-branch-source-identity.ts",
+    "sha256": "3dfdcaf0d6386f63129c4bed595a85e09970f4ed75af7a64c183aaf61944fcb9"
+  },
+  {
+    "path": "src/execution/workspace-database.ts",
+    "sha256": "1cb6e8fec4962af0bd7ea6878767b0d89ed2c9c579cd108a54b2200ccfb2ffe3"
+  },
+  {
+    "path": "src/execution/workspace-directory-announced-changes.ts",
+    "sha256": "b9f25720a11ac2389327d86299b789bfa9cbeed1408e9682bbbdd4e1503a2f66"
+  },
+  {
+    "path": "src/execution/workspace-directory-has-audit-only-findings.ts",
+    "sha256": "85c93fbe5edea50f275060f2e11d508c0931ddacda4ab248a058311d3aa3af55"
+  },
+  {
+    "path": "src/execution/workspace-directory-operation-diagnostics.ts",
+    "sha256": "7ccf810bce9da4ab2be742594284626d66b93557d004a1eee4d8ee0900f555dc"
+  },
+  {
+    "path": "src/execution/workspace-directory-slack-manifest.ts",
+    "sha256": "9f6975a468259b7efe86d3300b2e0b4b408648ca64d10153f2814603ff65ef13"
+  },
+  {
+    "path": "src/execution/workspace-identity-budget-parent-key.ts",
+    "sha256": "f8b72936a70be6cbc995591738dbab971a52db2b912b681e68d073e7f417e14c"
+  },
+  {
+    "path": "src/execution/workspace-provider-result-error.ts",
+    "sha256": "1a43347b9bb2586e3873f284d62e0f42e5860f8664423c11f6247b0ee536f065"
+  },
+  {
+    "path": "src/execution/workspace-receipt.ts",
+    "sha256": "71a3047decab40836ac42b9c62489aab010c13892007ebc1a24b925741e7477c"
+  },
+  {
+    "path": "src/execution/workspace-schedule-health-repository.ts",
+    "sha256": "75e36e6575bd8831b1421feb2a5facccee4ddf3fd4a001771e16ae07470d3c0d"
+  },
+  {
+    "path": "src/execution/workspace-status.ts",
+    "sha256": "b2e885bdc588d1bb23b1adde98363fadc015a7655cfd12179d7dd99e19a86485"
+  },
+  {
+    "path": "src/execution/writer-readiness.ts",
+    "sha256": "6b15db181cdb3e288c842a3cf38a910a2759f811ad17f7e64d62e821346faabd"
+  },
+  {
+    "path": "src/execution/zero-change-plan-message.ts",
+    "sha256": "682b6a68263dd58bd01158c5be8b85a38ae9fa2ef3543e0288ee48a50251299e"
+  },
+  {
+    "path": "src/github-access-audit/access-change.ts",
+    "sha256": "52d8e8d8a3f13075a864f7ddc2436ca3a6732f8d4e95d94165a8dafd13876109"
+  },
+  {
+    "path": "src/github-access-audit/compare-saml-scim.ts",
+    "sha256": "2f540245ad41ff9904ee9dd4c240738c1600c4e4f06eab542c3764ee4a4cb37a"
+  },
+  {
+    "path": "src/github-access-audit/content-hash.ts",
+    "sha256": "f4e241853db5411b7a96d2b4a924dff4650f3d754e9ec28542de2d89a804d193"
+  },
+  {
+    "path": "src/github-access-audit/correlate-identities.ts",
+    "sha256": "6262dde611fec767190f8044b5a9e3493500bb55298f2faccf7b6a7f0b0c99fd"
+  },
+  {
+    "path": "src/github-access-audit/git-hub-access-audit-client.ts",
+    "sha256": "cc8df5ae827776a3f4fae8de7bebba70ff2300e33841691d753f19ea429216db"
+  },
+  {
+    "path": "src/github-access-audit/github-contracts.ts",
+    "sha256": "3a942e322f586a0593a2318cd0c15bcd84df325c0fb6d6be545f1f77627d741e"
+  },
+  {
+    "path": "src/github-access-audit/github-deprovision-authority-contract.ts",
+    "sha256": "763dc8ce1ad26764c9d6e2f7dfde5db7ddc7faf39889120167d65c1fcbb2b7e0"
+  },
+  {
+    "path": "src/github-access-audit/google-access-audit-client.ts",
+    "sha256": "018ebc6008e6977ffb5bc620dd5c7d9bc3d7f3f776cccdf34f9d5dae55e9e11f"
+  },
+  {
+    "path": "src/github-access-audit/google-contracts.ts",
+    "sha256": "e2f5dbfdecbea5a2f4ec26b5c7c7590b1adb252924a393ecae918c5b5da54ab9"
+  },
+  {
+    "path": "src/github-access-audit/google-graph.ts",
+    "sha256": "8dd88bddf2638f66f60662f18ed70f0950c1e7788be410a4ed3a5cc5d10e9dbb"
+  },
+  {
+    "path": "src/github-access-audit/model.ts",
+    "sha256": "14f79a6b7802f8ec228e5af799a6f12fe72cceadbedb246a395367b81b4d64d3"
+  },
+  {
+    "path": "src/github-access-audit/removal-grace.ts",
+    "sha256": "31de2ccf03e87aa73414db2bfc8c1ed60c42dc4afc07137a8d1ecc5092e158b6"
+  },
+  {
+    "path": "src/github-access-audit/repository-access.ts",
+    "sha256": "df5dcf9ffb8619d4ae9eb5c1120130d6c78f1ca68e1ef46622790a13bc32546c"
+  },
+  {
+    "path": "src/github-access-audit/reviewed-direct-grants.ts",
+    "sha256": "11f082d52474c218baf0f3874365b4f4431014ff735d909610ce7215d834e54e"
+  },
+  {
+    "path": "src/github-access-audit/reviewed-team-memberships.ts",
+    "sha256": "b75d1d5264730e087c0799dea5502b03935f42410832e984df5e20bda07d8e96"
+  },
+  {
+    "path": "src/github-access-audit/service.ts",
+    "sha256": "1f7dfc8a9389da2adf7535dc5fac451c3eb26bd8d4d5da47f6067568df49c0a7"
+  },
+  {
+    "path": "src/github/organization-membership-reader.ts",
+    "sha256": "d38ab06ae700cc3e147c788b10e22c500e4a5fd3426a996d0819279e35e4b937"
+  },
+  {
+    "path": "src/github/resolve-direct-repository-grants.ts",
+    "sha256": "5c4ed0e02db9cde48bc2d6f30eddc49a86983fec60d8969fa882b93dd7907cfd"
+  },
+  {
+    "path": "src/google-workspace/user-lifecycle.ts",
+    "sha256": "e5c5dd1c8dc3a66290bb2d4d6f9895f11260cab75379568ae7b86f31ef946fd7"
+  },
+  {
+    "path": "src/identity-lifecycle/authoritative-google-directory-notification-subject-resolver.ts",
+    "sha256": "0c4fc1e986a4d2daca91fc82ed590813983d9e9084a97546cef04f285e62bb16"
+  },
+  {
+    "path": "src/identity-lifecycle/authority-payload-hash.ts",
+    "sha256": "11a86012d6815691465736d702495ea0d99dc0eb0bf6beb82a3aa56085b08142"
+  },
+  {
+    "path": "src/identity-lifecycle/channel-authenticator.ts",
+    "sha256": "ff1aa9a7f4cc0870a932afb5f09b7f65da2dfea38890c5b89526b5540bce2569"
+  },
+  {
+    "path": "src/identity-lifecycle/channel-manager.ts",
+    "sha256": "0d1cd7394458c6e24fcf97d75d79d920cc3718c8ead2710dc36b4661fedd431d"
+  },
+  {
+    "path": "src/identity-lifecycle/contracts.ts",
+    "sha256": "1d0d34d3126cdb4d8bdfef8ab4c888160cd9ce51b16840d724b4114a7ffa3194"
+  },
+  {
+    "path": "src/identity-lifecycle/d1-google-directory-full-reconciliation-store.ts",
+    "sha256": "97311c673f3d40ef1add350054dd956be12e2683f83dee2294c0028fa4d6be00"
+  },
+  {
+    "path": "src/identity-lifecycle/d1-google-watch-notification-receipt-store.ts",
+    "sha256": "d4cafdf595423a0a07ad7a6cd7d18956327a55fbf221c806c1dad4f1d207b7c6"
+  },
+  {
+    "path": "src/identity-lifecycle/google-admin-directory-watch-gateway.ts",
+    "sha256": "300acb51fa8a3f76bed61ab8637bd265bb93decfdaeaeec6793c99a3f6ab52b7"
+  },
+  {
+    "path": "src/identity-lifecycle/google-directory-authority-reader.ts",
+    "sha256": "fac46a577150722fd79baa7af893b79c6cfafdf2b5111c238f589f53dc868ae0"
+  },
+  {
+    "path": "src/identity-lifecycle/google-directory-full-reconciler.ts",
+    "sha256": "59071c86a0f923dc79b9ab2fdb43a4ab6a060e7c1295bdc3eaa25db8c78a5733"
+  },
+  {
+    "path": "src/identity-lifecycle/google-directory-identity-history.ts",
+    "sha256": "31a6926c44a47f1cde700e7b65a2dd0c1e9e06a63d7fb7c12a07118f8d5c33a2"
+  },
+  {
+    "path": "src/identity-lifecycle/google-directory-lifecycle-refresh-handler.ts",
+    "sha256": "76e22de1b9054ce5c8881bce1546b83a83304a76015e1a44c554d7c58c2b7a5f"
+  },
+  {
+    "path": "src/identity-lifecycle/project-google-directory-authority.ts",
+    "sha256": "918b6b1cb99f0ffe899ad070088c1d3f523ef0aec6697cfb33b979e0ddd281d6"
+  },
+  {
+    "path": "src/identity-lifecycle/webhook-handler.ts",
+    "sha256": "6f21a81fd3fd4a2be524cbee455ac05823c4ade30d63b94ff56991be33405e6a"
+  },
+  {
+    "path": "src/identity-provisioning/attio-deprovision-authority-capture.ts",
+    "sha256": "2eba8c9223d5924dadaa8318dc85b47fd98164c8633c8ce05bc85ec36236f870"
+  },
+  {
+    "path": "src/identity-provisioning/attio-deprovision-authority-refresh.ts",
+    "sha256": "cea5400d93a466b6122c924a76e5620e07e89a812da2b8802e4a85d377de8a96"
+  },
+  {
+    "path": "src/identity-provisioning/attio-deprovision-authority-snapshot-store.ts",
+    "sha256": "7877ef66b3e1785cbb6783b46c137b18cbc904d7a99dc06068902732d162d480"
+  },
+  {
+    "path": "src/identity-provisioning/contracts.ts",
+    "sha256": "4d674e9b479b85775374c3b76042ef56d61beca93af79cfcc6991aa081135d8f"
+  },
+  {
+    "path": "src/identity-provisioning/desired-identity-state-planner.ts",
+    "sha256": "9b433b019847969285ab2396de6c5cf59762d5e10dc9aa6a52a1a8f0fe90497a"
+  },
+  {
+    "path": "src/identity-provisioning/employee-entitlement-policy.ts",
+    "sha256": "9e3656b8633ac418d71ea0d83d3d59079b646db9466f948d1cd67e68169ed6a0"
+  },
+  {
+    "path": "src/identity-provisioning/git-hub-audit-only-connector.ts",
+    "sha256": "f4734940cbcae6bb54f715a2c8e99ae95bb43e7e1d64aa6832af42b49cd5fec1"
+  },
+  {
+    "path": "src/identity-provisioning/git-hub-deprovision-authority-port.ts",
+    "sha256": "36f29b79f91d66d2f3f75d76b55e270cc8e545bd8f5c54814460270f13358fbf"
+  },
+  {
+    "path": "src/identity-provisioning/git-hub-organization-snapshot-port.ts",
+    "sha256": "ed1b619fe434a6389b788de9fb2af2012358f8661e295d3ac89adabfcb93eaca"
+  },
+  {
+    "path": "src/identity-provisioning/github-authority-projector.ts",
+    "sha256": "b07f375b3230b638a292ae342ffa4371a7929b8d09030f91400df8f25e856345"
+  },
+  {
+    "path": "src/identity-provisioning/github-deprovision-authority-snapshot-store.ts",
+    "sha256": "7733b9a33d044767ced73d97b28b7d25cbd7ebc65d6fc624acf6535d89cc2339"
+  },
+  {
+    "path": "src/identity-provisioning/github-deprovision-google-authority-contract.ts",
+    "sha256": "1823cb7b4608643f71ff3e09504ef7d3e1b56aa409d718c9ebf0d26966cc4456"
+  },
+  {
+    "path": "src/identity-provisioning/github-managed-deprovision-connector.ts",
+    "sha256": "c30372ada1977370c038aa4f2a7faf8d525dcc1d45312ae1a0aeb13810f614ad"
+  },
+  {
+    "path": "src/identity-provisioning/github-organization-api-port.ts",
+    "sha256": "078ef3ced3ce50a66095b4f26a38d75515e4a57e0a5e90cb31c2f2ef63942217"
+  },
+  {
+    "path": "src/identity-provisioning/github-organization-connector.ts",
+    "sha256": "daeb6b96c824f2e79168109d161e15e82e3baf303f58d4df66d64add777dc354"
+  },
+  {
+    "path": "src/identity-provisioning/github-zero-dispatch.ts",
+    "sha256": "b942975e4f62da05be3e2686483cd35884ecae94ad334c1aa2e7563d6d47e7ce"
+  },
+  {
+    "path": "src/identity-provisioning/google-deprovision-authority.ts",
+    "sha256": "73c0f904127664121690fb9996f48044215438b0c4651d3086142a6646712613"
+  },
+  {
+    "path": "src/identity-provisioning/identity-budget-contracts.ts",
+    "sha256": "e36acfdd96bd94b265179f1f49921baaf8a46406a249e06a0709e981d95ad99c"
+  },
+  {
+    "path": "src/identity-provisioning/identity-budget-repository.ts",
+    "sha256": "35cbb2f786026ec6a34f9a9b9a88bddeb75e8098c626549e58832f09f4323f7a"
+  },
+  {
+    "path": "src/identity-provisioning/orchestrator.ts",
+    "sha256": "8f42ad4a9550b0d8ab82873a35ff440c6b0ea9056e904c6f90401427bd164752"
+  },
+  {
+    "path": "src/identity-provisioning/persistence.ts",
+    "sha256": "35e43b232ac66e6e702db6509984470c7421da6c6889aba66f9c526e57b9e910"
+  },
+  {
+    "path": "src/identity-provisioning/refresh-git-hub-deprovision-authority-snapshot.ts",
+    "sha256": "e8d6bb012fb20687143db45b295aba53147c80a06c7f2c336204812ad3f4d8aa"
+  },
+  {
+    "path": "src/identity-sync/assert-google-identity-parent-authority.ts",
+    "sha256": "622613156013df896c42dea7cff1ccc7f12a6edeba460b4f19db50a6c95ea2eb"
+  },
+  {
+    "path": "src/identity-sync/derive-google-identity-authority-transition.ts",
+    "sha256": "f1e0486e8f7e7341546a0046f4becd97c4d8e818aa251f561879d3ec3cadf1fc"
+  },
+  {
+    "path": "src/identity-sync/github-identity-admin-attestation.ts",
+    "sha256": "8b6ff41a5f08a9f5d23919ed1dabf77e672c3a45720ee689425ec6ccc2195324"
+  },
+  {
+    "path": "src/identity-sync/github-identity-attestation-attempt-store.ts",
+    "sha256": "149586e8708fe352d0d4235353d9176a6ab11b40a8f28788f2f2025edb08b141"
+  },
+  {
+    "path": "src/identity-sync/github-identity-seed-planner.ts",
+    "sha256": "5319b688aa37b56a9c38cf636ed398cffca15928350e10fabd2a5151047f81df"
+  },
+  {
+    "path": "src/identity-sync/github-inactive-identity-attestation.ts",
+    "sha256": "71dfbba2cfc49eb0d62cd044589df7055e44ea7b1ce38f95b83bda84d7b34268"
+  },
+  {
+    "path": "src/identity-sync/google-github-identity-seed-service.ts",
+    "sha256": "16ae904eb5759b7fc0f51925cb2bc9d7122b95a47c2a86c297ecf2099004fa31"
+  },
+  {
+    "path": "src/identity-sync/google-identity-maintenance-fence-error.ts",
+    "sha256": "bd51051f639b874cb21b17246a19527f5b67c5cb02cfcba34126be4be4734f83"
+  },
+  {
+    "path": "src/identity-sync/google-identity-parent-boundary-schema.ts",
+    "sha256": "0cf3b8291dfc033309084422b34dc850361225eceefd6de8ce8833da7b31c5ec"
+  },
+  {
+    "path": "src/identity-sync/google-identity-parent-preflight-error.ts",
+    "sha256": "aac1eae749dee38aede9d80a990562c201254bce8b70451d2f1ebd0e6057a528"
+  },
+  {
+    "path": "src/identity-sync/normalize-identity-email.ts",
+    "sha256": "dd98a3a3a9444192f8bccee0f630acd476cb7be8da02aaab84c61ba13a7d7827"
+  },
+  {
+    "path": "src/identity-sync/resource-lease.ts",
+    "sha256": "5295afc4e67c617262e8b2ab1030e1e67877ad4aba84f1df5487567d35252fc4"
+  },
+  {
+    "path": "src/operations/canonical.ts",
+    "sha256": "6f78c37d0a22c28c710af4465b5d925019ada7439d0dd9d1f297d84562711429"
+  },
+  {
+    "path": "src/operations/kernel.ts",
+    "sha256": "cd9579bb5ea54148dc9cdbc858f3e1272a09740adea46841ffd0653d5de22757"
+  },
+  {
+    "path": "src/operations/preflight-diagnostic.ts",
+    "sha256": "4f0f7030fc40c0766b531dbff3c4884b27f89b6f60544811c78b490e8a9a3519"
+  },
+  {
+    "path": "src/operations/registry.ts",
+    "sha256": "59f2e315398c63acf63621bd5400492ec237a1474b54ec95f265ed34be1c305e"
+  },
+  {
+    "path": "src/operations/schemas.ts",
+    "sha256": "1181ac66860267fe895ba3e931d3b7797c3a58ab9f71a922e115fdcc6fee16fa"
+  },
+  {
+    "path": "src/operations/workflow-executor.ts",
+    "sha256": "e8be722fb7b156e73428fafe6f324a950d32694d1133c1fc9ad8cbebe1d57af6"
+  },
+  {
+    "path": "src/operations/workflow-status.ts",
+    "sha256": "aeaeb8d73dbd4e93f9c18ee9f2fb95690d570a930e102297b353f29267b22332"
+  },
+  {
+    "path": "src/org-sync/assert-reviewed-lifecycle-removal.ts",
+    "sha256": "1ac363a0360f65002ce871c4d6026b1dee4c98386925252b3122802882fa71ad"
+  },
+  {
+    "path": "src/org-sync/channel-membership-provenance.ts",
+    "sha256": "9339274acf159b004ca42085ae8d08f65b16dfb708f5b66bb170f8dfe620f007"
+  },
+  {
+    "path": "src/org-sync/channel-model.ts",
+    "sha256": "a677e2d1d61421643716864b18d7be920e7a4430575c366e12020a2cef6bc173"
+  },
+  {
+    "path": "src/org-sync/channel-service.ts",
+    "sha256": "e118101b1fb5327cd4739c31a273a404dfe56c99135461720037cac7d5c03e40"
+  },
+  {
+    "path": "src/org-sync/config.ts",
+    "sha256": "f0e94099f5172d57fa8ccd32a2cb9b96f9146ba09b3682839d0557cde8c0b7a9"
+  },
+  {
+    "path": "src/org-sync/create-slack-membership-budget-guard.ts",
+    "sha256": "98fc69dedb57b71fd1695a325bc4e921f674da705d9b2c37b0a591a4de2a26e9"
+  },
+  {
+    "path": "src/org-sync/derive-org-channel-removal-policy.ts",
+    "sha256": "dd00deb8f5c8ebd8468f2ff53f1f5d575eb88d3cb427770c63a8a2d611d929c5"
+  },
+  {
+    "path": "src/org-sync/exchange-google-token.ts",
+    "sha256": "6d0f5c6396bc6bb47f1a0f994b0125ef43b8a01f1697af6cfb865e459a3e6cb7"
+  },
+  {
+    "path": "src/org-sync/flatten-google-groups.ts",
+    "sha256": "9be5ff25004dbd079590801f458868e3ff9e79ab047b2dcebe273a5830d65e01"
+  },
+  {
+    "path": "src/org-sync/google-api-request.ts",
+    "sha256": "51fe2281515125cc4d1bab9956ab82f4bce4f80154a51cc7fbb8614d30f92480"
+  },
+  {
+    "path": "src/org-sync/google-delegated-auth.ts",
+    "sha256": "17af36005c9263a9355dfac6dbc05b1066fac310e0ea4eae0b24b8d7d087344b"
+  },
+  {
+    "path": "src/org-sync/google-directory-authority.ts",
+    "sha256": "9074e239393a7cdf2d9e9237f9627dbb06c988ff3a5d2130e010397921c33d0b"
+  },
+  {
+    "path": "src/org-sync/google-directory-client.ts",
+    "sha256": "e6cfdb9a11021d86f51667084d80209c8c6cfc0d7ec1d20dc5f1cc2e74cc0fe3"
+  },
+  {
+    "path": "src/org-sync/google-group-members.ts",
+    "sha256": "0155a104d1699a87d675ade5f0e6bd898076df2c6581ce9e137f316249e477b1"
+  },
+  {
+    "path": "src/org-sync/google-group-rename-client.ts",
+    "sha256": "fb4e998be2fe83275eff4766ba45842e72aebd01b3ce0d24ad306ebb2aca32a2"
+  },
+  {
+    "path": "src/org-sync/google-groups-client.ts",
+    "sha256": "9ec64a8288f87e820008b912c83551d698b1edc4ff3d9bd7f60fd95fd067d412"
+  },
+  {
+    "path": "src/org-sync/google-groups-settings-client.ts",
+    "sha256": "de535e76977ae65f6364af6f7b192b30b0aaf4d7a3f6ec2c8e029b234a0ad9ad"
+  },
+  {
+    "path": "src/org-sync/google-identity-schema.ts",
+    "sha256": "a7bdbec24672131a0d90d2ec60df8657e98d840ec0591e01919587fbc787d0d2"
+  },
+  {
+    "path": "src/org-sync/google-org-chart-drive-client.ts",
+    "sha256": "446920bba4dda49a25e2cde97ae0f16e964cfa823e8e14692dece90e0259520b"
+  },
+  {
+    "path": "src/org-sync/http.ts",
+    "sha256": "116e2b3bbd2d189891d1396fcb159f42094278b2c484d1f2dfd601d4208b7046"
+  },
+  {
+    "path": "src/org-sync/model.ts",
+    "sha256": "16753c002d70b074d4e7f4e8bc0bcca4aa89485b3b48b1cdf92e986a0ec7d301"
+  },
+  {
+    "path": "src/org-sync/normalize-google-private-key.ts",
+    "sha256": "23b488a1f50b7231d91baee847f948d1f766a6e63a1d1558f4435e55c60c26c4"
+  },
+  {
+    "path": "src/org-sync/org-channel-slack-client.ts",
+    "sha256": "28807c8984b22545a3795d3b06a729308d0c3f6cba05d98dbb095c2338afdfd9"
+  },
+  {
+    "path": "src/org-sync/org-chart-fonts.ts",
+    "sha256": "80e6f55a2991b22907661cba776da79d0148f93cefd4a4f198cc7e5c44f8bc5a"
+  },
+  {
+    "path": "src/org-sync/org-chart-service.ts",
+    "sha256": "d0816dbba1f7d77a3845b1df109d7220c404f54d6fd2cacd7f91a22fc9023c7e"
+  },
+  {
+    "path": "src/org-sync/org-chart.ts",
+    "sha256": "f6c98532c743387d2358c9507eeed512d6eb0cb24d3947131b63fe44a279c6ab"
+  },
+  {
+    "path": "src/org-sync/org-slack-client.ts",
+    "sha256": "168807bf827378110a2dc98a84d355d56a6b473675b680c02a031a2994350358"
+  },
+  {
+    "path": "src/org-sync/org-sync-settings-schema.ts",
+    "sha256": "f1312d686387d2609bd73857d14987cc76f3d0342c3795be97a8e671ccb1a2a9"
+  },
+  {
+    "path": "src/org-sync/render-org-chart-html.ts",
+    "sha256": "9f0fed2d5362b391ff2b4cb52512c601d7177cffa3a4f0a3eace7710b1c0f573"
+  },
+  {
+    "path": "src/org-sync/reviewed-lifecycle-removal.ts",
+    "sha256": "52e545eaf96a1fc4a916df1b6f2699f10d8073d9ca638f911f4e8668d5d61dc8"
+  },
+  {
+    "path": "src/org-sync/service.ts",
+    "sha256": "7695cf1927a71bc636f02cdaf19887a41d82265c29a32dd7b07df56eb0808644"
+  },
+  {
+    "path": "src/org-sync/slack-api-transport.ts",
+    "sha256": "a2686f5bbffdb26d1ad38bba2482f520e1805d586e8b1b8a8ab75f661cc557be"
+  },
+  {
+    "path": "src/org-sync/slack-rate-limit.ts",
+    "sha256": "660548c6805520baca7aea5206cc5ae301a50d48f4a8a32ca722eb5ca26ad45b"
+  },
+  {
+    "path": "src/provider-readiness.ts",
+    "sha256": "fed08942f3d5a6fd45739ce7123fa52d76633493c9d96befa829babf472a622e"
+  },
+  {
+    "path": "src/runtime/fetch-port.ts",
+    "sha256": "bdacf0d5dce9f87fbcd2636869cd672c43468bc2d8d7aab3856291fb2cc67de2"
+  },
+  {
+    "path": "src/runtime/provider-write.ts",
+    "sha256": "ffd759ee7884b65bf65128b760f3d7c781360abfe8b8efb64596cf82da05a912"
+  },
+  {
+    "path": "src/runtime/read-bounded-text.ts",
+    "sha256": "c5be61e537fcfa0828ded77d843dbaf55ba0810458b63321d2425a97c02b8405"
+  },
+  {
+    "path": "src/runtime/sequential.ts",
+    "sha256": "36d105950215a4872d14178d26e1c068e0a630e51439ae7c4dae2470d630fa24"
+  },
+  {
+    "path": "src/runtime/sha256.ts",
+    "sha256": "a2f0d1ac5cd55f835ed6d0f49b3540813a28eecdf4126619298738b40649f209"
+  },
+  {
+    "path": "src/shared/escape-slack-mrkdwn.ts",
+    "sha256": "025d42a0f851f35b591d342dd3ca5a81b0b10c8bd9568d8ddec7608c6c1caaf1"
+  },
+  {
+    "path": "src/shared/log-event.ts",
+    "sha256": "8546a586ceca8e9c2891e9f5a3dac30f93c5ffe31ae291a5ef0b59390cfebb67"
+  },
+  {
+    "path": "src/shared/sanitize-error.ts",
+    "sha256": "ca7be6425a21cf5844546e388e20b3f1c93778270d9fe4c0b03bebe1cf902cbd"
+  },
+  {
+    "path": "src/shared/stable-slack-client-message-id.ts",
+    "sha256": "465f128ec1d50c4d009fbea171301a82d2248ce8edc1cc91d9a92a9be5cea9dd"
+  },
+  {
+    "path": "src/trycomp/client.ts",
+    "sha256": "12d56f64adca90518fbeff6eb340b0a1bcbf5ac526bc9cd27b8ddcf92583a099"
+  },
+  {
+    "path": "src/trycomp/config.ts",
+    "sha256": "593b11a2d1848120552729d342b265991fda97b50757a7bc91cb4f8b7ee72db9"
+  },
+  {
+    "path": "src/trycomp/deactivation-safety.ts",
+    "sha256": "b209e4ccdfbeafd1d637935b4d45be98b115c62ca68d89cd52637e9715aa80c6"
+  },
+  {
+    "path": "src/trycomp/is-trycomp-membership-deactivated.ts",
+    "sha256": "6c8669f4d306c1fc820f33767c1b5dd42c822542a2d2aac762bf36597369e279"
+  },
+  {
+    "path": "src/trycomp/model.ts",
+    "sha256": "ec9edd1260019900d4aa253144369b2bc24154a960a66c596eb776bd51af5295"
+  },
+  {
+    "path": "src/trycomp/plan.ts",
+    "sha256": "94f04c768e71780c843658700c7f21473f76fb7326ac3f6a09dfa0ef404106c4"
+  },
+  {
+    "path": "src/trycomp/reviewed-identity.ts",
+    "sha256": "b78a447c08f01ad79772027b2e5a5c82748c801c56aeeeb6a8d7ca238b018521"
+  },
+  {
+    "path": "src/trycomp/safety.ts",
+    "sha256": "501d7225b162c7ef98788446c5cfa67fc2d186da34c8797b7c819b9c80556306"
+  },
+  {
+    "path": "src/trycomp/service.ts",
+    "sha256": "4ba8425a1c573717a9a76c20ad88529b360690cd6a6f65684f7f99b40f4f2000"
+  },
+  {
+    "path": "src/workspace-directory/d1-workspace-ledger-history-index.ts",
+    "sha256": "c624d45451e5e8e9ab0ab0a2a4196abdc8e3c75f4e9ab77d0660800d18f33d01"
+  },
+  {
+    "path": "src/workspace-directory/fingerprint-name-authority.ts",
+    "sha256": "35f18ee9de5d1abbf7ba06c91c82bfad8c6e05105db65781797b71d39228b666"
+  },
+  {
+    "path": "src/workspace-directory/google-group-cleanup-sync.ts",
+    "sha256": "f366bdf17f2c504db3384cbd7489eec8ca0566ffd5f7ebd05452c6127a0ec56c"
+  },
+  {
+    "path": "src/workspace-directory/index-named-active-google-users.ts",
+    "sha256": "4b58e91415c2cd0518602c8bf3741b9195c337a0bb10b9183b3e1cb72470285f"
+  },
+  {
+    "path": "src/workspace-directory/ledger-history-sql.ts",
+    "sha256": "26cb250a94dc7b7c12644666b61d5ea7a1845310f9273c2a255c8a951f18412e"
+  },
+  {
+    "path": "src/workspace-directory/linear-profile-sync.ts",
+    "sha256": "ac95692596589dcf1362fd4d9f900c5aa73d91b15e7c994d0ef4e682494b0b9b"
+  },
+  {
+    "path": "src/workspace-directory/pagerduty-readiness-contracts.ts",
+    "sha256": "f4f9a69dc1fd44ff9fa05badeab85ed0938f4673b6815f8083ef6ae0d6ce8b8e"
+  },
+  {
+    "path": "src/workspace-directory/pagerduty-team-client.ts",
+    "sha256": "729382e3b93cefc583fd883a0e3e57849ee95f8d96dc262136a4c64e7ae233c0"
+  },
+  {
+    "path": "src/workspace-directory/pagerduty-team-config.ts",
+    "sha256": "ff7417912130b86ce3a36433baf79917eebb22dbbace65e9dc4925252bd388a1"
+  },
+  {
+    "path": "src/workspace-directory/pagerduty-team-sync.ts",
+    "sha256": "6f264274ddca2b0269ca9f294a1fef51039e8c859c2b96629ecee75505ea9cb9"
+  },
+  {
+    "path": "src/workspace-directory/parent-name-identity-eligibility.ts",
+    "sha256": "05a3405630bb071addf3614cbc67c6ab3023f52c82d67d8e88e8af90dbaa190b"
+  },
+  {
+    "path": "src/workspace-directory/sentry-workspace-client.ts",
+    "sha256": "5e4607259ac4599e760a39e65765c739fd66873b7a14fb7f7ef437f4928aabe5"
+  },
+  {
+    "path": "src/workspace-directory/sentry-workspace-sync.ts",
+    "sha256": "40ad970833086c3335df4acebb4096f539ddeddfac884f5b29fd51760614d8bf"
+  },
+  {
+    "path": "src/workspace-directory/slack-name-sync.ts",
+    "sha256": "09750248d3e031cc6f938863b56e9629156a0b808ef48f9d8b62e2ae62eae7de"
+  },
+  {
+    "path": "src/workspace-directory/workspace-deployment-fence-repository.ts",
+    "sha256": "b043014d75dac21ec087efbdd387305e881d80cab2aeb17ceb05f76a5a5c430a"
+  },
+  {
+    "path": "syncpack.strict.mts",
+    "sha256": "765e75e9deac6979658e8f4a8cdddea2ee7f5c6e6982d8bf9ecce74e885ed798"
+  },
+  {
+    "path": "test/attio-deprovision-authority-capture.test.ts",
+    "sha256": "d487abac52e5c437e46ebf33a10041e7ee4e46639316aadfc217d97bfd41c3b4"
+  },
+  {
+    "path": "test/attio-deprovision-authority-refresh.test.ts",
+    "sha256": "7d08441df7d9e98b1018a811fa6b29763c6e8db5079d05f8f967b44c8428decc"
+  },
+  {
+    "path": "test/attio-deprovision-authority-snapshot-store.test.ts",
+    "sha256": "e9877cd7178af684bbef63fde4e1aaeaaa8808ee4a3f0488e9b66db64b71352a"
+  },
+  {
+    "path": "test/bot-account.test.ts",
+    "sha256": "a7df7652bf9a841bf24eaf097694c4ac1bab99f20becf3cfc8492e42ef32d98c"
+  },
+  {
+    "path": "test/configuration.test.ts",
+    "sha256": "b3a9dc01d39d0ea5169f54084a07ff77bf22eeccdc8f7a63f31ef102a4205f66"
+  },
+  {
+    "path": "test/delay.test.ts",
+    "sha256": "83865a8a316120fe4bb7249c9838c2a96d90d1f1fc6cdcfd37ccd83a80b526de"
+  },
+  {
+    "path": "test/delegated-auth-security.test.ts",
+    "sha256": "ffc40f6d7a1a32a6c56ea1121a4718c5eb70dcf50df3d8fc04826faa5845a5ba"
+  },
+  {
+    "path": "test/deleted-subject-security.test.ts",
+    "sha256": "085d49b1416d8dcfee14170910b478d122f655cd7eb51e48533dab880174f303"
+  },
+  {
+    "path": "test/documentation.test.ts",
+    "sha256": "94b6488e2574ba63e58cb2d40f627f9effbbbf795e4183d51c25bcc52c3afdc7"
+  },
+  {
+    "path": "test/employee-entitlement-authority.test.ts",
+    "sha256": "250ce3e6fef28ecf039075cde1a6dbc52ff84fd7bf8e1c823cc5c53ebf563679"
+  },
+  {
+    "path": "test/execution-boundaries.test.ts",
+    "sha256": "09a00564c1b11a1d18b8ced5925502309616463f2790aacb6f826e78934eab70"
+  },
+  {
+    "path": "test/fetch-port.test.ts",
+    "sha256": "b700e0238035e3cda287072fcbd89d43d2eb8cc5325e7a0860b603dc67219397"
+  },
+  {
+    "path": "test/github-access-audit-client.test.ts",
+    "sha256": "6d2b0202708b83bf04775bc16d98da159154d75feda19b956eacec42dead1ed2"
+  },
+  {
+    "path": "test/github-access-audit-google-client.test.ts",
+    "sha256": "144ee778ae3b6fad32c42b0c5f091a6f4c691151a96734dafb138d6e19c6fb5f"
+  },
+  {
+    "path": "test/github-access-audit-service.test.ts",
+    "sha256": "c8cadd4753b724bba02b8c03d7f018a25483a213745820de76f584abf4bacd51"
+  },
+  {
+    "path": "test/github-conditional-read-fetch.test.ts",
+    "sha256": "f810ba63abceb91af5e209627bf599400c86af87e432928525a82c7a8de759a5"
+  },
+  {
+    "path": "test/github-deprovision-authority-refresh.test.ts",
+    "sha256": "7412a87aebc2d8175144fda4fb21f6dac4085d9481e32869d1aae10ac7e40b4d"
+  },
+  {
+    "path": "test/github-deprovision-authority-snapshot-store.test.ts",
+    "sha256": "80bbb60bf441286c56ddedb402114671d9b107042987310480a71294131b0559"
+  },
+  {
+    "path": "test/github-identity-seed-planner.test.ts",
+    "sha256": "a6c3ff03687ad2d8f660aa41d1238e43fc4f4deff8ca37bca0a5af911145515e"
+  },
+  {
+    "path": "test/github-managed-deprovision-connector.test.ts",
+    "sha256": "22b1a52bc11d1b5a6f6e8bf3bd8484b6994b08e471b1aac9fe5bdf8faf094afd"
+  },
+  {
+    "path": "test/github-organization-api-port.test.ts",
+    "sha256": "82c0f08586d6c0a6cfa751f7e198bb30323817fb8f2bcf2a7e4ecb58ac7f1848"
+  },
+  {
+    "path": "test/github-organization-connector.test.ts",
+    "sha256": "58a3cb3184765346bd0f92e7210bc9a17615e3a78ac9957adc3f9b3879c6d563"
+  },
+  {
+    "path": "test/github-organization-snapshot-port.test.ts",
+    "sha256": "092ec58518f009c28731dce38eea23273cc09595c9ff218b46b000b6f80ab537"
+  },
+  {
+    "path": "test/google-deprovision-authority.test.ts",
+    "sha256": "a2e555494bc3a6b4ed499c4cd7c31fd2dce603f4d2db640b3f2b9261d93ee2d7"
+  },
+  {
+    "path": "test/google-directory-authority-reader.test.ts",
+    "sha256": "048435ae8575038a4863f38b2e84375c7628b51b63c9f9117374868fed08194f"
+  },
+  {
+    "path": "test/google-directory-authority.test.ts",
+    "sha256": "100a991fb202178d574feacb848ed29101d54c701da8e3da741b5f2af1ed7a61"
+  },
+  {
+    "path": "test/google-directory-full-reconciler.test.ts",
+    "sha256": "17c1200d490a46941e4ad715d54815e98006a0a2109df96873cc32966406563c"
+  },
+  {
+    "path": "test/google-directory-lifecycle-contracts.test.ts",
+    "sha256": "baeab0503b79d4b607304b71c7d60b458e103a0d51128ac419ee3c3787a5decb"
+  },
+  {
+    "path": "test/google-directory-photos.test.ts",
+    "sha256": "b342cbf1daa4083bd0ece04e71c3cb3a1c14d5ebf25e7b8f5b743304a7d28bb4"
+  },
+  {
+    "path": "test/google-directory-preferences.test.ts",
+    "sha256": "871c3d87d2c7362606091decf75075a41394969918b3a9809cb290dc0f067d17"
+  },
+  {
+    "path": "test/google-directory-watch-gateway.test.ts",
+    "sha256": "bc10783876a2c6d05e82e895e3c9bf60868f04dc75460bcbde9ebb88d78e37f9"
+  },
+  {
+    "path": "test/google-drive-client.test.ts",
+    "sha256": "7f75fdda29a29353c9a9d68dbb9da3e2c2dfdd5390307823fa3180d0d9aaa377"
+  },
+  {
+    "path": "test/google-github-identity-seed-service.test.ts",
+    "sha256": "0065ab37dfe8d29c7368e1bccd891337e7596d6c6eaeb9c85d2fe0867d6701f5"
+  },
+  {
+    "path": "test/google-group-cleanup-sync.test.ts",
+    "sha256": "b0ef445ac7083169a96c9a48ad76d7a4661328f633c7a007a23ed2be1f7af7da"
+  },
+  {
+    "path": "test/google-group-rename-client.test.ts",
+    "sha256": "a5cc036cb017e60c1608ce6eec9b25ac6403dbd0c5bcdd56c3e92e71c61a0c91"
+  },
+  {
+    "path": "test/google-groups-settings-client.test.ts",
+    "sha256": "bde061acfd5a9d664dbd652e68c7431cfc7237c85015035356f3fd15ecf2bb04"
+  },
+  {
+    "path": "test/google-identity-authority-transition.test.ts",
+    "sha256": "ba79b2bcd9694265c8faf1d87144ef510b0a0a7580bc9042b0b9bc45464508c7"
+  },
+  {
+    "path": "test/google-identity-schema-id.test.ts",
+    "sha256": "4636ea6a79678f94093bd2e46394690707c3a89bb620c8cf0ac8e0ec7f3ac64d"
+  },
+  {
+    "path": "test/google-identity-schema.test.ts",
+    "sha256": "ba2aa0c6252a8c088e8776e0fc3d47ef074880c468cd9a84b06c6305d710f968"
+  },
+  {
+    "path": "test/http-security.test.ts",
+    "sha256": "01e2cc3660772e81512aea9e9ebc8cfac24940746d116a650531984b1b158d90"
+  },
+  {
+    "path": "test/identity-email.test.ts",
+    "sha256": "65464651db913531977277fbaec17b4c19ab706595a6b6a219ba3510fbb9ded5"
+  },
+  {
+    "path": "test/identity-provisioning-orchestrator.test.ts",
+    "sha256": "da4f9641b1c600a20cf62c3da186a03789c9fc4d527d7cb61bc72ea9540a1a48"
+  },
+  {
+    "path": "test/ledger-history-sql.test.ts",
+    "sha256": "5998e7bed868b8092d1d864698077a90070440f275c103cbc08c0ff868e9a631"
+  },
+  {
+    "path": "test/linear-profile-sync.test.ts",
+    "sha256": "4fb9b12cb74b7930a31d1ead79a081fbfb8ae7ca19a53d0c34e4fadd5462dbf0"
+  },
+  {
+    "path": "test/linear-suspension-final-guard.test.ts",
+    "sha256": "e3c7afeaf2acd86564a09fba4469bd0a985e778098ffcac12b54e49600a0542e"
+  },
+  {
+    "path": "test/org-channel-sync-clients.test.ts",
+    "sha256": "6339f85861a8effe8be39f471acdc0c4b8f44869befd6578db3dea1008be6e42"
+  },
+  {
+    "path": "test/org-chart-html.test.ts",
+    "sha256": "4d49d506e8e0ea1ed43a0f8c57cd15179b8b1ca8dc5dc8f9ba8103169d49dfd2"
+  },
+  {
+    "path": "test/org-chart-service.test.ts",
+    "sha256": "d8fa5ec12987ccc6069e1d7f7b030ae495b2d924874da70250485b07a9a1c0ba"
+  },
+  {
+    "path": "test/org-chart.test.ts",
+    "sha256": "ee913e7b232964235f4277c6b95147d0a4710d8c1c33664e033afeaf840169c1"
+  },
+  {
+    "path": "test/org-sync-config.test.ts",
+    "sha256": "6a4f4f6b741c3dfc6a52b72653f2d7358b9cb6966cad8fb06a6171a53bfe3769"
+  },
+  {
+    "path": "test/pagerduty-team-client.test.ts",
+    "sha256": "3f2f78740f71d433de66879212842ee6f40f881077abd8894cd780a2713aef97"
+  },
+  {
+    "path": "test/pagerduty-team-sync.test.ts",
+    "sha256": "01f669bd645ec4d34f7a0147aa633b62fa600b21b6ee9b07463e34ac0924f063"
+  },
+  {
+    "path": "test/policy.ts",
+    "sha256": "571fffe5c59aef7f1d3f5f64c544e6c4a51a4cf3fb540c25b0bfd2a17e6a3968"
+  },
+  {
+    "path": "test/profile-sync-fixture.ts",
+    "sha256": "84b35216b562b2176913a0eedc0ce31fed81c62ac60ab461909072bb721b2d6c"
+  },
+  {
+    "path": "test/profile-sync.test.ts",
+    "sha256": "0b6296665cc34e111577e094289582de8d2f2e58d162ee36b7d7c3ab34f0d724"
+  },
+  {
+    "path": "test/provider-write.test.ts",
+    "sha256": "a12fa8d7db2ea1f5d871b467674889a3cf3ed407e35ecfe0abe23dd94d0a28ee"
+  },
+  {
+    "path": "test/read-body.test.ts",
+    "sha256": "b235ef2b7dd2011dd31393fd69a255a1fcc95dcc648ea790d609a41844b97dbd"
+  },
+  {
+    "path": "test/resolve-direct-repository-grants.test.ts",
+    "sha256": "a264fca06361147beed34927db98aafa5d82cc5304db91c5e71155781c5847e1"
+  },
+  {
+    "path": "test/runtime-fetch.test.ts",
+    "sha256": "17b52a697bfb74ed63720044a7499fab3fd340888c9eb7be1e182fa219acd1f0"
+  },
+  {
+    "path": "test/runtime-sequential.test.ts",
+    "sha256": "88c61fcd2f3fd5c7c453ae24022d0accc1e9c71bf762627ff853d69ce926091d"
+  },
+  {
+    "path": "test/sentry-workspace-sync.test.ts",
+    "sha256": "f95fb54c9abfe2082daced3b7b22ac60b7923e2decd2df6361b04ced9957ff72"
+  },
+  {
+    "path": "test/setup.ts",
+    "sha256": "30307f97e9c575de547c836e87825b182cf29eb3e23de7f712738f87c9424dd5"
+  },
+  {
+    "path": "test/sha256.test.ts",
+    "sha256": "d233dffd898d5962e2efcaec0694196a9da45c4b51514fff783fe472c1a68242"
+  },
+  {
+    "path": "test/site-worker.test.ts",
+    "sha256": "d32189d9f6eea71bc3b657cb61572d8b2e426feae0619e4c79bd61308980e973"
+  },
+  {
+    "path": "test/slack-api-transport.test.ts",
+    "sha256": "026e0ad3824e7135fbc3b4dc72c849158c81031e337f5b44b4d6efa7ec9002c5"
+  },
+  {
+    "path": "test/slack-channel-hydration.test.ts",
+    "sha256": "c2515fa646bd5a54706e2713ce1cd62ef6ec9069dfaa353c7fe1b7514fd201da"
+  },
+  {
+    "path": "test/slack-membership-budget-guard.test.ts",
+    "sha256": "5354867db7022bf69a6b36cae3396bf118ac70bdf91bee4256720192a1b96c19"
+  },
+  {
+    "path": "test/slack-name-sync.test.ts",
+    "sha256": "ee3475024a08f66126204bf4c1c1299c0a3f4945d40cd15683ab2fee1d5875f5"
+  },
+  {
+    "path": "test/slack-rate-limit.test.ts",
+    "sha256": "2156beaddbd2a2aaef8da5e261a1875dc11bfdfce4086f4afe3db8084fa22134"
+  },
+  {
+    "path": "test/support/rsa-private-key-fixture.ts",
+    "sha256": "c76208cdb46e5e2a8402f9e2eed1cb4014fc903c416821386a80b9a3aede2416"
+  },
+  {
+    "path": "test/support/value-guards.ts",
+    "sha256": "9a6d0e8ff624de0b54f266e63425d97b8867fec0d3bc16777e185ba89b9d9209"
+  },
+  {
+    "path": "test/trycomp-people-sync.test.ts",
+    "sha256": "008d789d561cfd3efa400a188a99bb9701affb65022de3f4589457cafb700321"
+  },
+  {
+    "path": "test/webhook-security.test.ts",
+    "sha256": "4738594cd9c75e875d3ff2ee3c9e3516ca9693cf216f8495d5a69dcf66b867f3"
+  },
+  {
+    "path": "tsconfig.build.json",
+    "sha256": "cf30679a2505faee95877bf4c8a79c283f48b9406874659606348e7d6f1bd201"
+  },
+  {
+    "path": "tsconfig.json",
+    "sha256": "e0bb1ba677a4864703ab9497f5541a4ece70bcff594912f9086794343b3e1c0a"
+  },
+  {
+    "path": "vitest.config.ts",
+    "sha256": "3a747453a333af03721e8eef6e4bbc8ead342ee5ddf6f08c1eb780cadcbb7ff8"
+  },
+  {
+    "path": "zizmor.yml",
+    "sha256": "0421410ac09bfc69837d62b4c629304f8ca08e36364a436bc1b648d94d82fb01"
+  }
+]
