@@ -4,7 +4,7 @@
 
 Report vulnerabilities through [private advisories](https://github.com/sarj-ai/workspace-sync/security/advisories/new)
 with the affected version and a synthetic reproduction. Keep credentials and
-employee data out of public issues. Supported series: 0.5.
+employee data out of public issues. Supported series: 0.6.
 
 Use one immutable policy per process or Worker isolate. Isolate tenant storage
 and credentials; keep secrets out of policy and logs.

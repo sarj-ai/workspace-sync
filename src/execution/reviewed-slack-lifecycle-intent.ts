@@ -22,7 +22,6 @@ export function isReviewedPlanWithinOriginalApproval(
     generatedAtMs < proof.expiresAtMs
   );
 }
-const IntentStateSchema = z.enum(["pending", "claimed"]);
 
 export const ReviewedSlackLifecycleIntentProofSchema = z
   .strictObject({
@@ -114,22 +113,43 @@ export type IReviewedProviderIntentAdmission =
   IReviewedSlackLifecycleIntentAdmission;
 export type IReviewedProviderIntentClaims = IReviewedSlackLifecycleIntentClaims;
 
-export interface ReviewedSlackLifecycleIntent {
-  readonly claimedAtMs: null | number;
-  readonly claimedTickId: null | string;
-  readonly intentId: string;
-  readonly proof: ReviewedProviderIntentProof;
-  readonly state: "claimed" | "pending";
-}
+export const PendingReviewedProviderIntentSchema = z
+  .strictObject({
+    claimedAtMs: z.null(),
+    claimedTickId: z.null(),
+    intentId: HashSchema,
+    proof: ReviewedProviderIntentProofSchema,
+    state: z.literal("pending"),
+  })
+  .readonly();
+export const ReviewedProviderIntentSchema = z.discriminatedUnion("state", [
+  PendingReviewedProviderIntentSchema,
+  ClaimedReviewedProviderIntentSchema.readonly(),
+]);
+export type ReviewedSlackLifecycleIntent = z.output<
+  typeof ReviewedProviderIntentSchema
+>;
+export type ClaimedReviewedProviderIntent = Readonly<
+  z.output<typeof ClaimedReviewedProviderIntentSchema>
+>;
 
-const RowSchema = z.strictObject({
-  "claimed_at_ms": z.number().int().nullable(),
-  "claimed_tick_id": HashSchema.nullable(),
+const RowIdentitySchema = z.strictObject({
   "expires_at_ms": z.number().int(),
   "intent_id": HashSchema,
   "proof_json": z.string(),
-  state: IntentStateSchema,
 });
+const RowSchema = z.discriminatedUnion("state", [
+  RowIdentitySchema.extend({
+    state: z.literal("pending"),
+    "claimed_at_ms": z.null(),
+    "claimed_tick_id": z.null(),
+  }),
+  RowIdentitySchema.extend({
+    state: z.literal("claimed"),
+    "claimed_at_ms": z.number().int().nonnegative(),
+    "claimed_tick_id": HashSchema,
+  }),
+]);
 
 export interface IReviewedSlackLifecycleIntentAdmission {
   admit(
@@ -139,10 +159,10 @@ export interface IReviewedSlackLifecycleIntentAdmission {
 
 export interface IReviewedSlackLifecycleIntentClaims {
   assertClaimed(
-    expected: ReviewedSlackLifecycleIntent,
+    expected: ClaimedReviewedProviderIntent,
     tickId: string,
   ): Promise<void>;
-  claim(tickId: string): Promise<null | ReviewedSlackLifecycleIntent>;
+  claim(tickId: string): Promise<null | ClaimedReviewedProviderIntent>;
   read(intentId: string): Promise<null | ReviewedSlackLifecycleIntent>;
 }
 
@@ -186,7 +206,7 @@ export class ReviewedSlackLifecycleIntentRepository
     return stored;
   }
 
-  async claim(tickId: string): Promise<null | ReviewedSlackLifecycleIntent> {
+  async claim(tickId: string): Promise<null | ClaimedReviewedProviderIntent> {
     const tick = HashSchema.parse(tickId);
     const original = await this.#primary
       .prepare(
@@ -225,7 +245,7 @@ export class ReviewedSlackLifecycleIntentRepository
   }
 
   async assertClaimed(
-    expected: ReviewedSlackLifecycleIntent,
+    expected: ClaimedReviewedProviderIntent,
     tickId: string,
   ): Promise<void> {
     this.#assertFresh(expected.proof);
@@ -273,18 +293,14 @@ async function decode(raw: unknown): Promise<ReviewedSlackLifecycleIntent> {
   );
   if (
     row["expires_at_ms"] !== proof.expiresAtMs ||
-    (await sha256Hex(JsonValueSchema.parse(proof))) !== row["intent_id"] ||
-    (row.state === "pending" &&
-      (row["claimed_tick_id"] !== null || row["claimed_at_ms"] !== null)) ||
-    (row.state === "claimed" &&
-      (row["claimed_tick_id"] === null || row["claimed_at_ms"] === null))
+    (await sha256Hex(JsonValueSchema.parse(proof))) !== row["intent_id"]
   )
     throw new Error(INTENT_INVALID);
-  return {
+  return ReviewedProviderIntentSchema.parse({
     intentId: row["intent_id"],
     proof,
     state: row.state,
     claimedTickId: row["claimed_tick_id"],
     claimedAtMs: row["claimed_at_ms"],
-  };
+  });
 }

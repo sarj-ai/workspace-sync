@@ -27,6 +27,7 @@ import {
 import { buildGoogleEmailIndex, buildTrycompPlan } from "./plan.ts";
 import {
   assertTrycompSelectedIdentity,
+  type PinnedTrycompWritePlan,
   sameReviewedTrycompPlan,
   selectedTrycompIdentity,
   trycompManagedSlice,
@@ -67,26 +68,23 @@ export interface TrycompAuthorityInput {
   googleUsers: readonly GoogleDirectoryUser[];
 }
 
-export interface TrycompPeopleSyncInput extends TrycompAuthorityInput {
-  assertWriteAuthority?: () => Promise<void>;
-  deployment?: TrycompDeploymentEvidence;
-  lease?: ActiveResourceLease;
-  mode?: "audit" | "live";
-  mutationJournal?: TrycompMutationStore;
-  preannounce?: (
+/** Authority required for one already-reviewed scheduled application. */
+export interface TrycompReviewedApplyInput extends TrycompAuthorityInput {
+  assertWriteAuthority: () => Promise<void>;
+  deployment: TrycompDeploymentEvidence;
+  lease: ActiveResourceLease;
+  mutationJournal: TrycompMutationStore;
+  preannounce: (
     plan: Pick<TrycompRunReport, "planHash" | "planned" | "runId">,
     renew: () => Promise<void>,
   ) => Promise<{ intentKey: string; slackTimestamp: string }>;
-  refreshAuthority?: () => Promise<TrycompAuthorityInput>;
-  requireSelectedIdentity?: boolean;
-  safetyReader?: TrycompSafetyStore;
-  trigger: "cron" | "http";
+  refreshAuthority: () => Promise<TrycompAuthorityInput>;
+  reviewedPlan: TrycompReviewedPlan;
+  safetyReader: TrycompSafetyStore;
 }
 
 export interface ITrycompPeopleSyncService {
-  applyReviewed(
-    input: TrycompPeopleSyncInput & { reviewedPlan: TrycompReviewedPlan },
-  ): Promise<TrycompRunReport>;
+  applyReviewed(input: TrycompReviewedApplyInput): Promise<TrycompRunReport>;
   captureReviewedPlan(
     authority: TrycompAuthorityInput,
   ): Promise<TrycompReviewedPlan>;
@@ -95,49 +93,11 @@ export interface ITrycompPeopleSyncService {
     reviewedPlan: TrycompReviewedPlan,
     evidence?: TrycompReviewedReadEvidence,
   ): Promise<TrycompReviewedSlice>;
-  run(input: TrycompPeopleSyncInput): Promise<TrycompRunReport>;
 }
 
 export interface TrycompReviewedReadEvidence {
   authority: TrycompAuthorityInput;
   verifiedInvitationMemberId?: (() => Promise<null | string>) | undefined;
-}
-
-type FencedTrycompPeopleSyncInput = TrycompPeopleSyncInput &
-  Required<
-    Pick<TrycompPeopleSyncInput, "assertWriteAuthority" | "refreshAuthority">
-  >;
-type LiveTrycompPeopleSyncInput = FencedTrycompPeopleSyncInput &
-  Required<
-    Pick<
-      TrycompPeopleSyncInput,
-      | "deployment"
-      | "lease"
-      | "mutationJournal"
-      | "preannounce"
-      | "safetyReader"
-    >
-  >;
-
-function hasLiveSafety(
-  input: TrycompPeopleSyncInput,
-): input is LiveTrycompPeopleSyncInput {
-  return (
-    hasFencedRefreshableAuthority(input) &&
-    Boolean(
-      input.deployment &&
-      input.lease &&
-      input.mutationJournal &&
-      input.preannounce &&
-      input.safetyReader,
-    )
-  );
-}
-
-function hasFencedRefreshableAuthority(
-  input: TrycompPeopleSyncInput,
-): input is FencedTrycompPeopleSyncInput {
-  return Boolean(input.assertWriteAuthority && input.refreshAuthority);
 }
 
 export class TrycompPeopleSyncService implements ITrycompPeopleSyncService {
@@ -193,114 +153,29 @@ export class TrycompPeopleSyncService implements ITrycompPeopleSyncService {
   }
 
   async applyReviewed(
-    input: TrycompPeopleSyncInput & { reviewedPlan: TrycompReviewedPlan },
+    input: TrycompReviewedApplyInput,
   ): Promise<TrycompRunReport> {
     const reviewed = TrycompReviewedPlanSchema.parse(input.reviewedPlan);
-    if (
-      input.requireSelectedIdentity ||
-      reviewed.selectedIdentity !== undefined
-    )
-      assertTrycompSelectedIdentity(reviewed, input.googleUsers);
-    const report = reviewedReport(reviewed, crypto.randomUUID(), "live");
-    if (
-      this.#config.mode !== "live" ||
-      input.mode === "audit" ||
-      input.trigger !== "cron" ||
-      !hasLiveSafety(input)
-    ) {
+    const report = reviewedReport(reviewed, crypto.randomUUID());
+    if (this.#config.mode !== "live") {
       return {
         ...report,
-        errors: [
-          "Trycomp reviewed apply requires live configuration and fenced, journaled, refreshable write authority",
-        ],
+        errors: ["Trycomp reviewed apply requires live configuration"],
         status: "blocked",
       };
     }
     if (reviewed.plan.errors.length > 0)
       return { ...report, status: "blocked" };
+    if (reviewed.plan.actions.length === 0) return report;
+    assertTrycompSelectedIdentity(reviewed, input.googleUsers);
+    await input.safetyReader.assertClosed();
     return this.#runLive(input, report, reviewed);
   }
 
-  async run(input: TrycompPeopleSyncInput): Promise<TrycompRunReport> {
-    const runId = crypto.randomUUID();
-    const mode = input.mode ?? this.#config.mode;
-    if (mode === "live") {
-      if (!hasLiveSafety(input)) {
-        return this.#blockedWithoutPlan(
-          runId,
-          mode,
-          "Trycomp live sync requires fenced, journaled, refreshable write authority",
-        );
-      }
-      await input.safetyReader.assertClosed();
-    }
-    if (mode === "live" && input.trigger === "cron") {
-      return this.applyReviewed({
-        ...input,
-        reviewedPlan: await this.captureReviewedPlan(input),
-      });
-    }
-    const members = await this.#client.listMembers(runId);
-    const plan = await this.#buildPlan(input, members);
-    const report: TrycompRunReport = {
-      applied: [],
-      errors: plan.errors,
-      mode,
-      planHash: plan.planHash,
-      planned: plan.actions,
-      runId,
-      status: mode === "audit" ? "audit" : "converged",
-      warnings: plan.warnings,
-    };
-    if (plan.errors.length > 0) {
-      const blocked = { ...report, status: "blocked" as const };
-      if (mode !== "live") await this.#recordScheduledAudit(input, blocked);
-      return blocked;
-    }
-    await this.#recordScheduledAudit(input, report);
-    return report;
-  }
-
-  async #recordScheduledAudit(
-    input: TrycompPeopleSyncInput,
-    report: TrycompRunReport,
-  ): Promise<void> {
-    if (input.trigger !== "cron" || !input.mutationJournal) return;
-    if (!input.deployment)
-      throw new Error("trycomp_deployment_evidence_missing");
-    const operationKeys = await Promise.all(
-      report.planned.map((action, index) =>
-        this.#operationKey(report.planHash, action, index),
-      ),
-    );
-    await input.mutationJournal.beginRun({
-      actionAuthority: actionAuthorityEvidence(
-        report.planned,
-        input.googleUsers,
-        input.contractorGroup,
-      ),
-      actions: report.planned,
-      deployment: input.deployment,
-      mode: report.mode,
-      planHash: report.planHash,
-      providerOperationKeys: operationKeys,
-      runId: report.runId,
-      trigger: input.trigger,
-    });
-    if (report.status === "blocked") {
-      await input.mutationJournal.failRun(
-        report.runId,
-        report.errors.join("; "),
-      );
-    } else {
-      await input.mutationJournal.completeRun(report.runId);
-    }
-  }
-
   async #runLive(
-    input: LiveTrycompPeopleSyncInput,
+    input: TrycompReviewedApplyInput,
     report: TrycompRunReport,
-    reviewed: TrycompReviewedPlan,
+    reviewed: PinnedTrycompWritePlan,
   ): Promise<TrycompRunReport> {
     const runId = report.runId;
     const { assertWriteAuthority, refreshAuthority } = input;
@@ -344,7 +219,7 @@ export class TrycompPeopleSyncService implements ITrycompPeopleSyncService {
       planHash: freshPlan.planHash,
       providerOperationKeys: freshOperationKeys,
       runId,
-      trigger: input.trigger,
+      trigger: "cron",
     });
     if (freshPlan.actions.length > 0) {
       try {
@@ -359,7 +234,9 @@ export class TrycompPeopleSyncService implements ITrycompPeopleSyncService {
           slackTimestamp: receipt.slackTimestamp,
         });
       } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
+        const message =
+          (error instanceof Error ? error.message : String(error)) ||
+          "trycomp_unknown_failure";
         logEvent("trycomp_sync.preannouncement_failed", {
           error: message,
           "run_id": runId,
@@ -428,7 +305,9 @@ export class TrycompPeopleSyncService implements ITrycompPeopleSyncService {
       }
       await mutationJournal.completeRun(runId);
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
+      const message =
+        (error instanceof Error ? error.message : String(error)) ||
+        "trycomp_unknown_failure";
       logEvent("trycomp_sync.write_failed", {
         error: message,
         "run_id": runId,
@@ -495,10 +374,9 @@ export class TrycompPeopleSyncService implements ITrycompPeopleSyncService {
     ];
   }
 
-  #buildPlan(input: TrycompPeopleSyncInput, members: readonly TrycompMember[]) {
+  #buildPlan(input: TrycompAuthorityInput, members: readonly TrycompMember[]) {
     return buildTrycompPlan({
-      ...((input.mode ?? this.#config.mode) === "live" &&
-        input.trigger === "cron" && { automaticIdentityLimit: 1 as const }),
+      automaticIdentityLimit: 1,
       ...(!(input.activeGoogleUserCount === undefined) && {
         activeGoogleUserCount: input.activeGoogleUserCount,
       }),
@@ -524,10 +402,7 @@ export class TrycompPeopleSyncService implements ITrycompPeopleSyncService {
     authority: TrycompAuthorityInput,
     members: readonly TrycompMember[],
   ): Promise<TrycompReviewedPlan> {
-    const plan = await this.#buildPlan(
-      { ...authority, mode: "live", trigger: "cron" },
-      members,
-    );
+    const plan = await this.#buildPlan(authority, members);
     const selectedIdentity = selectedTrycompIdentity(
       plan,
       authority.googleUsers,
@@ -620,7 +495,9 @@ export class TrycompPeopleSyncService implements ITrycompPeopleSyncService {
       await safety.markVerified(runId, actionIndex, invited[0].id);
     } catch (error) {
       if (attempted) {
-        const message = error instanceof Error ? error.message : String(error);
+        const message =
+          (error instanceof Error ? error.message : String(error)) ||
+          "trycomp_unknown_failure";
         await safety.openForAmbiguous(runId, actionIndex, message);
       }
       throw error;
@@ -635,23 +512,6 @@ export class TrycompPeopleSyncService implements ITrycompPeopleSyncService {
     return sha256(
       JSON.stringify({ action, index, planHash, policyVersion: 1 }),
     );
-  }
-
-  #blockedWithoutPlan(
-    runId: string,
-    mode: "audit" | "live",
-    error: string,
-  ): TrycompRunReport {
-    return {
-      applied: [],
-      errors: [error],
-      mode,
-      planHash: "0".repeat(64),
-      planned: [],
-      runId,
-      status: "blocked",
-      warnings: [],
-    };
   }
 
   #exactActionMember(
@@ -780,7 +640,7 @@ export class TrycompPeopleSyncService implements ITrycompPeopleSyncService {
       googleUsers: readonly GoogleDirectoryUser[];
     },
     members: readonly TrycompMember[],
-    reviewed: TrycompReviewedPlan,
+    reviewed: PinnedTrycompWritePlan,
   ): Promise<void> {
     const protectedEmails = this.#writeProtectedActionEmails(
       authority.googleUsers,
@@ -812,12 +672,11 @@ export class TrycompPeopleSyncService implements ITrycompPeopleSyncService {
 function reviewedReport(
   reviewed: TrycompReviewedPlan,
   runId: string,
-  mode: "audit" | "live",
 ): TrycompRunReport {
   return {
     applied: [],
     errors: reviewed.plan.errors,
-    mode,
+    mode: "live",
     planHash: reviewed.plan.planHash,
     planned: reviewed.plan.actions,
     runId,

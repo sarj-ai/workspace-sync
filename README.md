@@ -9,7 +9,7 @@ Sync profiles and access from Google Workspace.
 Node.js >=24.0.0:
 
 ```sh
-pnpm add https://github.com/sarj-ai/workspace-sync/releases/download/v0.5.2/sarj-ai-workspace-sync-0.5.2.tgz zod@4.6.7
+pnpm add https://github.com/sarj-ai/workspace-sync/releases/download/v0.6.0/sarj-ai-workspace-sync-0.6.0.tgz zod@4.6.7
 ```
 
 Start with the [read-only example](https://engineering.sarj.ai/projects/workspace-sync/configuration/).

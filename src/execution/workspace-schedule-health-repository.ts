@@ -235,7 +235,6 @@ export class WorkspaceScheduleHealthRepository<
     this.#now = now;
     this.#resolutionStore = new CanaryBranchResolutionStore(
       database,
-      undefined,
       now,
       resolutionPins,
     );

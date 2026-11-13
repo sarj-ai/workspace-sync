@@ -41,10 +41,13 @@ export function selectedTrycompIdentity(
   };
 }
 
+export type PinnedTrycompWritePlan = TrycompReviewedPlan &
+  Required<Pick<TrycompReviewedPlan, "selectedIdentity">>;
+
 export function assertTrycompSelectedIdentity(
   reviewed: TrycompReviewedPlan,
   users: readonly GoogleDirectoryUser[],
-): void {
+): asserts reviewed is PinnedTrycompWritePlan {
   const actual = selectedTrycompIdentity(reviewed.plan, users);
   if (
     reviewed.selectedIdentity === undefined ||
