@@ -97,7 +97,8 @@ describe("SlackApiTransport POST rate limits", () => {
   ])(
     "does not replay a POST after a 200 $name response",
     async ({ response }) => {
-      const fetchImpl = vi.fn<typeof fetch>(async () => response());
+      const reply = response();
+      const fetchImpl = vi.fn<typeof fetch>(async () => reply);
       const fixture = transport(fetchImpl);
 
       await expect(
@@ -112,14 +113,14 @@ describe("SlackApiTransport POST rate limits", () => {
       ).rejects.toBeInstanceOf(SlackWriteOutcomeUnknownError);
       expect(fetchImpl).toHaveBeenCalledOnce();
       expect(fixture.sleep).not.toHaveBeenCalled();
+      expect(reply.body?.locked).toBe(false);
     },
   );
 
   it("bounds a stalled 200 POST response by the caller deadline without replay", async () => {
-    const cancel = vi.fn();
-    const fetchImpl = vi.fn<typeof fetch>(
-      async () => new Response(new ReadableStream({ cancel })),
-    );
+    const cancel = vi.fn(() => Promise.withResolvers<never>().promise);
+    const body = new ReadableStream<Uint8Array>({ cancel });
+    const fetchImpl = vi.fn<typeof fetch>(async () => new Response(body));
     const fixture = transport(fetchImpl);
 
     await expect(
@@ -135,6 +136,50 @@ describe("SlackApiTransport POST rate limits", () => {
     ).rejects.toBeInstanceOf(SlackWriteOutcomeUnknownError);
     expect(fetchImpl).toHaveBeenCalledOnce();
     expect(cancel).toHaveBeenCalledOnce();
+    expect(body.locked).toBe(false);
+  });
+
+  it("releases an oversized POST body even when cancellation never settles", async () => {
+    const cancel = vi.fn(() => Promise.withResolvers<never>().promise);
+    const body = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(new Uint8Array(8 * 1024 * 1024 + 1));
+      },
+      cancel,
+    });
+    const fetchImpl = vi.fn<typeof fetch>(async () => new Response(body));
+    const fixture = transport(fetchImpl);
+    await expect(
+      fixture.client.call(
+        "conversations.kick",
+        { channel: "C1", user: "U1" },
+        "run-1",
+        { post: true },
+      ),
+    ).rejects.toBeInstanceOf(SlackWriteOutcomeUnknownError);
+    expect(fetchImpl).toHaveBeenCalledOnce();
+    expect(cancel).toHaveBeenCalledOnce();
+    expect(body.locked).toBe(false);
+  });
+
+  it("releases an errored POST body without replay", async () => {
+    const body = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.error(new Error("synthetic-read-failure"));
+      },
+    });
+    const fetchImpl = vi.fn<typeof fetch>(async () => new Response(body));
+    const fixture = transport(fetchImpl);
+    await expect(
+      fixture.client.call(
+        "conversations.kick",
+        { channel: "C1", user: "U1" },
+        "run-1",
+        { post: true },
+      ),
+    ).rejects.toBeInstanceOf(SlackWriteOutcomeUnknownError);
+    expect(fetchImpl).toHaveBeenCalledOnce();
+    expect(body.locked).toBe(false);
   });
 
   it("keeps a deterministic HTTP 400 out of ambiguous-write handling", async () => {
