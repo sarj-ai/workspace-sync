@@ -13,10 +13,7 @@ import {
 } from "./operation.ts";
 import { ClaimedReviewedSlackLifecycleIntentSchema } from "./reviewed-slack-lifecycle-intent.ts";
 import { WorkspaceScheduleTickSchema } from "./schedule-health-contracts.ts";
-import {
-  workspaceDirectoryExecutionId,
-  type WorkspaceDirectoryWorkflowBinding,
-} from "./workflow.ts";
+import { workspaceDirectoryExecutionId } from "./workflow.ts";
 import { workspaceBranchSourceIdentity } from "./workspace-branch-source-identity.ts";
 import type {
   WorkspaceDatabase,
@@ -56,11 +53,11 @@ const ResolutionRowSchema = z.strictObject({
   "resolution_change_hash": DigestSchema,
 });
 
-export interface CanaryResolutionSnapshot {
-  resolved: boolean;
-  row: z.output<typeof RowSchema>;
-  sourceHash: string;
-  tick: z.output<typeof WorkspaceScheduleTickSchema>;
+export interface VerifiedCanaryResolution {
+  readonly resolution: z.output<typeof ResolutionRowSchema>;
+  readonly row: z.output<typeof RowSchema>;
+  readonly sourceHash: string;
+  readonly tick: z.output<typeof WorkspaceScheduleTickSchema>;
 }
 const SOURCE_SQL = `SELECT tick.revision, tick.snapshot_json, tick.scheduled_at_ms,
   tick.worker_version_id, tick.worker_revision, intent.proof_json, intent.claimed_at_ms, intent.expires_at_ms,
@@ -74,120 +71,50 @@ const SOURCE_SQL = `SELECT tick.revision, tick.snapshot_json, tick.scheduled_at_
     AND budget.parent_execution_key = 'identity-budget:v1:scheduled:organization-sync:' || tick.scheduled_at_ms
   WHERE tick.tick_id = ?1 AND intent.intent_id = ?2 AND intent.state = 'claimed'`;
 
-/** This store can append forensic metadata only. No method can mutate original evidence or providers. */
+export interface CanaryBranchResolutionStoreContract {
+  readForHealth(): Promise<VerifiedCanaryResolution | null>;
+}
+
+/** Revalidates retained historical evidence; no method writes or dispatches anything. */
 export class CanaryBranchResolutionStore<
   Statement extends WorkspaceStatement<Statement> = D1PreparedStatement,
-> implements ICanaryBranchResolutionStore {
+> implements CanaryBranchResolutionStoreContract {
   readonly #db: WorkspaceDatabaseSession<Statement>;
-  readonly #binding: Pick<WorkspaceDirectoryWorkflowBinding, "get"> | undefined;
   readonly #now: () => number;
   readonly #pins: CanaryResolutionPins;
 
   constructor(
     db: WorkspaceDatabase<Statement>,
-    binding: Pick<WorkspaceDirectoryWorkflowBinding, "get"> | undefined,
     now: () => number = Date.now,
     pins: CanaryResolutionPins = getWorkspaceExecutionPolicy()
       .legacyCanaryResolution,
   ) {
     this.#db = db.withSession("first-primary");
-    this.#binding = binding;
     this.#now = now;
     this.#pins = Object.freeze({ ...pins });
   }
 
-  async read(): Promise<CanaryResolutionSnapshot> {
-    const snapshot = await this.#readSource();
-    await this.#assertTerminal();
-    return snapshot;
-  }
-
   /* Revalidates the fixed historical attestation, never authorizes dispatch or accepts caller pins. */
-  async readForHealth(): Promise<CanaryResolutionSnapshot | null> {
-    const existing = await this.#db
-      .prepare(
-        "SELECT tick_id FROM workspace_branch_attempt_resolution WHERE tick_id = ?1",
-      )
+  async readForHealth(): Promise<VerifiedCanaryResolution | null> {
+    const stored = await this.#db
+      .prepare(`SELECT intent_id, source_hash, snapshot_json, proof_json, triggers_json,
+        tick_revision, claimed_at_ms, budget_key, kind, evidence_id, recorded_at_ms, workflow_status,
+        resolution_change_hash FROM workspace_branch_attempt_resolution WHERE tick_id = ?1`)
       .bind(this.#pins.tickId)
       .first();
-    if (existing === null) return null;
-    return this.#readSource();
+    if (stored === null) return null;
+    const source = await this.#readSource();
+    const resolution = assertResolution(
+      stored,
+      source.row,
+      source.sourceHash,
+      this.#pins,
+      this.#now(),
+    );
+    return { ...source, resolution };
   }
 
-  async attach(
-    expected: CanaryResolutionSnapshot,
-    resolutionChangeHash: string,
-    expiresAtMs: number,
-  ): Promise<void> {
-    DigestSchema.parse(resolutionChangeHash);
-    const current = await this.read();
-    if (
-      current.sourceHash !== expected.sourceHash ||
-      !sameJson(
-        JsonValueSchema.parse(current.row),
-        JsonValueSchema.parse(expected.row),
-      )
-    )
-      throw conflict();
-    if (current.resolved) return;
-    const recordedAtMs = this.#now();
-    if (!Number.isSafeInteger(expiresAtMs) || recordedAtMs >= expiresAtMs)
-      throw conflict();
-    const row = current.row;
-    const result = await this.#db
-      .prepare(`INSERT INTO workspace_branch_attempt_resolution
-      (tick_id, intent_id, kind, evidence_id, tick_revision, snapshot_json, proof_json, claimed_at_ms,
-       budget_key, triggers_json, source_hash, resolution_change_hash, recorded_at_ms, workflow_status)
-      SELECT ?1, ?2, 'not-dispatched', ?3, revision, snapshot_json, proof_json, claimed_at_ms,
-       budget_key, triggers_json, ?4, ?5, ?6, 'errored'
-      FROM (
-        SELECT tick.revision, tick.snapshot_json, tick.scheduled_at_ms,
-          tick.worker_version_id, tick.worker_revision, intent.proof_json, intent.claimed_at_ms,
-          intent.expires_at_ms, budget.parent_execution_key AS budget_key, budget.google_user_id,
-          budget.reserved_at_ms,
-          (SELECT json_group_object(name, sql) FROM sqlite_schema WHERE type = 'trigger' AND name IN
-            ('identity_reconciliation_budget_no_update', 'identity_reconciliation_budget_no_delete',
-             'identity_reconciliation_budget_no_replace', 'workspace_branch_resolution_no_update',
-             'workspace_branch_resolution_no_delete', 'workspace_branch_resolution_no_replace')) AS triggers_json
-        FROM workspace_directory_schedule_tick AS tick
-        JOIN workspace_reviewed_slack_lifecycle_intent AS intent ON intent.claimed_tick_id = tick.tick_id
-        JOIN identity_reconciliation_budget_reservation AS budget ON budget.service_id = 'slack'
-          AND budget.parent_execution_key = 'identity-budget:v1:scheduled:organization-sync:' || tick.scheduled_at_ms
-        WHERE tick.tick_id = ?7 AND intent.intent_id = ?8 AND intent.state = 'claimed'
-      ) AS original
-      WHERE revision = ?9 AND snapshot_json = ?10 AND scheduled_at_ms = ?11
-        AND worker_version_id = ?12 AND worker_revision = ?13 AND proof_json = ?14
-        AND claimed_at_ms = ?15 AND expires_at_ms = ?16 AND budget_key = ?17
-        AND google_user_id = ?18 AND reserved_at_ms = ?19 AND triggers_json = ?20 AND ?6 < ?21
-        AND NOT EXISTS (SELECT 1 FROM workspace_branch_attempt_resolution WHERE tick_id = ?1)`)
-      .bind(
-        this.#pins.tickId,
-        this.#pins.intentId,
-        this.#pins.evidenceId,
-        current.sourceHash,
-        resolutionChangeHash,
-        recordedAtMs,
-        this.#pins.tickId,
-        this.#pins.intentId,
-        row.revision,
-        row["snapshot_json"],
-        row["scheduled_at_ms"],
-        row["worker_version_id"],
-        row["worker_revision"],
-        row["proof_json"],
-        row["claimed_at_ms"],
-        row["expires_at_ms"],
-        row["budget_key"],
-        row["google_user_id"],
-        row["reserved_at_ms"],
-        row["triggers_json"],
-        expiresAtMs,
-      )
-      .run();
-    if (result.meta.changes !== 1) throw conflict();
-  }
-
-  async #readSource(): Promise<CanaryResolutionSnapshot> {
+  async #readSource(): Promise<Omit<VerifiedCanaryResolution, "resolution">> {
     const row = RowSchema.parse(
       await this.#db
         .prepare(SOURCE_SQL)
@@ -199,23 +126,7 @@ export class CanaryBranchResolutionStore<
     );
     await validateSource(row, tick, this.#pins, this.#now());
     const sourceHash = await sha256Hex(JsonValueSchema.parse(row));
-    const stored = await this.#db
-      .prepare(`SELECT intent_id, source_hash, snapshot_json, proof_json, triggers_json,
-      tick_revision, claimed_at_ms, budget_key, kind, evidence_id, recorded_at_ms, workflow_status,
-      resolution_change_hash FROM workspace_branch_attempt_resolution WHERE tick_id = ?1`)
-      .bind(this.#pins.tickId)
-      .first();
-    if (stored !== null)
-      assertResolution(stored, row, sourceHash, this.#pins, this.#now());
-    return { row, tick, sourceHash, resolved: stored !== null };
-  }
-
-  async #assertTerminal(): Promise<void> {
-    if (this.#binding === undefined) throw conflict();
-    const instance = await this.#binding.get(this.#pins.workflowId);
-    const status = await instance.status();
-    if (instance.id !== this.#pins.workflowId || status.status !== "errored")
-      throw conflict();
+    return { row, tick, sourceHash };
   }
 }
 
@@ -350,7 +261,7 @@ function assertResolution(
   sourceHash: string,
   pins: CanaryResolutionPins,
   now: number,
-): void {
+): z.output<typeof ResolutionRowSchema> {
   const originalTick = WorkspaceScheduleTickSchema.parse(
     JSON.parse(row["snapshot_json"]),
   );
@@ -371,18 +282,9 @@ function assertResolution(
     stored["recorded_at_ms"] < originalTick.completedAtMs
   )
     throw conflict();
+  return stored;
 }
 
 function conflict(): Error {
   return new Error("workspace_canary_resolution_conflict");
-}
-
-interface ICanaryBranchResolutionStore {
-  attach(
-    expected: CanaryResolutionSnapshot,
-    changeHash: string,
-    expiresAtMs: number,
-  ): Promise<void>;
-  read(): Promise<CanaryResolutionSnapshot>;
-  readForHealth(): Promise<CanaryResolutionSnapshot | null>;
 }

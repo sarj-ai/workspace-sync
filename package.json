@@ -1,6 +1,6 @@
 {
   "name": "@sarj-ai/workspace-sync",
-  "version": "0.5.2",
+  "version": "0.6.0",
   "private": true,
   "description": "Sync profiles and access from Google Workspace",
   "license": "MIT",
@@ -1026,10 +1026,6 @@
     "./org-sync/derive-org-channel-removal-policy": {
       "types": "./dist/org-sync/derive-org-channel-removal-policy.d.ts",
       "import": "./dist/org-sync/derive-org-channel-removal-policy.js"
-    },
-    "./execution/notification-recovery": {
-      "types": "./dist/execution/notification-recovery.d.ts",
-      "import": "./dist/execution/notification-recovery.js"
     },
     "./shared/stable-slack-client-message-id": {
       "types": "./dist/shared/stable-slack-client-message-id.d.ts",

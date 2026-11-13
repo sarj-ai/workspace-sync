@@ -24,7 +24,19 @@ import type {
   TrycompMutationStore,
   TrycompSafetyStore,
 } from "../src/trycomp/safety.ts";
-import { TrycompPeopleSyncService } from "../src/trycomp/service.ts";
+import {
+  type TrycompReviewedApplyInput,
+  TrycompPeopleSyncService,
+} from "../src/trycomp/service.ts";
+
+async function applyNextReviewed(
+  service: TrycompPeopleSyncService,
+  input: Omit<TrycompReviewedApplyInput, "reviewedPlan">,
+) {
+  await input.safetyReader.assertClosed();
+  const reviewedPlan = await service.captureReviewedPlan(input);
+  return service.applyReviewed({ ...input, reviewedPlan });
+}
 
 const TEST_LEASE = activeResourceLease({
   expiresAtMs: 60_000,
@@ -60,9 +72,9 @@ class MemoryMutationSafety implements TrycompMutationStore, TrycompSafetyStore {
   recordPreannouncement(): Promise<void> {
     return Promise.resolve();
   }
-  markVerified(): Promise<void> {
-    return Promise.resolve();
-  }
+  readonly markVerified = vi.fn<TrycompMutationStore["markVerified"]>(
+    async () => undefined,
+  );
   openForAmbiguous(): Promise<void> {
     return Promise.resolve();
   }
@@ -101,7 +113,7 @@ const CONTRACTORS: GoogleGroupSnapshot = {
   members: [
     {
       email: "contractor@company.test",
-      id: "g2",
+      id: "102",
       role: "MEMBER",
       status: "ACTIVE",
       type: "USER",
@@ -187,13 +199,13 @@ class MemoryTrycompClient implements ITrycompPeopleClient {
   }
 }
 
-function reviewedFixture() {
+function reviewedFixture(mode: "audit" | "live" = "live") {
   const client = new MemoryTrycompClient([]);
   const authority = {
     contractorGroup: { ...CONTRACTORS, members: [] },
     googleUsers: [
-      googleUser("g1", "a@company.test"),
-      googleUser("g2", "b@company.test"),
+      googleUser("101", "a@company.test"),
+      googleUser("102", "b@company.test"),
     ],
   };
   const service = new TrycompPeopleSyncService(client, {
@@ -205,7 +217,7 @@ function reviewedFixture() {
     maxAutomaticActivations: 1,
     maxAutomaticDeactivations: 1,
     minimumGoogleUsers: 2,
-    mode: "live",
+    mode,
   });
   const safety = journaledAuthority();
   const beginRun = vi.spyOn(safety.mutationJournal, "beginRun");
@@ -215,7 +227,6 @@ function reviewedFixture() {
     ...safety,
     assertWriteAuthority: vi.fn(async () => undefined),
     refreshAuthority: vi.fn(async () => authority),
-    trigger: "cron" as const,
   };
   return { authority, beginRun, client, input, invite, service };
 }
@@ -229,7 +240,7 @@ function historicalAliasFixture() {
     excludedGoogleUserIds: [] as string[],
     expectedContractorGroupId: "contractors",
     googleUsers: [
-      googleUser("g1", "current@company.test", {
+      googleUser("101", "current@company.test", {
         aliases: ["old@company.test"],
       }),
     ],
@@ -293,17 +304,20 @@ describe("Trycomp preserved historical aliases", () => {
         maxAutomaticDeactivations: 1,
         mode,
       });
-      const report = await service.run({
-        ...fixture,
-        ...journaledAuthority(),
-        assertWriteAuthority: vi.fn(async () => undefined),
-        refreshAuthority: vi.fn(async () => fixture),
-        trigger: "http",
-      });
-      expect(report.status).toBe(mode === "audit" ? "audit" : "converged");
-      expect(report.errors).toEqual([]);
-      expect(report.planned).toEqual([]);
-      expect(report.applied).toEqual([]);
+      const reviewed = await service.captureReviewedPlan(fixture);
+      expect(reviewed.plan.errors).toEqual([]);
+      expect(reviewed.plan.actions).toEqual([]);
+      if (mode === "live") {
+        const report = await service.applyReviewed({
+          ...fixture,
+          ...journaledAuthority(),
+          assertWriteAuthority: vi.fn(async () => undefined),
+          refreshAuthority: vi.fn(async () => fixture),
+          reviewedPlan: reviewed,
+        });
+        expect(report.status).toBe("converged");
+        expect(report.applied).toEqual([]);
+      }
       expect(deactivate).not.toHaveBeenCalled();
       expect(reactivate).not.toHaveBeenCalled();
       expect(invite).not.toHaveBeenCalled();
@@ -428,10 +442,10 @@ describe("Trycomp preserved historical aliases", () => {
         google.deletionTime = "2026-10-01T00:00:00Z";
         break;
       case "configured-exclusion":
-        input.excludedGoogleUserIds.push("g1");
+        input.excludedGoogleUserIds.push("101");
         break;
       case "protected-id":
-        input.writeProtectedGoogleUserIds.push("g1");
+        input.writeProtectedGoogleUserIds.push("101");
         break;
       case "protected-email":
         input.writeProtectedEmails.push("old@company.test");
@@ -441,7 +455,7 @@ describe("Trycomp preserved historical aliases", () => {
           role: "MEMBER",
           status: "ACTIVE",
           type: "USER",
-          id: "g1",
+          id: "101",
           email: "old@company.test",
         });
         break;
@@ -469,7 +483,7 @@ describe("Trycomp preserved historical aliases", () => {
   it("continues planning unrelated identities with their exact provider IDs", async () => {
     const input = historicalAliasFixture();
     input.googleUsers.push(
-      googleUser("g2", "inactive@company.test", { suspended: true }),
+      googleUser("102", "inactive@company.test", { suspended: true }),
     );
     input.trycompMembers.push(
       member("inactive-member", "inactive@company.test"),
@@ -489,18 +503,19 @@ describe("Trycomp preserved historical aliases", () => {
 });
 
 describe("Trycomp exact reviewed service ports", () => {
-  it("preserves legacy reviewed execution when fresh capture adds an identity pin", async () => {
+  it("rejects an unpinned legacy plan before a new provider write", async () => {
     const fixture = reviewedFixture();
     fixture.authority.googleUsers[0] = googleUser("123", "a@company.test");
     const fresh = await fixture.service.captureReviewedPlan(fixture.authority);
     const { selectedIdentity: _pin, ...legacy } = fresh;
-    const report = await fixture.service.applyReviewed({
-      ...fixture.input,
-      reviewedPlan: legacy,
-    });
-    expect(report.errors).toEqual([]);
-    expect(report.applied).toEqual(legacy.plan.actions);
-    expect(fixture.invite).toHaveBeenCalledOnce();
+    await expect(
+      fixture.service.applyReviewed({
+        ...fixture.input,
+        reviewedPlan: legacy,
+      }),
+    ).rejects.toThrow("trycomp_reviewed_identity_missing_or_changed");
+    expect(fixture.invite).not.toHaveBeenCalled();
+    expect(fixture.beginRun).not.toHaveBeenCalled();
   });
 
   it.each([{ id: "456" }, { isAdmin: true }, { isDelegatedAdmin: true }])(
@@ -526,7 +541,6 @@ describe("Trycomp exact reviewed service ports", () => {
         fixture.service.applyReviewed({
           ...fixture.input,
           reviewedPlan: reviewed,
-          requireSelectedIdentity: true,
         }),
       ).rejects.toThrow("identity_missing_or_changed");
       expect(list).not.toHaveBeenCalled();
@@ -628,7 +642,6 @@ describe("Trycomp exact reviewed service ports", () => {
       fixture.service.applyReviewed({
         ...fixture.input,
         reviewedPlan: legacy,
-        requireSelectedIdentity: true,
       }),
     ).rejects.toThrow("identity_missing_or_changed");
     expect(fixture.beginRun).not.toHaveBeenCalled();
@@ -672,8 +685,13 @@ describe("Trycomp exact reviewed service ports", () => {
     expect(fixture.beginRun).not.toHaveBeenCalled();
     expect(fixture.input.preannounce).not.toHaveBeenCalled();
     expect(fixture.invite).not.toHaveBeenCalled();
-    await expect(fixture.service.readReviewedSlice(reviewed)).resolves.toEqual({
+    await expect(
+      fixture.service.readReviewedSlice(reviewed, {
+        authority: fixture.authority,
+      }),
+    ).resolves.toEqual({
       state: "pending",
+      selectedIdentity: reviewed.selectedIdentity,
     });
   });
 
@@ -723,15 +741,25 @@ describe("Trycomp exact reviewed service ports", () => {
       fixture.authority,
     );
     expect(reviewed.plan.actions[0]?.type).toBe("reactivate");
-    await expect(fixture.service.readReviewedSlice(reviewed)).resolves.toEqual({
+    await expect(
+      fixture.service.readReviewedSlice(reviewed, {
+        authority: fixture.authority,
+      }),
+    ).resolves.toEqual({
       state: "pending",
+      selectedIdentity: reviewed.selectedIdentity,
     });
     fixture.client.members.set(
       "m1",
       member("m1", "a@company.test", { role: "owner" }),
     );
-    await expect(fixture.service.readReviewedSlice(reviewed)).resolves.toEqual({
+    await expect(
+      fixture.service.readReviewedSlice(reviewed, {
+        authority: fixture.authority,
+      }),
+    ).resolves.toEqual({
       state: "drifted",
+      selectedIdentity: reviewed.selectedIdentity,
     });
   });
 
@@ -764,18 +792,25 @@ describe("Trycomp exact reviewed service ports", () => {
           reviewed.plan.planHash = "f".repeat(64);
           break;
       }
-      const result = await fixture.service.applyReviewed({
+      const applying = fixture.service.applyReviewed({
         ...fixture.input,
         reviewedPlan: reviewed,
       });
-      expect(result.status).toBe("blocked");
+      if (change === "action") {
+        await expect(applying).rejects.toThrow(
+          "Selected identity must match the sole error-free reviewed action",
+        );
+      } else {
+        const result = await applying;
+        expect(result.status).toBe("blocked");
+      }
       expect(fixture.beginRun).not.toHaveBeenCalled();
       expect(fixture.input.preannounce).not.toHaveBeenCalled();
       expect(fixture.invite).not.toHaveBeenCalled();
     },
   );
 
-  it("does not replace an already-converged reviewed target with the next identity", async () => {
+  it("requires original invitation evidence before treating an observed account as converged", async () => {
     const fixture = reviewedFixture();
     const reviewed = await fixture.service.captureReviewedPlan(
       fixture.authority,
@@ -784,8 +819,13 @@ describe("Trycomp exact reviewed service ports", () => {
       "existing-a",
       member("existing-a", "a@company.test"),
     );
-    await expect(fixture.service.readReviewedSlice(reviewed)).resolves.toEqual({
-      state: "converged",
+    await expect(
+      fixture.service.readReviewedSlice(reviewed, {
+        authority: fixture.authority,
+      }),
+    ).resolves.toEqual({
+      state: "drifted",
+      selectedIdentity: reviewed.selectedIdentity,
     });
     const result = await fixture.service.applyReviewed({
       ...fixture.input,
@@ -809,15 +849,36 @@ describe("Trycomp exact reviewed service ports", () => {
     expect(result.status).toBe("converged");
     expect(result.applied).toEqual(reviewed.plan.actions);
     expect(fixture.invite).toHaveBeenCalledOnce();
-    await expect(fixture.service.readReviewedSlice(reviewed)).resolves.toEqual({
+    expect(fixture.input.mutationJournal.markVerified).toHaveBeenCalledWith(
+      result.runId,
+      0,
+      "invited-0",
+    );
+    await expect(
+      fixture.service.readReviewedSlice(reviewed, {
+        authority: fixture.authority,
+        verifiedInvitationMemberId: async () =>
+          fixture.input.mutationJournal.markVerified.mock.calls.at(-1)?.[2] ??
+          null,
+      }),
+    ).resolves.toEqual({
       state: "converged",
+      selectedIdentity: reviewed.selectedIdentity,
     });
     const next = await fixture.service.captureReviewedPlan(fixture.authority);
     expect(next.plan.actions).toEqual([
       { email: "b@company.test", type: "invite" },
     ]);
-    await expect(fixture.service.readReviewedSlice(reviewed)).resolves.toEqual({
+    await expect(
+      fixture.service.readReviewedSlice(reviewed, {
+        authority: fixture.authority,
+        verifiedInvitationMemberId: async () =>
+          fixture.input.mutationJournal.markVerified.mock.calls.at(-1)?.[2] ??
+          null,
+      }),
+    ).resolves.toEqual({
       state: "converged",
+      selectedIdentity: reviewed.selectedIdentity,
     });
   });
 
@@ -831,10 +892,10 @@ describe("Trycomp exact reviewed service ports", () => {
       .mockResolvedValue({
         ...fixture.authority,
         googleUsers: [
-          googleUser("g1", "a@company.test", {
+          googleUser("101", "a@company.test", {
             aliases: ["new-alias@company.test"],
           }),
-          googleUser("g2", "b@company.test"),
+          googleUser("102", "b@company.test"),
         ],
       });
     const result = await fixture.service.applyReviewed({
@@ -846,15 +907,14 @@ describe("Trycomp exact reviewed service ports", () => {
     expect(fixture.invite).not.toHaveBeenCalled();
   });
 
-  it("does not admit reviewed HTTP writes into the cron-only journal boundary", async () => {
-    const fixture = reviewedFixture();
+  it("blocks reviewed writes in audit configuration", async () => {
+    const fixture = reviewedFixture("audit");
     const reviewed = await fixture.service.captureReviewedPlan(
       fixture.authority,
     );
     const result = await fixture.service.applyReviewed({
       ...fixture.input,
       reviewedPlan: reviewed,
-      trigger: "http",
     });
     expect(result.status).toBe("blocked");
     expect(fixture.beginRun).not.toHaveBeenCalled();
@@ -917,7 +977,6 @@ function revocationFixture(offboardingOnly = false) {
     ...journaledAuthority(),
     assertWriteAuthority: vi.fn(async () => undefined),
     refreshAuthority: vi.fn(async () => authority),
-    trigger: "cron" as const,
   };
   return { authority, client, input, service };
 }
@@ -1039,7 +1098,7 @@ describe("Trycomp membership revocation", () => {
         fixture.client.members.set("target", current);
       });
       const verified = vi.spyOn(fixture.input.mutationJournal, "markVerified");
-      const result = await fixture.service.run(fixture.input);
+      const result = await applyNextReviewed(fixture.service, fixture.input);
       expect(result.status).toBe("failed");
       expect(verified).not.toHaveBeenCalled();
     },
@@ -1166,7 +1225,7 @@ describe("Trycomp membership revocation", () => {
       .spyOn(fixture.client, "deactivate")
       .mockResolvedValue();
     const verified = vi.spyOn(fixture.input.mutationJournal, "markVerified");
-    const result = await fixture.service.run(fixture.input);
+    const result = await applyNextReviewed(fixture.service, fixture.input);
     expect(result).toMatchObject({
       status: "failed",
       errors: ["trycomp_deactivation_not_observed"],
@@ -1202,7 +1261,7 @@ describe("Trycomp membership revocation", () => {
           );
         }
       });
-      const result = await fixture.service.run(fixture.input);
+      const result = await applyNextReviewed(fixture.service, fixture.input);
       expect(result.status).toBe("failed");
       expect(deactivate).not.toHaveBeenCalled();
     },
@@ -1372,7 +1431,7 @@ describe("Trycomp people lifecycle sync", () => {
     const before = await buildTrycompPlan({
       ...input,
       googleUsers: [
-        googleUser("g1", "employee@company.test", {
+        googleUser("101", "employee@company.test", {
           aliases: ["first@company.test"],
         }),
       ],
@@ -1380,7 +1439,7 @@ describe("Trycomp people lifecycle sync", () => {
     const after = await buildTrycompPlan({
       ...input,
       googleUsers: [
-        googleUser("g1", "employee@company.test", {
+        googleUser("101", "employee@company.test", {
           aliases: ["second@company.test"],
         }),
       ],
@@ -1402,13 +1461,13 @@ describe("Trycomp people lifecycle sync", () => {
     const ordinary = await buildTrycompPlan({
       ...base,
       googleUsers: [
-        googleUser("g1", "admin@company.test", { suspended: true }),
+        googleUser("101", "admin@company.test", { suspended: true }),
       ],
     });
     const admin = await buildTrycompPlan({
       ...base,
       googleUsers: [
-        googleUser("g1", "admin@company.test", {
+        googleUser("101", "admin@company.test", {
           isAdmin: true,
           suspended: true,
         }),
@@ -1448,12 +1507,12 @@ describe("Trycomp people lifecycle sync", () => {
         };
         const known = await buildTrycompPlan({
           ...input,
-          googleUsers: [googleUser("g1", "employee@company.test", identity)],
+          googleUsers: [googleUser("101", "employee@company.test", identity)],
         });
         const unknown = await buildTrycompPlan({
           ...input,
           googleUsers: [
-            googleUser("g1", "employee@company.test", {
+            googleUser("101", "employee@company.test", {
               ...identity,
               ...flags,
             }),
@@ -1533,7 +1592,7 @@ describe("Trycomp people lifecycle sync", () => {
       member("m1", "old@company.test", { deactivated: true, isActive: false }),
     ]);
     const googleUsers = [
-      googleUser("g1", "new@company.test", { aliases: ["old@company.test"] }),
+      googleUser("101", "new@company.test", { aliases: ["old@company.test"] }),
     ];
     const service = new TrycompPeopleSyncService(client, {
       allowDeactivations: false,
@@ -1546,7 +1605,7 @@ describe("Trycomp people lifecycle sync", () => {
       minimumGoogleUsers: 1,
       mode: "live",
     });
-    const report = await service.run({
+    const report = await applyNextReviewed(service, {
       assertWriteAuthority: vi.fn(async () => undefined),
       contractorGroup: { ...CONTRACTORS, members: [] },
       googleUsers,
@@ -1555,7 +1614,6 @@ describe("Trycomp people lifecycle sync", () => {
         contractorGroup: { ...CONTRACTORS, members: [] },
         googleUsers,
       })),
-      trigger: "cron",
     });
     expect(report.status).toBe("converged");
     expect(report.applied).toEqual([
@@ -1695,7 +1753,7 @@ describe("Trycomp people lifecycle sync", () => {
         },
         excludedGoogleUserIds: [],
         expectedContractorGroupId: "contractors",
-        googleUsers: [googleUser("g2", "contractor@company.test", state)],
+        googleUsers: [googleUser("102", "contractor@company.test", state)],
         managedDomain: "company.test",
         minimumGoogleUsers: 1,
       };
@@ -1728,11 +1786,11 @@ describe("Trycomp people lifecycle sync", () => {
         expect(plan.actions).toEqual([]);
       }
       for (const protection of [
-        { excludedGoogleUserIds: ["g2"] },
-        { writeProtectedGoogleUserIds: ["g2"] },
+        { excludedGoogleUserIds: ["102"] },
+        { writeProtectedGoogleUserIds: ["102"] },
         {
           googleUsers: [
-            googleUser("g2", "contractor@company.test", {
+            googleUser("102", "contractor@company.test", {
               ...state,
               isAdmin: true,
             }),
@@ -1774,7 +1832,7 @@ describe("Trycomp people lifecycle sync", () => {
         excludedGoogleUserIds: [],
         expectedContractorGroupId: "contractors",
         googleUsers: [
-          googleUser("g2", "contractor@company.test", { suspended: true }),
+          googleUser("102", "contractor@company.test", { suspended: true }),
         ],
         managedDomain: "company.test",
         minimumGoogleUsers: 1,
@@ -1801,7 +1859,7 @@ describe("Trycomp people lifecycle sync", () => {
         },
         excludedGoogleUserIds: [],
         expectedContractorGroupId: "contractors",
-        googleUsers: [googleUser("g2", "contractor@company.test", state)],
+        googleUsers: [googleUser("102", "contractor@company.test", state)],
         managedDomain: "company.test",
         minimumGoogleUsers: 1,
         trycompMembers: [],
@@ -1819,9 +1877,9 @@ describe("Trycomp people lifecycle sync", () => {
       excludedGoogleUserIds: [],
       expectedContractorGroupId: "contractors",
       googleUsers: [
-        googleUser("g1", "employee@company.test"),
-        googleUser("g2", "contractor@company.test"),
-        googleUser("g3", "departed@company.test", { suspended: true }),
+        googleUser("101", "employee@company.test"),
+        googleUser("102", "contractor@company.test"),
+        googleUser("103", "departed@company.test", { suspended: true }),
       ],
       managedDomain: "company.test",
       minimumGoogleUsers: 3,
@@ -1860,13 +1918,13 @@ describe("Trycomp people lifecycle sync", () => {
     "prioritizes %s deactivation over lexically earlier activations under the shared limit",
     async (deactivationAuthority) => {
       const offboarded = googleUser(
-        "g3",
+        "103",
         "z-offboard@company.test",
         deactivationAuthority === "inactive_google" ? { suspended: true } : {},
       );
       const googleUsers = [
-        googleUser("g1", "a-invite@company.test"),
-        googleUser("g2", "b-reactivate@company.test"),
+        googleUser("101", "a-invite@company.test"),
+        googleUser("102", "b-reactivate@company.test"),
         offboarded,
       ];
       const trycompMembers = [
@@ -1939,8 +1997,8 @@ describe("Trycomp people lifecycle sync", () => {
       member("m2", "contractor@company.test"),
     ]);
     const googleUsers = [
-      googleUser("g1", "employee@company.test"),
-      googleUser("g2", "contractor@company.test"),
+      googleUser("101", "employee@company.test"),
+      googleUser("102", "contractor@company.test"),
     ];
     const plan = await buildTrycompPlan({
       contractorGroup: CONTRACTORS,
@@ -1967,7 +2025,7 @@ describe("Trycomp people lifecycle sync", () => {
       protectedGoogleUserIds: [],
     });
 
-    const first = await service.run({
+    const first = await applyNextReviewed(service, {
       assertWriteAuthority: vi.fn(async () => undefined),
       contractorGroup: CONTRACTORS,
       googleUsers,
@@ -1976,7 +2034,6 @@ describe("Trycomp people lifecycle sync", () => {
         contractorGroup: CONTRACTORS,
         googleUsers,
       })),
-      trigger: "cron",
     });
 
     expect(first.status).toBe("converged");
@@ -1994,7 +2051,7 @@ describe("Trycomp people lifecycle sync", () => {
     );
     expect(client.members.get("m2")).toMatchObject({ isActive: false });
 
-    const second = await service.run({
+    const second = await applyNextReviewed(service, {
       assertWriteAuthority: vi.fn(async () => undefined),
       contractorGroup: CONTRACTORS,
       googleUsers,
@@ -2003,7 +2060,6 @@ describe("Trycomp people lifecycle sync", () => {
         contractorGroup: CONTRACTORS,
         googleUsers,
       })),
-      trigger: "cron",
     });
 
     expect(second.status).toBe("converged");
@@ -2023,8 +2079,8 @@ describe("Trycomp people lifecycle sync", () => {
   it("returns a journal completion failure after one write without throwing into a new selection", async () => {
     const client = new MemoryTrycompClient([]);
     const googleUsers = [
-      googleUser("g2", "zebra@company.test"),
-      googleUser("g1", "alpha@company.test"),
+      googleUser("102", "zebra@company.test"),
+      googleUser("101", "alpha@company.test"),
     ];
     const contractorGroup = { ...CONTRACTORS, members: [] };
     const service = new TrycompPeopleSyncService(client, {
@@ -2042,13 +2098,12 @@ describe("Trycomp people lifecycle sync", () => {
     vi.spyOn(authority.mutationJournal, "completeRun").mockRejectedValue(
       new Error("journal_unavailable"),
     );
-    const report = await service.run({
+    const report = await applyNextReviewed(service, {
       ...authority,
       assertWriteAuthority: vi.fn(async () => undefined),
       contractorGroup,
       googleUsers,
       refreshAuthority: vi.fn(async () => ({ contractorGroup, googleUsers })),
-      trigger: "cron",
     });
     expect(report.status).toBe("failed");
     expect(report.errors).toEqual(["journal_unavailable"]);
@@ -2089,10 +2144,10 @@ describe("Trycomp people lifecycle sync", () => {
       protectedGoogleUserIds: [],
     });
     const authority = journaledAuthority();
-    const report = await service.run({
+    const report = await applyNextReviewed(service, {
       assertWriteAuthority: vi.fn(async () => undefined),
       contractorGroup: { ...CONTRACTORS, members: [] },
-      googleUsers: [googleUser("g1", "employee@company.test")],
+      googleUsers: [googleUser("101", "employee@company.test")],
       ...authority,
       preannounce: vi.fn(async (announced) => {
         expect(announced.planned).toEqual([
@@ -2103,9 +2158,8 @@ describe("Trycomp people lifecycle sync", () => {
       }),
       refreshAuthority: vi.fn(async () => ({
         contractorGroup: { ...CONTRACTORS, members: [] },
-        googleUsers: [googleUser("g1", "employee@company.test")],
+        googleUsers: [googleUser("101", "employee@company.test")],
       })),
-      trigger: "cron",
     });
 
     expect(report.status).toBe("converged");
@@ -2132,19 +2186,18 @@ describe("Trycomp people lifecycle sync", () => {
       protectedEmails: [],
       protectedGoogleUserIds: [],
     });
-    const report = await service.run({
+    const report = await applyNextReviewed(service, {
       assertWriteAuthority: vi.fn(async () => undefined),
       contractorGroup: { ...CONTRACTORS, members: [] },
-      googleUsers: [googleUser("g1", "employee@company.test")],
+      googleUsers: [googleUser("101", "employee@company.test")],
       ...journaledAuthority(),
       preannounce: vi.fn(async () => {
         throw new Error("trycomp_preannouncement_readback_failed");
       }),
       refreshAuthority: vi.fn(async () => ({
         contractorGroup: { ...CONTRACTORS, members: [] },
-        googleUsers: [googleUser("g1", "employee@company.test")],
+        googleUsers: [googleUser("101", "employee@company.test")],
       })),
-      trigger: "cron",
     });
 
     expect(report).toMatchObject({
@@ -2174,20 +2227,19 @@ describe("Trycomp people lifecycle sync", () => {
       protectedGoogleUserIds: [],
     });
 
-    const report = await service.run({
+    const report = await applyNextReviewed(service, {
       assertWriteAuthority: vi.fn(async () => undefined),
       contractorGroup: noContractors,
       googleUsers: [
-        googleUser("g2", "departed@company.test", { suspended: true }),
+        googleUser("102", "departed@company.test", { suspended: true }),
       ],
       ...journaledAuthority(),
       refreshAuthority: vi.fn(async () => ({
         contractorGroup: noContractors,
         googleUsers: [
-          googleUser("g2", "departed@company.test", { suspended: true }),
+          googleUser("102", "departed@company.test", { suspended: true }),
         ],
       })),
-      trigger: "cron",
     });
 
     expect(report).toMatchObject({
@@ -2197,37 +2249,24 @@ describe("Trycomp people lifecycle sync", () => {
     });
   });
 
-  it("blocks every live write without a fenced authority callback", async () => {
-    const client = new MemoryTrycompClient([]);
-    const service = new TrycompPeopleSyncService(client, {
-      allowDeactivations: false,
-      approvedPlanHash: "",
-      expectedContractorGroupId: "contractors",
-      excludedGoogleUserIds: [],
-      managedDomain: "company.test",
-      maxAutomaticActivations: 1,
-      maxAutomaticDeactivations: 0,
-      minimumGoogleUsers: 1,
-      mode: "live",
-      protectedEmails: [],
-      protectedGoogleUserIds: [],
-    });
-
-    const report = await service.run({
-      contractorGroup: { ...CONTRACTORS, members: [] },
-      googleUsers: [googleUser("g1", "employee@company.test")],
-      ...journaledAuthority(),
-      trigger: "cron",
-    });
-
-    expect(report).toMatchObject({
-      applied: [],
-      errors: [
-        "Trycomp live sync requires fenced, journaled, refreshable write authority",
-      ],
-      status: "blocked",
-    });
-    expect(client.members.size).toBe(0);
+  it("checks the write authority before a reviewed provider interaction", async () => {
+    const fixture = reviewedFixture();
+    const reviewedPlan = await fixture.service.captureReviewedPlan(
+      fixture.authority,
+    );
+    const list = vi.spyOn(fixture.client, "listMembers");
+    fixture.input.assertWriteAuthority.mockRejectedValue(
+      new Error("resource_lease_fenced"),
+    );
+    await expect(
+      fixture.service.applyReviewed({
+        ...fixture.input,
+        reviewedPlan,
+      }),
+    ).rejects.toThrow("resource_lease_fenced");
+    expect(list).not.toHaveBeenCalled();
+    expect(fixture.invite).not.toHaveBeenCalled();
+    expect(fixture.beginRun).not.toHaveBeenCalled();
   });
 
   it("blocks when the fresh Trycomp preflight changes the authority-bound plan", async () => {
@@ -2257,16 +2296,15 @@ describe("Trycomp people lifecycle sync", () => {
       protectedGoogleUserIds: [],
     });
 
-    const report = await service.run({
+    const report = await applyNextReviewed(service, {
       assertWriteAuthority: vi.fn(async () => undefined),
       contractorGroup: CONTRACTORS,
-      googleUsers: [googleUser("g2", "contractor@company.test")],
+      googleUsers: [googleUser("102", "contractor@company.test")],
       ...journaledAuthority(),
       refreshAuthority: vi.fn(async () => ({
         contractorGroup: CONTRACTORS,
-        googleUsers: [googleUser("g2", "contractor@company.test")],
+        googleUsers: [googleUser("102", "contractor@company.test")],
       })),
-      trigger: "cron",
     });
 
     expect(report).toMatchObject({
@@ -2281,7 +2319,7 @@ describe("Trycomp people lifecycle sync", () => {
     const client = new MemoryTrycompClient([
       member("m1", "contractor@company.test"),
     ]);
-    const activeUser = googleUser("g2", "contractor@company.test");
+    const activeUser = googleUser("102", "contractor@company.test");
     const service = new TrycompPeopleSyncService(client, {
       allowDeactivations: true,
       approvedPlanHash: "",
@@ -2296,7 +2334,7 @@ describe("Trycomp people lifecycle sync", () => {
       protectedGoogleUserIds: [],
     });
 
-    const report = await service.run({
+    const report = await applyNextReviewed(service, {
       assertWriteAuthority: vi.fn(async () => undefined),
       contractorGroup: CONTRACTORS,
       googleUsers: [activeUser],
@@ -2305,7 +2343,6 @@ describe("Trycomp people lifecycle sync", () => {
         contractorGroup: { ...CONTRACTORS, members: [] },
         googleUsers: [activeUser],
       })),
-      trigger: "cron",
     });
 
     expect(report).toMatchObject({
@@ -2320,7 +2357,7 @@ describe("Trycomp people lifecycle sync", () => {
     const client = new MemoryTrycompClient([
       member("m1", "contractor@company.test"),
     ]);
-    const contractor = googleUser("g2", "contractor@company.test");
+    const contractor = googleUser("102", "contractor@company.test");
     let refreshes = 0;
     const service = new TrycompPeopleSyncService(client, {
       allowDeactivations: true,
@@ -2338,7 +2375,7 @@ describe("Trycomp people lifecycle sync", () => {
       writeProtectedGoogleUserIds: [],
     });
 
-    const report = await service.run({
+    const report = await applyNextReviewed(service, {
       assertWriteAuthority: vi.fn(async () => undefined),
       contractorGroup: CONTRACTORS,
       googleUsers: [contractor],
@@ -2348,7 +2385,6 @@ describe("Trycomp people lifecycle sync", () => {
           refreshes++ === 0 ? CONTRACTORS : { ...CONTRACTORS, members: [] },
         googleUsers: [contractor],
       })),
-      trigger: "cron",
     });
 
     expect(report).toMatchObject({
@@ -2377,19 +2413,18 @@ describe("Trycomp people lifecycle sync", () => {
     });
 
     await expect(
-      service.run({
+      applyNextReviewed(service, {
         assertWriteAuthority: vi.fn(async () => {
           assertions += 1;
           if (assertions === 2) throw new Error("resource_lease_fenced");
         }),
         contractorGroup: { ...CONTRACTORS, members: [] },
-        googleUsers: [googleUser("g1", "employee@company.test")],
+        googleUsers: [googleUser("101", "employee@company.test")],
         ...journaledAuthority(),
         refreshAuthority: vi.fn(async () => ({
           contractorGroup: { ...CONTRACTORS, members: [] },
-          googleUsers: [googleUser("g1", "employee@company.test")],
+          googleUsers: [googleUser("101", "employee@company.test")],
         })),
-        trigger: "cron",
       }),
     ).resolves.toMatchObject({
       applied: [],
@@ -2420,7 +2455,7 @@ describe("Trycomp people lifecycle sync", () => {
       },
       excludedGoogleUserIds: [],
       expectedContractorGroupId: "contractors",
-      googleUsers: [rootadmin, googleUser("g2", "contractor@company.test")],
+      googleUsers: [rootadmin, googleUser("102", "contractor@company.test")],
       managedDomain: "company.test",
       minimumGoogleUsers: 2,
       protectedEmails: ["root-admin@company.test"],
@@ -2464,14 +2499,11 @@ describe("Trycomp people lifecycle sync", () => {
         writeProtectedGoogleUserIds: [],
       });
 
-      const report = await service.run({
+      const reviewed = await service.captureReviewedPlan({
         contractorGroup: { ...CONTRACTORS, members: [] },
         googleUsers: [{ ...rootadmin, suspended: true }],
-        mode: "audit",
-        trigger: "http",
       });
-
-      expect(report.planned).toEqual([]);
+      expect(reviewed.plan.actions).toEqual([]);
       expect(client.members.get("rootadmin-member")).toMatchObject({
         isActive: true,
       });
@@ -2613,7 +2645,7 @@ describe("Trycomp people lifecycle sync", () => {
       contractorGroup: { ...CONTRACTORS, members: [] },
       excludedGoogleUserIds: [],
       expectedContractorGroupId: "contractors",
-      googleUsers: [googleUser("g1", "employee@company.test")],
+      googleUsers: [googleUser("101", "employee@company.test")],
       managedDomain: "company.test",
       minimumGoogleUsers: 1,
       protectedEmails: [],
@@ -2624,7 +2656,7 @@ describe("Trycomp people lifecycle sync", () => {
       contractorGroup: CONTRACTORS,
       excludedGoogleUserIds: [],
       expectedContractorGroupId: "contractors",
-      googleUsers: [googleUser("g2", "contractor@company.test")],
+      googleUsers: [googleUser("102", "contractor@company.test")],
       managedDomain: "company.test",
       minimumGoogleUsers: 1,
       protectedEmails: [],
@@ -2659,7 +2691,7 @@ describe("Trycomp Google offboarding-only selection", () => {
           ...CONTRACTORS.members,
           {
             email: "departed@company.test",
-            id: "g3",
+            id: "103",
             role: "MEMBER" as const,
             status: "SUSPENDED" as const,
             type: "USER" as const,
@@ -2671,10 +2703,10 @@ describe("Trycomp Google offboarding-only selection", () => {
       managedDomain: "company.test",
       minimumGoogleUsers: 1,
       googleUsers: [
-        googleUser("g1", "invite@company.test"),
-        googleUser("g2", "contractor@company.test"),
-        googleUser("g3", "departed@company.test", { suspended: true }),
-        googleUser("g4", "reactivate@company.test"),
+        googleUser("101", "invite@company.test"),
+        googleUser("102", "contractor@company.test"),
+        googleUser("103", "departed@company.test", { suspended: true }),
+        googleUser("104", "reactivate@company.test"),
       ],
       trycompMembers: [
         member("active-contractor", "contractor@company.test"),
@@ -2711,9 +2743,9 @@ describe("Trycomp Google offboarding-only selection", () => {
 
   it("never selects invites, reactivations, or active contractor removals and binds even no-op policy", async () => {
     const source = input();
-    source.googleUsers = source.googleUsers.filter((user) => user.id !== "g3");
+    source.googleUsers = source.googleUsers.filter((user) => user.id !== "103");
     source.contractorGroup.members = source.contractorGroup.members.filter(
-      (user) => user.id !== "g3",
+      (user) => user.id !== "103",
     );
     source.trycompMembers = source.trycompMembers.filter(
       (user) => user.id !== "departed",

@@ -16,22 +16,8 @@ const DeactivationAuthoritySchema = z.enum([
   "inactive_google",
 ]);
 const RunModeSchema = z.enum(["audit", "live"]);
-const RunStateSchema = z.enum([
-  "planned",
-  "applying",
-  "completed",
-  "failed",
-  "ambiguous",
-]);
 const RunTriggerKindSchema = z.enum(["cron", "http"]);
 const ActionTypeSchema = z.enum(["invite", "reactivate", "deactivate"]);
-const ActionStateSchema = z.enum([
-  "planned",
-  "attempted",
-  "provider_accepted",
-  "verified",
-  "ambiguous",
-]);
 const NotificationKindSchema = z.enum([
   "audit_drift",
   "blocked",
@@ -41,6 +27,7 @@ const NotificationKindSchema = z.enum([
   "completed",
 ]);
 const NotificationStateSchema = z.enum(["pending", "claimed", "delivered"]);
+const FailureCodeSchema = z.string().min(1);
 const ReportStatusSchema = z.enum(["audit", "blocked", "failed", "converged"]);
 const ScheduledAttemptStateSchema = z.enum([
   "started",
@@ -48,11 +35,6 @@ const ScheduledAttemptStateSchema = z.enum([
   "completed",
   "failed",
 ]);
-const PreannouncementIntentKeySchema = z.string().regex(/^[a-f0-9]{64}$/u);
-const SlackTimestampSchema = z
-  .string()
-  .trim()
-  .regex(/^\d+(?:\.\d+)?$/u);
 const BREAKER_SELECT_SQL = `SELECT state, opened_run_id, opened_action_index, reason, opened_at_ms, updated_at_ms
   FROM trycomp_sync_breaker WHERE breaker_key = ?1`;
 
@@ -65,46 +47,212 @@ export type TrycompDeploymentEvidence = z.output<
   typeof TrycompDeploymentEvidenceSchema
 >;
 
-const BreakerRowSchema = z.strictObject({
-  "opened_action_index": z.number().int().nonnegative().nullable(),
-  "opened_at_ms": z.number().int().nonnegative().nullable(),
-  "opened_run_id": z.string().nullable(),
-  reason: z.string().nullable(),
-  state: z.enum(["closed", "review_required"]),
+const BreakerIdentitySchema = z.strictObject({
   "updated_at_ms": z.number().int().nonnegative(),
 });
+const BreakerRowSchema = z
+  .discriminatedUnion("state", [
+    BreakerIdentitySchema.extend({
+      state: z.literal("closed"),
+      "opened_action_index": z.null(),
+      "opened_at_ms": z.null(),
+      "opened_run_id": z.null(),
+      reason: z.null(),
+    }),
+    BreakerIdentitySchema.extend({
+      state: z.literal("review_required"),
+      "opened_action_index": z.number().int().nonnegative(),
+      "opened_at_ms": z.number().int().nonnegative(),
+      "opened_run_id": z.string().min(1),
+      reason: z.string().min(1),
+    }),
+  ])
+  .readonly();
 
 export type TrycompBreakerStatus = z.output<typeof BreakerRowSchema>;
-const RunRowSchema = z.strictObject({
-  "ambiguous_count": z.number().int().nonnegative(),
-  "attempted_count": z.number().int().nonnegative(),
-  "completed_at_ms": z.number().int().nonnegative().nullable(),
-  "created_at_ms": z.number().int().nonnegative(),
-  "error_code": z.string().nullable(),
+const RunIdentitySchema = z.strictObject({
+  ambiguousCount: z.number().int().nonnegative(),
+  attemptedCount: z.number().int().nonnegative(),
+  createdAtMs: z.number().int().nonnegative(),
   mode: RunModeSchema,
-  "plan_hash": z.string().regex(/^[a-f0-9]{64}$/u),
-  "planned_count": z.number().int().nonnegative(),
-  "provider_accepted_count": z.number().int().nonnegative(),
-  "run_id": z.uuid(),
-  state: RunStateSchema,
-  "trigger_kind": RunTriggerKindSchema,
-  "verified_count": z.number().int().nonnegative(),
-  "worker_version_id": z.string().min(1),
-  "worker_version_tag": z.string().regex(/^[a-f0-9]{40}$/u),
-  "worker_version_timestamp": z.iso.datetime(),
+  planHash: z.string().regex(/^[a-f0-9]{64}$/u),
+  plannedCount: z.number().int().nonnegative(),
+  providerAcceptedCount: z.number().int().nonnegative(),
+  runId: z.uuid(),
+  trigger: RunTriggerKindSchema,
+  verifiedCount: z.number().int().nonnegative(),
+  workerVersionId: z.string().min(1),
+  workerVersionTag: z.string().regex(/^[a-f0-9]{40}$/u),
+  workerVersionTimestamp: z.iso.datetime(),
 });
-const ActionRowSchema = z.strictObject({
-  "action_index": z.number().int().nonnegative(),
-  "action_type": ActionTypeSchema,
-  "authority_group_id": z.string().nullable(),
-  "deactivation_authority": DeactivationAuthoritySchema.nullable(),
+const RunSummarySchema = z
+  .discriminatedUnion("state", [
+    RunIdentitySchema.extend({
+      state: z.literal("planned"),
+      completedAtMs: z.null(),
+      errorCode: z.null(),
+    }),
+    RunIdentitySchema.extend({
+      state: z.literal("applying"),
+      completedAtMs: z.null(),
+      errorCode: z.null(),
+    }),
+    RunIdentitySchema.extend({
+      state: z.literal("completed"),
+      completedAtMs: z.number().int().nonnegative(),
+      errorCode: z.null(),
+    }),
+    RunIdentitySchema.extend({
+      state: z.literal("failed"),
+      completedAtMs: z.number().int().nonnegative(),
+      errorCode: z.string().min(1),
+    }),
+    RunIdentitySchema.extend({
+      state: z.literal("ambiguous"),
+      completedAtMs: z.number().int().nonnegative(),
+      errorCode: z.string().min(1),
+    }),
+  ])
+  .readonly();
+const RunSettlementSchema = z
+  .discriminatedUnion("state", [
+    z.strictObject({ state: z.literal("completed"), errorCode: z.null() }),
+    z.strictObject({
+      state: z.literal("failed"),
+      errorCode: z.string().min(1),
+    }),
+  ])
+  .readonly();
+const RunRowSchema = z
+  .strictObject({
+    "ambiguous_count": z.number().int().nonnegative(),
+    "attempted_count": z.number().int().nonnegative(),
+    "completed_at_ms": z.number().int().nonnegative().nullable(),
+    "created_at_ms": z.number().int().nonnegative(),
+    "error_code": z.string().nullable(),
+    mode: RunModeSchema,
+    "plan_hash": z.string().regex(/^[a-f0-9]{64}$/u),
+    "planned_count": z.number().int().nonnegative(),
+    "provider_accepted_count": z.number().int().nonnegative(),
+    "run_id": z.uuid(),
+    state: z.string(),
+    "trigger_kind": RunTriggerKindSchema,
+    "verified_count": z.number().int().nonnegative(),
+    "worker_version_id": z.string().min(1),
+    "worker_version_tag": z.string().regex(/^[a-f0-9]{40}$/u),
+    "worker_version_timestamp": z.iso.datetime(),
+  })
+  .transform((row) => ({
+    ambiguousCount: row["ambiguous_count"],
+    attemptedCount: row["attempted_count"],
+    completedAtMs: row["completed_at_ms"],
+    createdAtMs: row["created_at_ms"],
+    errorCode: row["error_code"],
+    mode: row.mode,
+    planHash: row["plan_hash"],
+    plannedCount: row["planned_count"],
+    providerAcceptedCount: row["provider_accepted_count"],
+    runId: row["run_id"],
+    state: row.state,
+    trigger: row["trigger_kind"],
+    verifiedCount: row["verified_count"],
+    workerVersionId: row["worker_version_id"],
+    workerVersionTag: row["worker_version_tag"],
+    workerVersionTimestamp: row["worker_version_timestamp"],
+  }))
+  .pipe(RunSummarySchema);
+const ActionIdentitySchema = z.strictObject({
+  actionIndex: z.number().int().nonnegative(),
+  actionType: ActionTypeSchema,
+  authorityGroupId: z.string().nullable(),
+  deactivationAuthority: DeactivationAuthoritySchema.nullable(),
   email: z.email(),
-  "error_code": z.string().nullable(),
-  "google_user_id": z.string().nullable(),
-  "member_id": z.string().nullable(),
-  "run_id": z.uuid(),
-  state: ActionStateSchema,
+  googleUserId: z.string().nullable(),
+  memberId: z.string().min(1).nullable(),
+  runId: z.uuid(),
 });
+const InvitationActionSchema = ActionIdentitySchema.extend({
+  actionType: z.literal("invite"),
+});
+const MemberActionSchema = ActionIdentitySchema.extend({
+  actionType: z.enum(["reactivate", "deactivate"]),
+  memberId: z.string().min(1),
+});
+const ActionSummarySchema = z
+  .discriminatedUnion("state", [
+    z.discriminatedUnion("actionType", [
+      InvitationActionSchema.extend({
+        state: z.literal("planned"),
+        errorCode: z.null(),
+      }),
+      MemberActionSchema.extend({
+        state: z.literal("planned"),
+        errorCode: z.null(),
+      }),
+    ]),
+    z.discriminatedUnion("actionType", [
+      InvitationActionSchema.extend({
+        state: z.literal("attempted"),
+        errorCode: z.null(),
+      }),
+      MemberActionSchema.extend({
+        state: z.literal("attempted"),
+        errorCode: z.null(),
+      }),
+    ]),
+    z.discriminatedUnion("actionType", [
+      InvitationActionSchema.extend({
+        state: z.literal("provider_accepted"),
+        errorCode: z.null(),
+      }),
+      MemberActionSchema.extend({
+        state: z.literal("provider_accepted"),
+        errorCode: z.null(),
+      }),
+    ]),
+    ActionIdentitySchema.extend({
+      state: z.literal("verified"),
+      memberId: z.string().min(1),
+      errorCode: z.null(),
+    }),
+    z.discriminatedUnion("actionType", [
+      InvitationActionSchema.extend({
+        state: z.literal("ambiguous"),
+        errorCode: z.string().min(1),
+      }),
+      MemberActionSchema.extend({
+        state: z.literal("ambiguous"),
+        errorCode: z.string().min(1),
+      }),
+    ]),
+  ])
+  .readonly();
+const ActionRowSchema = z
+  .strictObject({
+    "action_index": z.number().int().nonnegative(),
+    "action_type": ActionTypeSchema,
+    "authority_group_id": z.string().nullable(),
+    "deactivation_authority": DeactivationAuthoritySchema.nullable(),
+    email: z.email(),
+    "error_code": z.string().nullable(),
+    "google_user_id": z.string().nullable(),
+    "member_id": z.string().nullable(),
+    "run_id": z.uuid(),
+    state: z.string(),
+  })
+  .transform((row) => ({
+    actionIndex: row["action_index"],
+    actionType: row["action_type"],
+    authorityGroupId: row["authority_group_id"],
+    deactivationAuthority: row["deactivation_authority"],
+    email: row.email,
+    errorCode: row["error_code"],
+    googleUserId: row["google_user_id"],
+    memberId: row["member_id"],
+    runId: row["run_id"],
+    state: row.state,
+  }))
+  .pipe(ActionSummarySchema);
 const ScheduledAttemptRowSchema = z.strictObject({
   "attempt_key": z.string().regex(/^[a-f0-9]{64}$/u),
   "completed_at_ms": z.number().int().nonnegative().nullable(),
@@ -226,20 +374,7 @@ export const TrycompSafetyReadModelSchema = z.strictObject({
   effectiveBreaker: z.boolean(),
   verifiedIncidentResolutions:
     TrycompVerifiedIncidentResolutionsSchema.optional(),
-  latestActions: z.array(
-    z.strictObject({
-      actionIndex: z.number().int().nonnegative(),
-      actionType: ActionTypeSchema,
-      authorityGroupId: z.string().nullable(),
-      deactivationAuthority: DeactivationAuthoritySchema.nullable(),
-      email: z.email(),
-      errorCode: z.string().nullable(),
-      googleUserId: z.string().nullable(),
-      memberId: z.string().nullable(),
-      runId: z.uuid(),
-      state: ActionStateSchema,
-    }),
-  ),
+  latestActions: z.array(ActionSummarySchema),
   latestNotification: z
     .strictObject({
       attemptCount: z.number().int().nonnegative(),
@@ -256,26 +391,7 @@ export const TrycompSafetyReadModelSchema = z.strictObject({
       updatedAtMs: z.number().int().nonnegative(),
     })
     .nullable(),
-  latestRuns: z.array(
-    z.strictObject({
-      ambiguousCount: z.number().int().nonnegative(),
-      attemptedCount: z.number().int().nonnegative(),
-      completedAtMs: z.number().int().nonnegative().nullable(),
-      createdAtMs: z.number().int().nonnegative(),
-      errorCode: z.string().nullable(),
-      mode: RunModeSchema,
-      planHash: z.string().regex(/^[a-f0-9]{64}$/u),
-      plannedCount: z.number().int().nonnegative(),
-      providerAcceptedCount: z.number().int().nonnegative(),
-      runId: z.uuid(),
-      state: RunStateSchema,
-      trigger: RunTriggerKindSchema,
-      verifiedCount: z.number().int().nonnegative(),
-      workerVersionId: z.string().min(1),
-      workerVersionTag: z.string().regex(/^[a-f0-9]{40}$/u),
-      workerVersionTimestamp: z.iso.datetime(),
-    }),
-  ),
+  latestRuns: z.array(RunSummarySchema),
   latestScheduledAttempt: z
     .strictObject({
       attemptKey: z.string().regex(/^[a-f0-9]{64}$/u),
@@ -415,7 +531,7 @@ const VerifiedMemberIdSchema = z.string().min(1);
 
 const TimestampMsSchema = z.number().int().nonnegative();
 
-export class D1TrycompMutationStore implements TrycompMutationStore {
+export abstract class D1TrycompMutationStore implements TrycompMutationStore {
   readonly #clock: () => number;
   readonly #db: D1Database;
 
@@ -624,71 +740,19 @@ export class D1TrycompMutationStore implements TrycompMutationStore {
     this.#assertBatchTransition(results, "verified");
   }
 
-  async recordPreannouncement(input: {
+  abstract recordPreannouncement(input: {
     runId: string;
     lease: ActiveResourceLease;
     intentKey: string;
     slackTimestamp: string;
-  }): Promise<void> {
-    if (input.lease.resourceKey !== TRYCOMP_SYNC_RESOURCE_LEASE_KEY) {
-      throw new Error("trycomp_journal_wrong_resource_lease");
-    }
-    const now = this.#now();
-    const requiredUntil = now + TRYCOMP_SYNC_MINIMUM_LEASE_HEADROOM_MS;
-    const intentKey = PreannouncementIntentKeySchema.parse(input.intentKey);
-    const slackTimestamp = SlackTimestampSchema.parse(input.slackTimestamp);
-    const result = await this.#db
-      .prepare(
-        `UPDATE trycomp_sync_run
-         SET preannouncement_intent_key = ?2, preannouncement_slack_ts = ?3,
-             preannounced_at_ms = ?4
-         WHERE run_id = ?1 AND mode = 'live' AND trigger_kind = 'cron'
-           AND state = 'planned' AND planned_count > 0
-           AND attempted_count = 0 AND provider_accepted_count = 0
-           AND verified_count = 0 AND ambiguous_count = 0
-           AND preannouncement_intent_key IS NULL
-           AND preannouncement_slack_ts IS NULL
-           AND preannounced_at_ms IS NULL
-           AND EXISTS (
-             SELECT 1 FROM trycomp_sync_notification notification
-             JOIN trycomp_sync_attempt_notification evidence
-               ON evidence.intent_key = notification.intent_key
-              AND evidence.expected_kind = notification.kind
-             WHERE notification.intent_key = ?2 AND notification.kind = 'prechange'
-               AND notification.state = 'delivered' AND notification.slack_ts = ?3
-               AND evidence.phase = 'prechange'
-           )
-           AND EXISTS (
-             SELECT 1 FROM trycomp_sync_breaker
-             WHERE breaker_key = ?5 AND state = 'closed'
-           )
-           AND EXISTS (
-             SELECT 1 FROM automation_singleton_lease
-             WHERE lease_key = ?6 AND owner_id = ?7 AND generation = ?8
-               AND expires_at_ms > ?9
-           )`,
-      )
-      .bind(
-        input.runId,
-        intentKey,
-        slackTimestamp,
-        now,
-        BREAKER_KEY,
-        TRYCOMP_SYNC_RESOURCE_LEASE_KEY,
-        input.lease.ownerId,
-        input.lease.generation,
-        requiredUntil,
-      )
-      .run();
-    if (result.meta.changes !== 1)
-      throw new Error("trycomp_journal_preannouncement_failed");
-  }
+  }): Promise<void>;
 
   async openForAmbiguous(
     runId: string,
     actionIndex: number,
     errorCode: string,
   ): Promise<void> {
+    const failureCode = FailureCodeSchema.parse(errorCode);
     const now = this.#now();
     const results = await this.#db.batch([
       this.#db
@@ -698,7 +762,7 @@ export class D1TrycompMutationStore implements TrycompMutationStore {
            WHERE run_id = ?1 AND action_index = ?2
              AND state IN ('attempted', 'provider_accepted')`,
         )
-        .bind(runId, actionIndex, now, errorCode),
+        .bind(runId, actionIndex, now, failureCode),
       this.#db
         .prepare(
           `UPDATE trycomp_sync_run
@@ -706,7 +770,7 @@ export class D1TrycompMutationStore implements TrycompMutationStore {
                completed_at_ms = ?2, error_code = ?3
            WHERE run_id = ?1 AND state IN ('planned', 'applying')`,
         )
-        .bind(runId, now, errorCode),
+        .bind(runId, now, failureCode),
       this.#db
         .prepare(
           `UPDATE trycomp_sync_breaker
@@ -714,7 +778,7 @@ export class D1TrycompMutationStore implements TrycompMutationStore {
                reason = ?4, opened_at_ms = ?5, updated_at_ms = ?5
            WHERE breaker_key = ?1 AND state = 'closed'`,
         )
-        .bind(BREAKER_KEY, runId, actionIndex, errorCode, now),
+        .bind(BREAKER_KEY, runId, actionIndex, failureCode, now),
     ]);
     if (results.length !== 3 || results[0]?.meta.changes !== 1) {
       throw new Error("trycomp_breaker_open_failed");
@@ -725,11 +789,14 @@ export class D1TrycompMutationStore implements TrycompMutationStore {
   }
 
   async completeRun(runId: string): Promise<void> {
-    await this.#finishRun(runId, "completed", null);
+    await this.#finishRun(runId, { state: "completed", errorCode: null });
   }
 
   async failRun(runId: string, errorCode: string): Promise<void> {
-    await this.#finishRun(runId, "failed", errorCode);
+    await this.#finishRun(
+      runId,
+      RunSettlementSchema.parse({ state: "failed", errorCode }),
+    );
   }
 
   async #status(): Promise<TrycompBreakerStatus> {
@@ -743,10 +810,10 @@ export class D1TrycompMutationStore implements TrycompMutationStore {
 
   async #finishRun(
     runId: string,
-    state: "completed" | "failed",
-    errorCode: null | string,
+    settlement: z.output<typeof RunSettlementSchema>,
   ): Promise<void> {
     const now = this.#now();
+    const { state, errorCode } = settlement;
     if (state === "failed") {
       const results = await this.#db.batch([
         this.#db
@@ -1001,40 +1068,8 @@ export class D1TrycompSafetyStore implements TrycompSafetyStore {
     const unresolvedMutations = z
       .strictObject({ count: z.number().int().nonnegative() })
       .parse(unresolvedRaw).count;
-    const latestRuns = RunRowsSchema.parse(runsResult?.results ?? []).map(
-      (row) => ({
-        ambiguousCount: row["ambiguous_count"],
-        attemptedCount: row["attempted_count"],
-        completedAtMs: row["completed_at_ms"],
-        createdAtMs: row["created_at_ms"],
-        errorCode: row["error_code"],
-        mode: row.mode,
-        planHash: row["plan_hash"],
-        plannedCount: row["planned_count"],
-        providerAcceptedCount: row["provider_accepted_count"],
-        runId: row["run_id"],
-        state: row.state,
-        trigger: row["trigger_kind"],
-        verifiedCount: row["verified_count"],
-        workerVersionId: row["worker_version_id"],
-        workerVersionTag: row["worker_version_tag"],
-        workerVersionTimestamp: row["worker_version_timestamp"],
-      }),
-    );
-    const latestActions = ActionRowsSchema.parse(
-      actionsResult?.results ?? [],
-    ).map((row) => ({
-      actionIndex: row["action_index"],
-      actionType: row["action_type"],
-      authorityGroupId: row["authority_group_id"],
-      deactivationAuthority: row["deactivation_authority"],
-      email: row.email,
-      errorCode: row["error_code"],
-      googleUserId: row["google_user_id"],
-      memberId: row["member_id"],
-      runId: row["run_id"],
-      state: row.state,
-    }));
+    const latestRuns = RunRowsSchema.parse(runsResult?.results ?? []);
+    const latestActions = ActionRowsSchema.parse(actionsResult?.results ?? []);
     const scheduledAttemptRaw = attemptResult?.results[0];
     const scheduledAttempt = scheduledAttemptRaw
       ? ScheduledAttemptRowSchema.parse(scheduledAttemptRaw)

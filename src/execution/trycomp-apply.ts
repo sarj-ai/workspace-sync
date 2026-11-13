@@ -176,7 +176,6 @@ export async function applyWorkspaceReviewedTrycomp(
           assertWriteAuthority,
           deployment: ports.deployment,
           lease,
-          mode: "live",
           mutationJournal: ports.createJournal(receipt),
           preannounce: async (plan, renew) => {
             await renew();
@@ -191,9 +190,7 @@ export async function applyWorkspaceReviewedTrycomp(
           },
           refreshAuthority: () => ports.captureAuthority(),
           reviewedPlan: input.reviewedPlan,
-          requireSelectedIdentity: true,
           safetyReader: ports.safetyReader,
-          trigger: "cron",
         });
         if (report.status !== "converged")
           throw new Error("workspace_trycomp_reviewed_apply_incomplete");
