@@ -44,8 +44,14 @@ const DIRECTORY_SCHEMA_WRITE_SCOPE =
 export const DIRECTORY_READONLY_SCOPE =
   "https://www.googleapis.com/auth/admin.directory.user.readonly";
 // Filter only configured deleted IDs; active identities remain authoritative.
-function ignoredDeletedGoogleUserIds(): ReadonlySet<string> {
-  return new Set(getWorkspaceSyncPolicy().ignoredDeletedGoogleUserIds);
+function withoutIgnoredDeletedGoogleUsers(
+  users: readonly GoogleDirectoryUser[],
+): GoogleDirectoryUser[] {
+  if (users.length === 0) return [];
+  const ignoredIds = new Set(
+    getWorkspaceSyncPolicy().ignoredDeletedGoogleUserIds,
+  );
+  return users.filter((user) => !ignoredIds.has(user.id));
 }
 const MAX_DIRECTORY_PAGES = 20;
 const PHOTO_BATCH_SIZE = 20;
@@ -568,7 +574,7 @@ export class GoogleDirectoryClient
       fields:
         "nextPageToken,users(id,primaryEmail,aliases,nonEditableAliases,isAdmin,isDelegatedAdmin,suspended,archived,deletionTime,etag,customSchemas)",
     });
-    return users.filter((user) => !ignoredDeletedGoogleUserIds().has(user.id));
+    return withoutIgnoredDeletedGoogleUsers(users);
   }
 
   // Exact immutable-ID authority must retain records excluded from bulk projections.
@@ -584,7 +590,7 @@ export class GoogleDirectoryClient
     deadlineAt?: number,
   ): Promise<GoogleDirectoryUser[]> {
     const users = await this.#listUsers(true, runId, deadlineAt);
-    return users.filter((user) => !ignoredDeletedGoogleUserIds().has(user.id));
+    return withoutIgnoredDeletedGoogleUsers(users);
   }
 
   async listLinkedInDigestUsers(
