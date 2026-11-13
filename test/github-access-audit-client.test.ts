@@ -258,6 +258,49 @@ describe("GitHub access audit client", () => {
     );
   });
 
+  it.each([
+    { cursors: ["a", "a"], expectedRequests: 2 },
+    { cursors: ["a", "b", "a"], expectedRequests: 3 },
+  ])(
+    "fails incomplete SAML traversal after $expectedRequests cyclic requests",
+    async ({ cursors, expectedRequests }) => {
+      let graphqlRequests = 0;
+      const client = new GitHubAccessAuditClient({
+        organization: "example",
+        token: "read-token",
+        maxPages: 20,
+        fetchImpl: async (input) => {
+          const url = new URL(
+            input instanceof Request ? input.url : input.toString(),
+          );
+          if (url.pathname !== "/graphql") return Response.json([]);
+          const endCursor = cursors[graphqlRequests % cursors.length];
+          graphqlRequests++;
+          return Response.json({
+            data: {
+              organization: {
+                samlIdentityProvider: {
+                  externalIdentities: {
+                    nodes: [],
+                    pageInfo: { endCursor, hasNextPage: true },
+                  },
+                },
+              },
+            },
+          });
+        },
+      });
+      const snapshot = await client.captureIdentitySeed(Date.now() + 30_000);
+      expect(graphqlRequests).toBe(expectedRequests);
+      expect(snapshot.samlExternalIdentities).toEqual([]);
+      expect(snapshot.errors).toContainEqual({
+        capability: "saml_external_identities",
+        code: "saml_invalid_cursor",
+        message: "saml_invalid_cursor",
+      });
+    },
+  );
+
   it("surfaces only the bounded GitHub API message for failed reads", async () => {
     const client = new GitHubAccessAuditClient({
       fetchImpl: async () =>
