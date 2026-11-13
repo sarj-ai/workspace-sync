@@ -317,13 +317,13 @@ async function readBoundedSlackResponse(
     }
     parts.push(decoder.decode());
     const parsed: unknown = JSON.parse(parts.join(""));
-    reader.releaseLock();
     return parsed;
   } catch (error) {
     void reader.cancel().catch(() => undefined);
     throw error;
   } finally {
     signal.removeEventListener("abort", onAbort);
+    reader.releaseLock();
   }
 }
 
