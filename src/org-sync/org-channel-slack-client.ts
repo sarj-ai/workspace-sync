@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { logEvent } from "../shared/log-event.ts";
+import { sameStringMultiset } from "../shared/same-string-multiset.ts";
 import type {
   SlackChannelIdentity,
   SlackChannelRemovalSafety,
@@ -572,7 +573,7 @@ export class OrgChannelSlackClient implements IOrgChannelSlackClient {
     const hasReviewedRemovals = (reviewedRemovalUserIds?.length ?? 0) > 0;
     if (
       hasReviewedRemovals &&
-      !sameStrings(beforeProfile.channelIds, channelIds)
+      !sameStringMultiset(beforeProfile.channelIds, channelIds)
     ) {
       throw new Error(
         `Slack user group @${handle} gained an unreviewed channel association before removal`,
@@ -624,7 +625,7 @@ export class OrgChannelSlackClient implements IOrgChannelSlackClient {
     }
     if (
       hasReviewedRemovals &&
-      !sameStrings(beforeMembers.channelIds, channelIds)
+      !sameStringMultiset(beforeMembers.channelIds, channelIds)
     ) {
       throw new Error(
         `Slack user group @${handle} gained an unreviewed channel association before removal`,
@@ -639,7 +640,7 @@ export class OrgChannelSlackClient implements IOrgChannelSlackClient {
       handle,
     );
     if (
-      sameStrings(beforeMembers.userIds, finalUserIds) ||
+      sameStringMultiset(beforeMembers.userIds, finalUserIds) ||
       finalUserIds.length === 0
     )
       return;
@@ -669,7 +670,7 @@ export class OrgChannelSlackClient implements IOrgChannelSlackClient {
       const actual = await this.getUserGroup(handle, correlationId, deadlineAt);
       if (
         actual?.id !== userGroupId ||
-        !sameStrings(actual.userIds, finalUserIds)
+        !sameStringMultiset(actual.userIds, finalUserIds)
       )
         throw error;
     }
@@ -701,7 +702,7 @@ export class OrgChannelSlackClient implements IOrgChannelSlackClient {
       before?.handle !== handle ||
       before.isDisabled ||
       before.name !== name ||
-      !sameStrings(before.channelIds, channelIds)
+      !sameStringMultiset(before.channelIds, channelIds)
     ) {
       throw new Error(
         `Slack user group @${handle} changed before removal-only update`,
@@ -720,7 +721,7 @@ export class OrgChannelSlackClient implements IOrgChannelSlackClient {
         `Slack user group @${handle} removal-only update would empty membership`,
       );
     }
-    if (sameStrings(before.userIds, finalUserIds))
+    if (sameStringMultiset(before.userIds, finalUserIds))
       return { userIds: finalUserIds, wrote: false };
     await beforeMembershipMutation?.(
       membershipDifference(before.userIds, finalUserIds),
@@ -760,8 +761,8 @@ export class OrgChannelSlackClient implements IOrgChannelSlackClient {
         actual?.handle !== handle ||
         actual.isDisabled ||
         actual.name !== name ||
-        !sameStrings(actual.channelIds, channelIds) ||
-        !sameStrings(actual.userIds, finalUserIds)
+        !sameStringMultiset(actual.channelIds, channelIds) ||
+        !sameStringMultiset(actual.userIds, finalUserIds)
       ) {
         throw error;
       }
@@ -801,7 +802,7 @@ export class OrgChannelSlackClient implements IOrgChannelSlackClient {
       before?.handle !== handle ||
       before.isDisabled ||
       before.name !== name ||
-      !sameStrings(before.channelIds, channelIds)
+      !sameStringMultiset(before.channelIds, channelIds)
     ) {
       throw new Error(
         `Slack user group @${handle} changed before addition-only update`,
@@ -817,7 +818,7 @@ export class OrgChannelSlackClient implements IOrgChannelSlackClient {
       before.userIds,
       reviewedAdditionUserIds,
     ).toSorted((left, right) => left.localeCompare(right));
-    if (sameStrings(before.userIds, finalUserIds))
+    if (sameStringMultiset(before.userIds, finalUserIds))
       return { userIds: finalUserIds, wrote: false };
     await beforeMembershipMutation?.(
       membershipDifference(before.userIds, finalUserIds),
@@ -851,8 +852,8 @@ export class OrgChannelSlackClient implements IOrgChannelSlackClient {
         actual?.handle !== handle ||
         actual.isDisabled ||
         actual.name !== name ||
-        !sameStrings(actual.channelIds, channelIds) ||
-        !sameStrings(actual.userIds, finalUserIds)
+        !sameStringMultiset(actual.channelIds, channelIds) ||
+        !sameStringMultiset(actual.userIds, finalUserIds)
       ) {
         throw error;
       }
@@ -954,8 +955,8 @@ export class OrgChannelSlackClient implements IOrgChannelSlackClient {
       after.handle !== before.handle ||
       after.name !== before.name ||
       after.isDisabled !== before.isDisabled ||
-      !sameStrings(after.userIds, before.userIds) ||
-      !sameStrings(after.channelIds, before.channelIds)
+      !sameStringMultiset(after.userIds, before.userIds) ||
+      !sameStringMultiset(after.channelIds, before.channelIds)
     )
       throw new Error("slack_budget_provider_group_changed");
   }
@@ -973,7 +974,7 @@ export class OrgChannelSlackClient implements IOrgChannelSlackClient {
     if (
       before.handle === handle &&
       before.name === name &&
-      sameStrings(before.channelIds, channelIds)
+      sameStringMultiset(before.channelIds, channelIds)
     ) {
       return;
     }
@@ -1000,7 +1001,7 @@ export class OrgChannelSlackClient implements IOrgChannelSlackClient {
       if (
         actual?.id !== userGroupId ||
         actual.name !== name ||
-        !sameStrings(actual.channelIds, channelIds)
+        !sameStringMultiset(actual.channelIds, channelIds)
       ) {
         throw error;
       }
@@ -1054,15 +1055,6 @@ function buildFinalUserGroupChannels(
     desiredChannelIds,
     latestChannelIds.filter((channelId) => !reviewed.has(channelId)),
   ).toSorted((left, right) => left.localeCompare(right));
-}
-
-function sameStrings(
-  current: readonly string[],
-  expected: readonly string[],
-): boolean {
-  return (
-    JSON.stringify(current.toSorted()) === JSON.stringify(expected.toSorted())
-  );
 }
 
 function buildFinalUserGroupMembership(

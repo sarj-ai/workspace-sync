@@ -12,6 +12,7 @@ import {
 } from "../identity-sync/resource-lease.ts";
 import { sha256 } from "../runtime/sha256.ts";
 import { logEvent } from "../shared/log-event.ts";
+import { sameStringMultiset } from "../shared/same-string-multiset.ts";
 import {
   assertReviewedLifecycleIdentity,
   type LifecycleRemovalEvidence,
@@ -1171,7 +1172,7 @@ export class OrgChannelSyncService
         (group) =>
           group.slackUserGroupId === source.slackUserGroupId &&
           group.automationOwnership.kind !== "legacy_unmanaged" &&
-          sameStrings(
+          sameStringMultiset(
             group.automationOwnership.sourceGoogleGroupIds,
             source.sourceGoogleGroupIds,
           ),
@@ -1380,7 +1381,10 @@ export class OrgChannelSyncService
     );
     if (
       expected.memberRemovals.length > 0 &&
-      !sameStrings(beforeUpdate?.channelIds ?? [], expected.desiredChannelIds)
+      !sameStringMultiset(
+        beforeUpdate?.channelIds ?? [],
+        expected.desiredChannelIds,
+      )
     ) {
       throw new Error(
         `Slack user group @${expected.handle} gained an unreviewed channel association before removal`,
@@ -1626,7 +1630,7 @@ export class OrgChannelSyncService
       actual.isDisabled ||
       actual.handle !== expected.handle ||
       actual.name !== expected.desiredName ||
-      !sameStrings(actual.channelIds, expected.requiredChannelIds) ||
+      !sameStringMultiset(actual.channelIds, expected.requiredChannelIds) ||
       applied.userIds.some((userId) => !actual.userIds.includes(userId))
     ) {
       throw new Error(
@@ -1970,7 +1974,7 @@ function matchesCreatedUserGroup(
     actual.handle === expected.handle &&
     actual.name === expected.desiredName &&
     actual.userIds.length === 0 &&
-    sameStrings(actual.channelIds, expected.desiredChannelIds)
+    sameStringMultiset(actual.channelIds, expected.desiredChannelIds)
   );
 }
 
@@ -2793,7 +2797,7 @@ function selectedMembershipRemovalIdentityMatches(
   return (
     group.expectedSlackUserGroupId !== null &&
     group.slackUserGroupId === group.expectedSlackUserGroupId &&
-    sameStrings(group.desiredChannelIds, group.requiredChannelIds) &&
+    sameStringMultiset(group.desiredChannelIds, group.requiredChannelIds) &&
     stringsAreSubset(
       group.requiredChannelIds,
       group.automationOwnership.allowedChannelIds,
@@ -2839,7 +2843,7 @@ function bootstrapUserGroupCandidateIsExecutable(
       group.requiredChannelIds,
       group.automationOwnership.allowedChannelIds,
     ) &&
-    sameStrings(
+    sameStringMultiset(
       group.desiredChannelIds,
       group.automationOwnership.allowedChannelIds,
     ) &&
@@ -2863,7 +2867,7 @@ function managedUserGroupIdentityMatches(
       group.requiredChannelIds,
       group.automationOwnership.allowedChannelIds,
     ) &&
-    sameStrings(
+    sameStringMultiset(
       group.desiredChannelIds,
       group.automationOwnership.allowedChannelIds,
     ) &&
@@ -2885,7 +2889,7 @@ function selectedChannelRemovalIdentityMatches(
   return (
     group.expectedSlackUserGroupId !== null &&
     group.slackUserGroupId === group.expectedSlackUserGroupId &&
-    sameStrings(group.requiredChannelIds, allowedChannelIds) &&
+    sameStringMultiset(group.requiredChannelIds, allowedChannelIds) &&
     group.channelRemovals.every(({ id }) => !allowedChannelIds.includes(id)) &&
     ownershipMatchesGoogleAuthority(group)
   );
@@ -3109,7 +3113,7 @@ function membershipAdditionCandidateOnly(
     group.memberRemovals.length === 0 &&
     group.channelAdditions.length === 0 &&
     group.channelRemovals.length === 0 &&
-    sameStrings(group.desiredChannelIds, group.requiredChannelIds) &&
+    sameStringMultiset(group.desiredChannelIds, group.requiredChannelIds) &&
     stringsAreSubset(group.requiredChannelIds, allowedChannelIds) &&
     ownershipMatchesGoogleAuthority(group) &&
     group.memberAdditions.every(({ slackUserId }) =>
@@ -3147,8 +3151,14 @@ function ownershipMatchesGoogleAuthority(
       ? group.authority.excludedIds
       : (group.authority.excludedIds ?? []);
   return (
-    sameStrings(sourceIds, group.automationOwnership.sourceGoogleGroupIds) &&
-    sameStrings(excludedIds, group.automationOwnership.excludedGoogleGroupIds)
+    sameStringMultiset(
+      sourceIds,
+      group.automationOwnership.sourceGoogleGroupIds,
+    ) &&
+    sameStringMultiset(
+      excludedIds,
+      group.automationOwnership.excludedGoogleGroupIds,
+    )
   );
 }
 
@@ -3396,9 +3406,9 @@ function sameUserGroupPlan(
     ),
     current.currentHandle === expected.currentHandle,
     current.currentName === expected.currentName,
-    sameStrings(current.desiredChannelIds, expected.desiredChannelIds),
+    sameStringMultiset(current.desiredChannelIds, expected.desiredChannelIds),
     current.desiredName === expected.desiredName,
-    sameStrings(current.desiredUserIds, expected.desiredUserIds),
+    sameStringMultiset(current.desiredUserIds, expected.desiredUserIds),
     sameArray(
       current.effectiveAccessAdditions,
       expected.effectiveAccessAdditions,
@@ -3418,23 +3428,11 @@ function sameUserGroupPlan(
       sameMemberChange,
     ),
     current.membershipMode === expected.membershipMode,
-    sameStrings(current.requiredChannelIds, expected.requiredChannelIds),
+    sameStringMultiset(current.requiredChannelIds, expected.requiredChannelIds),
     current.rolloutPriority === expected.rolloutPriority,
     current.slackUserGroupId === expected.slackUserGroupId,
     current.status === expected.status,
   ].every(Boolean);
-}
-
-function sameStrings(
-  current: readonly string[],
-  expected: readonly string[],
-): boolean {
-  const currentSorted = current.toSorted();
-  const expectedSorted = expected.toSorted();
-  return (
-    currentSorted.length === expectedSorted.length &&
-    currentSorted.every((value, index) => value === expectedSorted[index])
-  );
 }
 
 function sameChannelMembership(
@@ -3508,17 +3506,17 @@ function sameUserGroupAuthority(
     return [
       left.email === right.email,
       left.id === right.id,
-      sameStrings(left.excludedEmails ?? [], right.excludedEmails ?? []),
-      sameStrings(left.excludedIds ?? [], right.excludedIds ?? []),
+      sameStringMultiset(left.excludedEmails ?? [], right.excludedEmails ?? []),
+      sameStringMultiset(left.excludedIds ?? [], right.excludedIds ?? []),
     ].every(Boolean);
   }
   if (left.kind !== "google_group_union" || right.kind !== "google_group_union")
     return false;
   return [
-    sameStrings(left.emails, right.emails),
-    sameStrings(left.ids, right.ids),
-    sameStrings(left.excludedEmails, right.excludedEmails),
-    sameStrings(left.excludedIds, right.excludedIds),
+    sameStringMultiset(left.emails, right.emails),
+    sameStringMultiset(left.ids, right.ids),
+    sameStringMultiset(left.excludedEmails, right.excludedEmails),
+    sameStringMultiset(left.excludedIds, right.excludedIds),
   ].every(Boolean);
 }
 
@@ -3533,13 +3531,16 @@ function sameAutomationOwnership(
   )
     return true;
   const commonMatches = [
-    sameStrings(current.allowedChannelIds, expected.allowedChannelIds),
+    sameStringMultiset(current.allowedChannelIds, expected.allowedChannelIds),
     current.evidenceDigest === expected.evidenceDigest,
-    sameStrings(
+    sameStringMultiset(
       current.excludedGoogleGroupIds,
       expected.excludedGoogleGroupIds,
     ),
-    sameStrings(current.sourceGoogleGroupIds, expected.sourceGoogleGroupIds),
+    sameStringMultiset(
+      current.sourceGoogleGroupIds,
+      expected.sourceGoogleGroupIds,
+    ),
   ].every(Boolean);
   if (!commonMatches) return false;
   if (
@@ -3641,7 +3642,7 @@ function verifyUserGroupReadback(
           actual?.userIds ?? [],
           expected.memberRemovals.map(({ slackUserId }) => slackUserId),
         )
-      : sameStrings(actual?.userIds ?? [], userIds);
+      : sameStringMultiset(actual?.userIds ?? [], userIds);
   if (actual?.id !== userGroupId || !membersConverged) {
     throw new Error(
       `Slack user-group member read-back failed for @${expected.handle}`,
@@ -3650,7 +3651,7 @@ function verifyUserGroupReadback(
   const channelsConverged =
     expected.channelMembershipMode === "additive"
       ? containsAll(actual.channelIds, channelIds)
-      : sameStrings(actual.channelIds, channelIds);
+      : sameStringMultiset(actual.channelIds, channelIds);
   if (!channelsConverged) {
     throw new Error(
       `Slack user-group channel read-back failed for @${expected.handle}`,

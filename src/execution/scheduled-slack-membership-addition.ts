@@ -1,5 +1,6 @@
 import { dequal } from "dequal";
 
+import { sameStringMultiset } from "../shared/same-string-multiset.ts";
 import type { WorkspaceDirectoryPlan } from "./contracts.ts";
 
 type SlackAccessPlan = WorkspaceDirectoryPlan["branches"][2];
@@ -43,8 +44,11 @@ export function isScheduledSlackMembershipAddition(
     plannedGroup.desiredName !== group.desiredName ||
     !sameJson(plannedGroup.automationOwnership, group.automationOwnership) ||
     !sameJson(plannedGroup.authority, group.authority) ||
-    !sameStringSet(plannedGroup.desiredChannelIds, group.requiredChannelIds) ||
-    !sameStringSet(
+    !sameStringMultiset(
+      plannedGroup.desiredChannelIds,
+      group.requiredChannelIds,
+    ) ||
+    !sameStringMultiset(
       plannedGroup.requiredChannelIds ?? [],
       group.requiredChannelIds,
     )
@@ -91,8 +95,11 @@ export function isScheduledSlackUserGroupReconciliation(
     plannedGroup.desiredName !== group.desiredName ||
     !sameJson(plannedGroup.automationOwnership, group.automationOwnership) ||
     !sameJson(plannedGroup.authority, group.authority) ||
-    !sameStringSet(plannedGroup.desiredChannelIds, group.requiredChannelIds) ||
-    !sameStringSet(
+    !sameStringMultiset(
+      plannedGroup.desiredChannelIds,
+      group.requiredChannelIds,
+    ) ||
+    !sameStringMultiset(
       plannedGroup.requiredChannelIds ?? [],
       group.requiredChannelIds,
     )
@@ -133,7 +140,7 @@ function scheduledSlackMemberAdditionsAreSafe(
   const addedSlackIds = new Set(addedSlackIdList);
   if (
     addedSlackIds.size !== addedSlackIdList.length ||
-    !sameStringSet(
+    !sameStringMultiset(
       (plannedGroup.memberAdditionUserIds ?? []).slice(
         0,
         group.memberAdditions.length,
@@ -153,15 +160,6 @@ function scheduledSlackMemberAdditionsAreSafe(
       requiredChannelIds.has(channelId) &&
       allowedChannelIds.has(channelId),
   );
-}
-
-function sameStringSet(
-  left: readonly string[],
-  right: readonly string[],
-): boolean {
-  if (left.length !== right.length) return false;
-  const sortedRight = right.toSorted();
-  return left.toSorted().every((value, index) => value === sortedRight[index]);
 }
 
 function sameJson(left: unknown, right: unknown): boolean {

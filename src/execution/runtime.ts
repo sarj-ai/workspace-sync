@@ -51,6 +51,7 @@ import type {
 } from "../org-sync/reviewed-lifecycle-removal.ts";
 import type { OrgSyncRunReport } from "../org-sync/service.ts";
 import { logErrorEvent } from "../shared/log-event.ts";
+import { sameStringMultiset } from "../shared/same-string-multiset.ts";
 import type { TrycompReviewedPlan } from "../trycomp/model.ts";
 import { D1WorkspaceLedgerHistoryIndex } from "../workspace-directory/d1-workspace-ledger-history-index.ts";
 import { bindWorkspaceLinearParentContext } from "./bind-workspace-linear-parent-context.ts";
@@ -1326,7 +1327,7 @@ function slackSelectedUserGroupConverged(
 ): boolean {
   if (review.automationOwnership.kind === "legacy_unmanaged") return false;
   const exactReviewedState =
-    sameStringSet(
+    sameStringMultiset(
       review.requiredChannelIds,
       review.automationOwnership.allowedChannelIds,
     ) &&
@@ -1335,19 +1336,22 @@ function slackSelectedUserGroupConverged(
     current.desiredName === review.desiredName &&
     dequal(current.automationOwnership, review.automationOwnership) &&
     dequal(current.authority, review.authority) &&
-    sameStringSet(
+    sameStringMultiset(
       current.requiredChannelIds ?? [],
       review.requiredChannelIds,
     ) &&
-    sameStringSet(current.desiredChannelIds, planned.desiredChannelIds) &&
-    sameStringSet(current.desiredUserIds, planned.desiredUserIds) &&
+    sameStringMultiset(current.desiredChannelIds, planned.desiredChannelIds) &&
+    sameStringMultiset(current.desiredUserIds, planned.desiredUserIds) &&
     (review.automationOwnership.kind === "automation_bootstrap" ||
       selectedSlackUserGroupTargetMatches(review, planned, current));
   if (!exactReviewedState) return false;
   if (review.automationOwnership.kind === "automation_bootstrap") {
     return (
       current.slackUserGroupId !== null &&
-      sameStringSet(current.memberAdditionUserIds ?? [], current.desiredUserIds)
+      sameStringMultiset(
+        current.memberAdditionUserIds ?? [],
+        current.desiredUserIds,
+      )
     );
   }
   return (
@@ -1391,8 +1395,8 @@ function selectedSlackUserGroupTargetMatches(
     current.memberRemovalUserIds ?? [],
   );
   return (
-    sameStringSet(observedChannelIds, expectedChannelIds) &&
-    sameStringSet(observedUserIds, expectedUserIds)
+    sameStringMultiset(observedChannelIds, expectedChannelIds) &&
+    sameStringMultiset(observedUserIds, expectedUserIds)
   );
 }
 function observedSlackIds(
@@ -2386,14 +2390,6 @@ export async function fingerprintGoogleAuthority(
         .toSorted((left, right) => left.id.localeCompare(right.id)),
     ),
   );
-}
-function sameStringSet(
-  left: readonly string[],
-  right: readonly string[],
-): boolean {
-  if (left.length !== right.length) return false;
-  const sortedRight = right.toSorted();
-  return left.toSorted().every((value, index) => value === sortedRight[index]);
 }
 export function workspaceDirectoryAuthorityRevision(
   googleUserId: string,
