@@ -1,9 +1,9 @@
 import { GoogleUserIdSchema } from "../catalog/identity-authority.ts";
 import { protectedIdentityBlocker } from "../identity-provisioning/protected-identity-blocker.ts";
-import { sameJson, sha256Hex } from "../operations/canonical.ts";
+import { sameJson } from "../operations/canonical.ts";
 import { JsonValueSchema } from "../operations/schemas.ts";
 import { orgSyncSettings } from "../org-sync/config.ts";
-import { googleAuthorityFingerprintRecord } from "../org-sync/google-directory-authority.ts";
+import { fingerprintGoogleDirectoryAuthority } from "../org-sync/fingerprint-google-directory-authority.ts";
 import {
   GoogleGitHubIdentityPlanSchema,
   GoogleGithubIdentityApplyMaxProviderReads,
@@ -43,7 +43,7 @@ export async function deriveGoogleIdentityAuthorityTransition(input: {
 }) {
   const plan = GoogleGitHubIdentitySeedPlanSchema.parse(input.reviewedSeedPlan);
   const users = structuredClone(input.users);
-  const beforeFingerprint = await fingerprint(users);
+  const beforeFingerprint = await fingerprintGoogleDirectoryAuthority(users);
   if (
     plan.kind !== "managed" ||
     beforeFingerprint !== input.expectedBeforeFingerprint ||
@@ -83,7 +83,8 @@ export async function deriveGoogleIdentityAuthorityTransition(input: {
           },
         },
   );
-  const afterFingerprint = await fingerprint(afterUsers);
+  const afterFingerprint =
+    await fingerprintGoogleDirectoryAuthority(afterUsers);
   if (afterFingerprint === beforeFingerprint)
     throw new Error(INVALID_TRANSITION);
   return {
@@ -91,16 +92,6 @@ export async function deriveGoogleIdentityAuthorityTransition(input: {
     beforeFingerprint,
     afterFingerprint,
   };
-}
-
-function fingerprint(users: readonly GoogleDirectoryUser[]) {
-  return sha256Hex(
-    JsonValueSchema.parse(
-      users
-        .map(googleAuthorityFingerprintRecord)
-        .toSorted((left, right) => left.id.localeCompare(right.id)),
-    ),
-  );
 }
 
 function indexUsers(users: readonly GoogleDirectoryUser[]) {

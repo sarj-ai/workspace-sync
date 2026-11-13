@@ -2,10 +2,10 @@ import { z } from "zod";
 
 import { GoogleUserIdSchema } from "../catalog/identity-authority.ts";
 import { protectedIdentityBlocker } from "../identity-provisioning/protected-identity-blocker.ts";
-import { sameJson, sha256Hex } from "../operations/canonical.ts";
+import { sameJson } from "../operations/canonical.ts";
 import { JsonValueSchema } from "../operations/schemas.ts";
 import { orgSyncSettings } from "../org-sync/config.ts";
-import { googleAuthorityFingerprintRecord } from "../org-sync/google-directory-authority.ts";
+import { fingerprintGoogleDirectoryAuthority } from "../org-sync/fingerprint-google-directory-authority.ts";
 import {
   type GoogleDirectoryUser,
   isActiveGoogleDirectoryUser,
@@ -66,13 +66,7 @@ export async function assertGoogleIdentityParentAuthority(input: {
     )
   )
     throw new Error("google_identity_parent_target_ineligible");
-  const fingerprint = await sha256Hex(
-    JsonValueSchema.parse(
-      input.users
-        .map(googleAuthorityFingerprintRecord)
-        .toSorted((left, right) => left.id.localeCompare(right.id)),
-    ),
-  );
+  const fingerprint = await fingerprintGoogleDirectoryAuthority(input.users);
   if (fingerprint !== input.expectedBeforeFingerprint)
     throw new Error("google_identity_parent_authority_drift");
 }
