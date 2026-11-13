@@ -25,6 +25,10 @@ export interface GoogleDelegatedAuthContract {
 export class GoogleDelegatedAuth implements GoogleDelegatedAuthContract {
   readonly #options: GoogleDelegatedAuthOptions;
   readonly #tokens = new Map<string, { expiresAt: number; value: string }>();
+  readonly #pendingTokens = new Map<
+    string,
+    { deadlineAt: number | undefined; promise: Promise<string> }
+  >();
 
   constructor(options: GoogleDelegatedAuthOptions) {
     this.#options = Object.freeze({ ...options });
@@ -38,6 +42,32 @@ export class GoogleDelegatedAuth implements GoogleDelegatedAuthContract {
     const now = Math.floor(Date.now() / 1000);
     const cached = this.#tokens.get(scope);
     if (cached && cached.expiresAt - 60 > now) return cached.value;
+    const pending = this.#pendingTokens.get(scope);
+    if (
+      pending !== undefined &&
+      pending.deadlineAt === deadlineAt &&
+      (deadlineAt === undefined || deadlineAt > Date.now())
+    )
+      return pending.promise;
+    const promise = this.#requestToken(scope, runId, deadlineAt);
+    this.#pendingTokens.set(scope, { deadlineAt, promise });
+    if (this.#pendingTokens.size > MAX_CACHED_SCOPES) {
+      const oldest = this.#pendingTokens.keys().next().value;
+      if (oldest !== undefined) this.#pendingTokens.delete(oldest);
+    }
+    try {
+      return await promise;
+    } finally {
+      if (this.#pendingTokens.get(scope)?.promise === promise)
+        this.#pendingTokens.delete(scope);
+    }
+  }
+
+  async #requestToken(
+    scope: string,
+    runId: string,
+    deadlineAt: number | undefined,
+  ): Promise<string> {
     const token = await exchangeGoogleToken(
       this.#options,
       scope,
