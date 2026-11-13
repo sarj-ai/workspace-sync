@@ -38,11 +38,7 @@
       "decision": "retain-explicit",
       "oldRepresentation": "Unlinked/verified/conflicting identity links",
       "authoritativeReplacement": "GitHubIdentityStateSchema and exhaustive authority transition results",
-      "events": [
-        "attest",
-        "unlink",
-        "observe-conflict"
-      ],
+      "events": ["attest", "unlink", "observe-conflict"],
       "guards": [
         "immutable provider ID and canonical login",
         "one-time attestation record",
@@ -60,21 +56,14 @@
       "decision": "simplify",
       "oldRepresentation": "Audit, kill switch, bounded automatic, and unexposed approved-apply path with redundant fixed fields",
       "authoritativeReplacement": "IdentityProvisioningExecutionPolicySchema: audit-only | kill-switch-engaged(reason) | bounded-automatic-deprovision",
-      "events": [
-        "reconcile",
-        "disable",
-        "enable-bounded-deprovision"
-      ],
+      "events": ["reconcile", "disable", "enable-bounded-deprovision"],
       "guards": [
         "maximum one subject",
         "GitHub deprovision only",
         "protected identity guard",
         "runtime policy schema"
       ],
-      "terminalStates": [
-        "audit-only",
-        "provider-disabled"
-      ],
+      "terminalStates": ["audit-only", "provider-disabled"],
       "recovery": "Unknown policy variants fail validation; adding a supported policy requires exhaustive execution handling."
     },
     {
@@ -87,24 +76,17 @@
       "oldRepresentation": "Unused approval schema, approval persistence, expiry and claim APIs",
       "authoritativeReplacement": "Deleted; Automations migration 0088 checks that approvals are empty before dropping their table",
       "events": [],
-      "guards": [
-        "Migration aborts for unexpected approval or run evidence"
-      ],
+      "guards": ["Migration aborts for unexpected approval or run evidence"],
       "terminalStates": [],
       "recovery": "No caller in the consuming application; production preflight found zero rows. This never replaces Workspace signed parent approvals."
     },
     {
       "id": "reconciliation-run",
-      "sources": [
-        "src/identity-provisioning/persistence.ts"
-      ],
+      "sources": ["src/identity-provisioning/persistence.ts"],
       "decision": "delete-obsolete-states",
       "oldRepresentation": "Write-only planned/applying/completed/failed columns with no run lifecycle producer",
       "authoritativeReplacement": "Immutable run identity (authority revision, plan hash, creation time), with unique canonical run ID",
-      "events": [
-        "create-plan",
-        "replay-plan"
-      ],
+      "events": ["create-plan", "replay-plan"],
       "guards": [
         "atomic D1 batch",
         "exact operation identity",
@@ -139,9 +121,7 @@
         "bounded subject and provider",
         "SQL state invariants and transition triggers"
       ],
-      "terminalStates": [
-        "succeeded"
-      ],
+      "terminalStates": ["succeeded"],
       "recovery": "Persist dispatch before the exact provider call. Failed prewrite checks return to pending. Uncertain/crashed dispatches use read-only connector.recover; no new DELETE is issued. Migration treats all legacy attempted pending/claimed records as uncertain."
     },
     {
@@ -166,26 +146,16 @@
       "guards": [
         "existing fresh authority, identity budgets, snapshots, leases and exact postconditions remain mandatory"
       ],
-      "terminalStates": [
-        "verified-postcondition"
-      ],
+      "terminalStates": ["verified-postcondition"],
       "recovery": "Acknowledgement is not verification. A thrown request is not proof of no effect. Readback can establish the required postcondition; failed readback preserves uncertainty."
     },
     {
       "id": "resource-lease",
-      "sources": [
-        "src/identity-sync/resource-lease.ts"
-      ],
+      "sources": ["src/identity-sync/resource-lease.ts"],
       "decision": "convert",
       "oldRepresentation": "Boolean operationFailed, possibly undefined error, and non-null asserted result",
       "authoritativeReplacement": "ResourceLeaseAcquisition and OperationOutcome<Result> discriminated unions",
-      "events": [
-        "acquire",
-        "run",
-        "throw",
-        "release",
-        "expire"
-      ],
+      "events": ["acquire", "run", "throw", "release", "expire"],
       "guards": [
         "owner/generation/expiry CAS",
         "release in every operation outcome"
@@ -217,10 +187,7 @@
         "exact payload cohort matching",
         "newer authority prevents stale deletion"
       ],
-      "terminalStates": [
-        "completed",
-        "terminal_failed"
-      ],
+      "terminalStates": ["completed", "terminal_failed"],
       "recovery": "Expired claims are reclaimed; equivalent older events complete only from current verified authority. Deleted authority beyond the provider retention window remains terminal_failed, never successful."
     },
     {
@@ -257,13 +224,7 @@
       "decision": "retain-explicit",
       "oldRepresentation": "Active/stopped rows and expiry",
       "authoritativeReplacement": "Typed create/renew actions and ready/blocked/disabled plans; active-channel-only DTOs",
-      "events": [
-        "create",
-        "renew",
-        "authenticate",
-        "stop",
-        "expire"
-      ],
+      "events": ["create", "renew", "authenticate", "stop", "expire"],
       "guards": [
         "channel/resource/token binding",
         "future expiry",
@@ -295,10 +256,7 @@
         "claim lease",
         "validated headers/body"
       ],
-      "terminalStates": [
-        "enqueued",
-        "ignored"
-      ],
+      "terminalStates": ["enqueued", "ignored"],
       "recovery": "Failed/expired admissions can be retried; terminal enqueued/ignored receipts deduplicate repeated events. New statuses require compile-time exhaustive handling."
     },
     {
@@ -336,12 +294,7 @@
       "decision": "retain-explicit",
       "oldRepresentation": "Attempt and resolution histories consolidated in 0.3.0",
       "authoritativeReplacement": "One immutable attempt with at most one exact terminal resolution; typed attestation/authority transition contracts",
-      "events": [
-        "reserve",
-        "dispatch",
-        "observe",
-        "resolve"
-      ],
+      "events": ["reserve", "dispatch", "observe", "resolve"],
       "guards": [
         "fresh parent fence",
         "immutable target",
@@ -360,11 +313,7 @@
       "decision": "retain-explicit",
       "oldRepresentation": "Consumed permanent budget alongside expiring resource leases",
       "authoritativeReplacement": "Immutable one-subject reservation, separately typed from resource lease ownership",
-      "events": [
-        "reserve",
-        "repeat-same-subject",
-        "reject-different-subject"
-      ],
+      "events": ["reserve", "repeat-same-subject", "reject-different-subject"],
       "guards": [
         "unique execution/service identity",
         "non-refundable budget",
@@ -382,14 +331,7 @@
       "decision": "retain-explicit",
       "oldRepresentation": "Membership provenance and removal control flow",
       "authoritativeReplacement": "Typed addition/removal plans, exact authority guards and mandatory readback; explicit kick outcomes",
-      "events": [
-        "observe",
-        "plan",
-        "reserve",
-        "join",
-        "remove",
-        "verify"
-      ],
+      "events": ["observe", "plan", "reserve", "join", "remove", "verify"],
       "guards": [
         "fresh source membership",
         "protected roots",
@@ -408,12 +350,7 @@
       "decision": "retain-explicit",
       "oldRepresentation": "Separate access/workspace indexes consolidated in 0.3.0",
       "authoritativeReplacement": "One namespaced Slack history/message store with typed cursor/revision operations",
-      "events": [
-        "claim-scan",
-        "index-page",
-        "complete-scan",
-        "read-message"
-      ],
+      "events": ["claim-scan", "index-page", "complete-scan", "read-message"],
       "guards": [
         "scope isolation",
         "revision CAS",
@@ -433,13 +370,7 @@
       "decision": "retain-explicit",
       "oldRepresentation": "Provider captures, incomplete inventories and authority freshness",
       "authoritativeReplacement": "Strict runtime authority schemas, ready/blocked observations and exact snapshot fingerprints",
-      "events": [
-        "capture",
-        "validate",
-        "expire",
-        "refresh",
-        "readback"
-      ],
+      "events": ["capture", "validate", "expire", "refresh", "readback"],
       "guards": [
         "complete provider inventory",
         "immutable identity",
@@ -457,12 +388,7 @@
       "decision": "retain-explicit",
       "oldRepresentation": "Shared expiring fence records",
       "authoritativeReplacement": "Typed deployment lease commands with generation/owner/version guards",
-      "events": [
-        "acquire",
-        "assert-active",
-        "release",
-        "expire"
-      ],
+      "events": ["acquire", "assert-active", "release", "expire"],
       "guards": [
         "one immutable policy per process",
         "active generation",
@@ -483,12 +409,7 @@
       "decision": "retain-explicit",
       "oldRepresentation": "Provider account facts and eligibility decisions",
       "authoritativeReplacement": "Closed satisfied/blocked/provision/deprovision and readiness/plan unions; provider observations distinguish absent, present, ambiguous and unsupported",
-      "events": [
-        "observe",
-        "plan",
-        "deny",
-        "verify"
-      ],
+      "events": ["observe", "plan", "deny", "verify"],
       "guards": [
         "runtime boundary schemas",
         "immutable identity links",
@@ -557,14 +478,7 @@
       "id": "child-workflow-and-operation-ledger",
       "oldRepresentation": "parent generation, child ticks and provider outcomes; implementation and transport were mixed across the legacy Automations sync trees",
       "authoritativeReplacement": "WorkspaceBranchAttemptSchema, WorkspaceScheduleTickSchema and owner/generation CAS transitions in the canonical repositories; parent ledger owns new receipts",
-      "events": [
-        "claim",
-        "renew",
-        "dispatch",
-        "readback",
-        "complete",
-        "retry"
-      ],
+      "events": ["claim", "renew", "dispatch", "readback", "complete", "retry"],
       "guards": [
         "resource leases",
         "fenced deployment",
@@ -644,9 +558,7 @@
         "Fresh private production read confirms all remaining schedule attempts terminal and all notifications delivered",
         "Historical evidence remains required by immutable incident checks"
       ],
-      "terminalStates": [
-        "delivered"
-      ],
+      "terminalStates": ["delivered"],
       "recovery": "Historical rows, original failures and incident readback remain readable. Removing the old recovery cron prevents stale standalone intents from creating a competing notification authority.",
       "verification": "Source caller/writer trace and read-only production terminal-state evidence complete. Native library checks, consuming cron removal, immutable historical-table migration and deployed verification remain pending.",
       "retainedEvidence": "Three historical host-owned tables remain for health and immutable audit evidence; there is no standalone notification dispatcher in this release. The legacy D1 receipt writer was deleted. Only D1WorkspaceTrycompMutationStore can satisfy the abstract recordPreannouncement contract."
@@ -671,18 +583,13 @@
         "atomic pending-to-claimed update",
         "claimed tick/time required only in claimed state"
       ],
-      "terminalStates": [
-        "claimed"
-      ],
+      "terminalStates": ["claimed"],
       "recovery": "Claims are single-use and never reset after unknown provider effects. Repeated admission preserves original proof bytes and identity. Existing active export names are retained because consuming Automations imports them.",
       "verification": "Implementation prepared; complete native shared-package and consuming-app verification pending."
     },
     {
       "id": "trycomp-run",
-      "sources": [
-        "src/trycomp/safety.ts",
-        "src/trycomp/service.ts"
-      ],
+      "sources": ["src/trycomp/safety.ts", "src/trycomp/service.ts"],
       "decision": "convert",
       "oldRepresentation": "planned|applying|completed|failed|ambiguous with nullable completion/error and run counters.",
       "authoritativeReplacement": "One immutable discriminated run summary pairs each of five states with its legal completion and error evidence. SQL transport is decoded into that model before it reaches readers. Typed completed|failed settlement commands cannot pair success with a failure code.",
@@ -705,10 +612,7 @@
     },
     {
       "id": "trycomp-action",
-      "sources": [
-        "src/trycomp/safety.ts",
-        "src/trycomp/service.ts"
-      ],
+      "sources": ["src/trycomp/safety.ts", "src/trycomp/service.ts"],
       "decision": "convert",
       "oldRepresentation": "planned|attempted|provider_accepted|verified|ambiguous with nullable member/Google authority/error evidence.",
       "authoritativeReplacement": "ActionSummarySchema: planned | attempted | provider_accepted | verified(memberId) | ambiguous(errorCode); persisted row codec pipes directly to the closed union.",
@@ -723,9 +627,7 @@
     },
     {
       "id": "trycomp-breaker",
-      "sources": [
-        "src/trycomp/safety.ts"
-      ],
+      "sources": ["src/trycomp/safety.ts"],
       "decision": "convert",
       "oldRepresentation": "closed|review_required with nullable opened-run/action/reason/time.",
       "authoritativeReplacement": "Immutable discriminated closed(null opening evidence) | review_required(required run/action/reason/time) runtime model matches the existing D1 state constraint.",
