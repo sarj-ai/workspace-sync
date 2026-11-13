@@ -141,10 +141,7 @@ export function slackChannelRunError(
   if (message === "Slack token lacks the matching channel invitation scope") {
     return "workspace_directory_slack_channel_invite_scope_missing";
   }
-  if (
-    message.includes("approval hash") ||
-    message.includes("approval hash does not match")
-  ) {
+  if (message.includes("approval hash")) {
     return "workspace_directory_slack_channel_approval_mismatch";
   }
   if (message.includes("additions exceed the limit")) {
@@ -676,28 +673,28 @@ export function createWorkspaceDirectoryRuntime(
   const cleanupAdapter = new ReviewedGoogleGroupCleanupAdapter({
     service: cleanupService,
     assertGoogleAuthority,
-    ...(!(options.googleGroupCleanupParentContext === undefined) && {
+    ...(options.googleGroupCleanupParentContext !== undefined && {
       parentContext: options.googleGroupCleanupParentContext,
     }),
   });
   const pagerDutyAdapter = new ReviewedPagerDutyTeamAdapter({
     service: pagerDutyService,
     assertGoogleAuthority,
-    ...(!(options.pagerDutyTeamParentContext === undefined) && {
+    ...(options.pagerDutyTeamParentContext !== undefined && {
       parentContext: options.pagerDutyTeamParentContext,
     }),
   });
   const sentryAdapter = new ReviewedSentryWorkspaceAdapter({
     service: sentryService,
     assertGoogleAuthority,
-    ...(!(options.sentryParentContext === undefined) && {
+    ...(options.sentryParentContext !== undefined && {
       parentContext: options.sentryParentContext,
     }),
   });
   const nameAdapter = new ReviewedWorkspaceNameAdapter({
     services: nameServices,
     assertGoogleAuthority,
-    ...(!(options.nameRepairParentContext === undefined) && {
+    ...(options.nameRepairParentContext !== undefined && {
       parentContext: options.nameRepairParentContext,
     }),
   });
@@ -1913,7 +1910,7 @@ async function captureChannelReport(
   const options = {
     allowRemovals: runtime.allowRemovals,
     googleUsers,
-    ...(!(reviewedLifecycleRemoval === undefined) && {
+    ...(reviewedLifecycleRemoval !== undefined && {
       reviewedLifecycleRemoval,
     }),
   };
@@ -1926,7 +1923,7 @@ async function captureChannelReport(
     const read = await runtime.service.readMembershipPlan({
       ...options,
       slackUserId: pin.slackUserId,
-      ...(!(purpose.branch.reviewedLifecycleRemoval === undefined) && {
+      ...(purpose.branch.reviewedLifecycleRemoval !== undefined && {
         reviewedLifecycleReadback: purpose.branch.reviewedLifecycleRemoval,
       }),
     });
@@ -2239,7 +2236,7 @@ async function captureAccessGuard(
       : selectReviewedLinearSuspension(audited, reviewedLinearSuspension);
   return {
     ...(automatic && { scheduledLinearSuspension: true as const }),
-    ...(!(reviewedLinearSuspension === undefined) && {
+    ...(reviewedLinearSuspension !== undefined && {
       reviewedLinearSuspension,
     }),
     branchId: "access-guard" as const,
