@@ -432,6 +432,20 @@ describe("Attio deprovision authority capture", () => {
       "source-unavailable",
     ],
     ["malformed JSON", async () => new Response("{"), "source-invalid"],
+    ["missing body", async () => new Response(null), "source-invalid"],
+    [
+      "invalid byte chunk",
+      async () =>
+        new Response(
+          new ReadableStream({
+            start(controller) {
+              controller.enqueue("invalid");
+              controller.close();
+            },
+          }),
+        ),
+      "source-invalid",
+    ],
     [
       "oversized response",
       async () =>
@@ -475,6 +489,60 @@ describe("Attio deprovision authority capture", () => {
       expect(error.message).not.toContain("network down");
     },
   );
+
+  it("rejects oversized bodies without waiting for cancellation and releases the lock", async () => {
+    const cancel = vi.fn(() => Promise.withResolvers<never>().promise);
+    const body = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(new Uint8Array(2 * 1_024 * 1_024 + 1));
+      },
+      cancel,
+    });
+    const capture = new AttioDeprovisionAuthorityCapture({
+      apiKey: "read-token",
+      expectedWorkspaceId: WORKSPACE_ID,
+      fetchImpl: vi.fn<typeof fetch>(async () => new Response(body)),
+    });
+    await expect(capture.capture()).rejects.toMatchObject({
+      code: "response-oversized",
+      component: "token-metadata",
+    });
+    expect(cancel).toHaveBeenCalledOnce();
+    expect(body.locked).toBe(false);
+  });
+
+  it("releases the successful UTF8 response reader while retaining complete empty inventories", async () => {
+    const bytes = new TextEncoder().encode(
+      JSON.stringify(tokenMetadata({ "additive_provider_field": "é🙂" })),
+    );
+    const body = new ReadableStream<Uint8Array>({
+      start(controller) {
+        for (const byte of bytes) controller.enqueue(new Uint8Array([byte]));
+        controller.close();
+      },
+    });
+    const response = new Response(body);
+    const fetchImpl = vi.fn<typeof fetch>(async (input) => {
+      const url = new URL(requestUrl(input));
+      if (url.pathname === "/v2/self") return response;
+      if (url.pathname === "/v2/workspace_members")
+        return Response.json({ data: [] });
+      return Response.json(scimPage([], { startIndex: 1, totalResults: 0 }));
+    });
+    await expect(
+      new AttioDeprovisionAuthorityCapture({
+        apiKey: "read-token",
+        expectedWorkspaceId: WORKSPACE_ID,
+        fetchImpl,
+      }).capture(),
+    ).resolves.toMatchObject({
+      complete: true,
+      scimUsers: [],
+      workspaceMembers: [],
+      token: { scopes: ["user_management:read"], workspaceId: WORKSPACE_ID },
+    });
+    expect(body.locked).toBe(false);
+  });
 
   it("retries transient reads with Retry-After while honoring one capture deadline", async () => {
     const waits: number[] = [];

@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { runtimeFetch } from "../clients/runtime-fetch.ts";
 import { fetchWithRetry, type RetryOptions } from "../org-sync/http.ts";
+import { readBoundedText } from "../runtime/read-bounded-text.ts";
 
 const ATTIO_API_ORIGIN = "https://api.attio.com";
 const ATTIO_SELF_PATH = "/v2/self";
@@ -468,28 +469,11 @@ async function readBoundedJson(
     throw captureError(component, "response-oversized");
   }
   if (response.body === null) throw new Error("attio_response_body_missing");
-  const reader = response.body.getReader();
-  const decoder = new TextDecoder();
-  let bytes = 0;
-  const textParts: string[] = [];
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- A stream reader terminates only through its `done` result.
-  while (true) {
-    // eslint-disable-next-line no-await-in-loop -- The response stream is consumed sequentially with a hard byte bound.
-    const chunk: ReadableStreamReadResult<unknown> = await reader.read();
-    if (chunk.done) break;
-    const value = chunk.value;
-    if (!(value instanceof Uint8Array))
-      throw new TypeError("attio_response_chunk_invalid");
-    bytes += value.byteLength;
-    if (bytes > MAX_RESPONSE_BYTES) {
-      // eslint-disable-next-line no-await-in-loop -- Cancellation must settle before the oversized response is rejected.
-      await reader.cancel();
-      throw captureError(component, "response-oversized");
-    }
-    textParts.push(decoder.decode(value, { stream: true }));
-  }
-  textParts.push(decoder.decode());
-  const parsed: unknown = JSON.parse(textParts.join(""));
+  const parsed: unknown = JSON.parse(
+    await readBoundedText(response, MAX_RESPONSE_BYTES, () =>
+      captureError(component, "response-oversized"),
+    ),
+  );
   return parsed;
 }
 

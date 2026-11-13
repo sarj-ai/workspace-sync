@@ -12,8 +12,10 @@ export async function readBoundedText(
   try {
     for (;;) {
       // eslint-disable-next-line no-await-in-loop -- Each read advances the same response stream.
-      const chunk = await reader.read();
+      const chunk: ReadableStreamReadResult<unknown> = await reader.read();
       if (chunk.done) break;
+      if (!(chunk.value instanceof Uint8Array))
+        throw new TypeError("response_chunk_invalid");
       bytes += chunk.value.byteLength;
       if (bytes > maxBytes) {
         void reader.cancel().catch(() => undefined);
