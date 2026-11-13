@@ -702,11 +702,7 @@ export async function reviewedAuthorityFingerprint(
         type: member.type,
       })),
     },
-    googleUsers: authority.googleUsers.map((user) => ({
-      ...googleAuthorityFingerprintRecord(user),
-      isAdmin: user.isAdmin ?? null,
-      isDelegatedAdmin: user.isDelegatedAdmin ?? null,
-    })),
+    googleUsers: authority.googleUsers.map(googleAuthorityFingerprintRecord),
   });
 }
 
