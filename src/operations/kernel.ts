@@ -1,3 +1,4 @@
+import { sameStringMultiset } from "../shared/same-string-multiset.ts";
 import {
   bytesToHex,
   canonicalJson,
@@ -556,7 +557,7 @@ function assertExpectedActionIds(
 ): void {
   if (
     expectedActionIds !== undefined &&
-    !sameStringSet(
+    !sameStringMultiset(
       expectedActionIds,
       pending.map(({ actionId }) => actionId),
     )
@@ -567,26 +568,6 @@ function assertExpectedActionIds(
         "Expected action IDs do not match the exact preflight mutation set",
     });
   }
-}
-
-function sameStringSet(
-  left: readonly string[],
-  right: readonly string[],
-): boolean {
-  return (
-    JSON.stringify(
-      [...left].toSorted(
-        (sortLeft, sortRight) =>
-          Number(sortLeft > sortRight) - Number(sortLeft < sortRight),
-      ),
-    ) ===
-    JSON.stringify(
-      [...right].toSorted(
-        (sortLeft, sortRight) =>
-          Number(sortLeft > sortRight) - Number(sortLeft < sortRight),
-      ),
-    )
-  );
 }
 
 async function readManagedSlice(
