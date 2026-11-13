@@ -30,4 +30,28 @@ describe("bounded HTTP bodies", () => {
     expect(cancel).toHaveBeenCalledOnce();
     expect(stream.locked).toBe(false);
   });
+
+  it("rejects non-byte chunks and releases the reader lock", async () => {
+    const stream = new ReadableStream({
+      start(controller) {
+        controller.enqueue("invalid chunk");
+        controller.close();
+      },
+    });
+    await expect(
+      readBoundedText({ body: stream }, 100, () => new Error("large")),
+    ).rejects.toThrow(TypeError);
+    expect(stream.locked).toBe(false);
+  });
+
+  it("returns an empty body and releases an ordinary reader", async () => {
+    await expect(
+      readBoundedText({ body: null }, 0, () => new Error("large")),
+    ).resolves.toBe("");
+    const response = new Response("exact");
+    await expect(
+      readBoundedText(response, 5, () => new Error("large")),
+    ).resolves.toBe("exact");
+    expect(response.body?.locked).toBe(false);
+  });
 });
