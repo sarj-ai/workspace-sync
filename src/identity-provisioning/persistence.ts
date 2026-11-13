@@ -514,7 +514,7 @@ export class D1IdentityProvisioningRepository
              candidate.occurred_at_ms, candidate.event_key LIMIT 1
          )
          UPDATE identity_lifecycle_event
-         SET state = CASE WHEN state IN ('dispatching', 'uncertain', 'recovering') THEN 'recovering' ELSE 'claimed' END,
+         SET state = 'claimed',
            claim_owner_id = ?1, claim_expires_at_ms = ?2,
              claim_generation = claim_generation + 1, attempt_count = attempt_count + 1,
              error_code = NULL,
