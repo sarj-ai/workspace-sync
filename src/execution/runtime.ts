@@ -27,7 +27,6 @@ import {
   D1ResourceLeaseRepository,
   type ResourceLeaseRepository,
 } from "../identity-sync/resource-lease.ts";
-import { sha256Hex } from "../operations/canonical.ts";
 import {
   OperationContractError,
   OperationSourceError,
@@ -37,10 +36,8 @@ import type {
   OrgChannelSyncRunReport,
   OrgChannelSyncService,
 } from "../org-sync/channel-service.ts";
-import {
-  googleAuthorityFingerprintRecord,
-  mergeGoogleDirectoryAuthority,
-} from "../org-sync/google-directory-authority.ts";
+import { fingerprintGoogleDirectoryAuthority } from "../org-sync/fingerprint-google-directory-authority.ts";
+import { mergeGoogleDirectoryAuthority } from "../org-sync/google-directory-authority.ts";
 import { DIRECTORY_READONLY_SCOPE } from "../org-sync/google-directory-client.ts";
 import { SarjIdentitySchemaService } from "../org-sync/google-identity-schema.ts";
 import type { GoogleDirectoryUser } from "../org-sync/model.ts";
@@ -2383,13 +2380,7 @@ function githubIdentitySeedDiagnostics(
 export async function fingerprintGoogleAuthority(
   users: readonly GoogleDirectoryUser[],
 ): Promise<string> {
-  return sha256Hex(
-    JsonValueSchema.parse(
-      users
-        .map(googleAuthorityFingerprintRecord)
-        .toSorted((left, right) => left.id.localeCompare(right.id)),
-    ),
-  );
+  return fingerprintGoogleDirectoryAuthority(users);
 }
 export function workspaceDirectoryAuthorityRevision(
   googleUserId: string,
