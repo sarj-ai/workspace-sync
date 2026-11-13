@@ -9,9 +9,12 @@ export function getStaticPaths() {
 }
 interface Props { entry: (typeof REFERENCE.modules)[number] }
 const { entry } = Astro.props;
+// Large inferred declarations create excessive token markup when highlighted.
+// Plain text keeps the complete declaration and copy control at a bounded size.
+const language = entry.declaration.length > 16_384 ? "text" : "ts";
 ---
 
 <ReferencePage title={entry.module}>
   <p><code>{entry.name}</code> · <a href={`${REFERENCE.repository}/blob/main/src/${entry.module}.ts`}>Source</a></p>
-  <Code code={entry.declaration} lang="ts" />
+  <Code code={entry.declaration} lang={language} />
 </ReferencePage>
