@@ -409,6 +409,7 @@ export class GitHubAccessAuditClient implements GitHubAccessAuditReader {
       GitHubAccessSnapshot["samlExternalIdentities"]
     > = [];
     let cursor: null | string = null;
+    const cursors = new Set<string>();
     for (let page = 1; page <= this.#maxPages; page++) {
       const response = SamlResponseSchema.parse(
         // eslint-disable-next-line no-await-in-loop -- GraphQL cursor pagination is ordered and bounded.
@@ -438,10 +439,11 @@ export class GitHubAccessAuditClient implements GitHubAccessAuditReader {
       if (!connection.pageInfo.hasNextPage) return identities;
       if (
         !connection.pageInfo.endCursor ||
-        connection.pageInfo.endCursor === cursor
+        cursors.has(connection.pageInfo.endCursor)
       ) {
         throw new Error("saml_invalid_cursor");
       }
+      cursors.add(connection.pageInfo.endCursor);
       cursor = connection.pageInfo.endCursor;
     }
     throw new Error("saml_page_limit_exceeded");
