@@ -12,6 +12,8 @@ function stableStringify(value: unknown): string {
   if (Array.isArray(value)) {
     return `[${value.map(stableStringify).toSorted(compareString).join(",")}]`;
   }
+  // eslint-disable-next-line @sarj/no-runtime-typeof -- Generic serializer dispatch; unknown objects retain schema validation below.
+  if (value === null || typeof value !== "object") return JSON.stringify(value);
   const object = JsonRecordSchema.safeParse(value);
   if (object.success) {
     return `{${Object.entries(object.data)

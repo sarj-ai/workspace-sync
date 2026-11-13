@@ -1,9 +1,5 @@
-import { z } from "zod";
-
 import { sha256 } from "../runtime/sha256.ts";
 import { type JsonValue, JsonValueSchema } from "./schemas.ts";
-
-const JsonObjectSchema = z.record(z.string(), z.unknown());
 
 export function canonicalJson(value: JsonValue): string {
   const parsed = JsonValueSchema.parse(value);
@@ -33,13 +29,10 @@ export function hexToBytes(value: string): null | Uint8Array<ArrayBuffer> {
 
 function serialize(value: JsonValue): string {
   if (Array.isArray(value)) return `[${value.map(serialize).join(",")}]`;
-  if (!isJsonObject(value)) return JSON.stringify(value);
+  // eslint-disable-next-line @sarj/no-runtime-typeof -- Generic serializer dispatch; canonicalJson already validates the complete JSON value.
+  if (value === null || typeof value !== "object") return JSON.stringify(value);
   return `{${Object.entries(value)
     .toSorted(([left], [right]) => left.localeCompare(right))
     .map(([key, child]) => `${JSON.stringify(key)}:${serialize(child)}`)
     .join(",")}}`;
-}
-
-function isJsonObject(value: JsonValue): value is Record<string, JsonValue> {
-  return JsonObjectSchema.safeParse(value).success;
 }
