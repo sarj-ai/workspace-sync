@@ -72,13 +72,7 @@ async function authoritativeUser(
     client,
   ).getUserById(task.googleUserId, runId, deadlineAt);
   if (authoritative !== null) return authoritative;
-  if (task.event !== "delete")
-    throw new Error("google_directory_authoritative_user_missing");
-  return {
-    deletionTime: task.observedAt,
-    id: task.googleUserId,
-    primaryEmail: task.notificationPrimaryEmail,
-  };
+  throw new Error("google_directory_authoritative_user_missing");
 }
 
 function acquiredClaim(

@@ -217,47 +217,33 @@
     },
     {
       "id": "watch-channel",
-      "sources": [
+      "sources": [],
+      "decision": "delete",
+      "oldRepresentation": "Active/stopped rows and expiry",
+      "authoritativeReplacement": "Removed the remote watch API, renewal planner, channel authenticator, notification receipt store and webhook producer. The controlling host retires its unused watch transport; authoritative scheduled reconciliation and retained lifecycle recovery remain canonical.",
+      "events": [],
+      "guards": [],
+      "terminalStates": [],
+      "recovery": "No replacement subscription or external stop action is inferred. Any historic remote watch uncertainty is not reclassified as absence. Existing queued lifecycle work still requires fresh exact provider authority; its receipt and recovery stores are retained. Operational observations and guarded empty-table retirement belong to the consuming app.",
+      "removedSources": [
         "src/identity-lifecycle/channel-manager.ts",
         "src/identity-lifecycle/channel-authenticator.ts"
-      ],
-      "decision": "retain-explicit",
-      "oldRepresentation": "Active/stopped rows and expiry",
-      "authoritativeReplacement": "Typed create/renew actions and ready/blocked/disabled plans; active-channel-only DTOs",
-      "events": ["create", "renew", "authenticate", "stop", "expire"],
-      "guards": [
-        "channel/resource/token binding",
-        "future expiry",
-        "bounded renewal overlap"
-      ],
-      "terminalStates": [],
-      "recovery": "New channels activate before old ones stop. A missing acknowledgement does not grant notification authority."
+      ]
     },
     {
       "id": "watch-notification",
-      "sources": [
+      "sources": [],
+      "decision": "delete",
+      "oldRepresentation": "String status branches with fallback assuming the only remaining status was claimed",
+      "authoritativeReplacement": "Removed the remote watch API, renewal planner, channel authenticator, notification receipt store and webhook producer. The controlling host retires its unused watch transport; authoritative scheduled reconciliation and retained lifecycle recovery remain canonical.",
+      "events": [],
+      "guards": [],
+      "terminalStates": [],
+      "recovery": "No replacement subscription or external stop action is inferred. Any historic remote watch uncertainty is not reclassified as absence. Existing queued lifecycle work still requires fresh exact provider authority; its receipt and recovery stores are retained. Operational observations and guarded empty-table retirement belong to the consuming app.",
+      "removedSources": [
         "src/identity-lifecycle/d1-google-watch-notification-receipt-store.ts",
         "src/identity-lifecycle/webhook-handler.ts"
-      ],
-      "decision": "simplify",
-      "oldRepresentation": "String status branches with fallback assuming the only remaining status was claimed",
-      "authoritativeReplacement": "Exhaustive status switch and acquired(lease) | duplicate(outcome) | in-flight(retryAfterSeconds) result union",
-      "events": [
-        "claim",
-        "duplicate",
-        "lease-expired",
-        "enqueue",
-        "ignore",
-        "fail"
-      ],
-      "guards": [
-        "channel/message identity",
-        "owner/generation CAS",
-        "claim lease",
-        "validated headers/body"
-      ],
-      "terminalStates": ["enqueued", "ignored"],
-      "recovery": "Failed/expired admissions can be retried; terminal enqueued/ignored receipts deduplicate repeated events. New statuses require compile-time exhaustive handling."
+      ]
     },
     {
       "id": "identity-retention",
@@ -498,9 +484,8 @@
     {
       "id": "sync-admission-and-cancellation",
       "oldRepresentation": "routing flags, worker events, signal and workflow instance status; implementation and transport were mixed across the legacy Automations sync trees",
-      "authoritativeReplacement": "One scheduled parent with explicit managed/audit provider execution and parent-only reviewed contexts; no standalone HTTP writer or supplemental scheduling fallback. Identity-event admission remains the canonical durable lifecycle orchestrator.",
+      "authoritativeReplacement": "Scheduled authoritative inventory and the canonical durable lifecycle orchestrator retain admission, cancellation and recovery. The unconfigured watch webhook and competing notification producer are removed.",
       "events": [
-        "webhook",
         "scheduled full inventory",
         "queue delivery",
         "abort",
@@ -517,8 +502,7 @@
       "sources": [
         "src/execution/scheduled.ts",
         "src/execution/provider-execution.ts",
-        "src/execution/reviewed-action-context.ts",
-        "src/identity-lifecycle/webhook-handler.ts"
+        "src/execution/reviewed-action-context.ts"
       ]
     },
     {
@@ -738,6 +722,31 @@
       ],
       "recovery": "Remove standalone audit/schedule execution and all optional authority assertions. Legacy plans remain readable for evidence; unpinned plans cannot authorize another mutation. Unknown acknowledgements stay journaled and block the next identity.",
       "verification": "Shared runtime/security tests and consuming D1 failure/lease fixtures migrated to current ports; qualification pending."
+    },
+    {
+      "id": "queued-refresh-current-provider-authority",
+      "decision": "simplify",
+      "oldRepresentation": "A queued delete string plus provider absence synthesized a deleted-user record from unverified notification time and email.",
+      "authoritativeReplacement": "The existing authoritative reader resolves an exact live user or a positively matched complete deleted-user inventory. Every missing result now throws before event admission; active/suspended/archived/deleted remain explicit in AuthoritativeGoogleDirectoryUserStateSchema.",
+      "sources": [
+        "src/identity-lifecycle/google-directory-lifecycle-refresh-handler.ts",
+        "src/identity-lifecycle/google-directory-authority-reader.ts",
+        "src/identity-lifecycle/contracts.ts"
+      ],
+      "events": [
+        "queued refresh",
+        "fresh exact live read",
+        "fresh exact deleted inventory",
+        "missing or failed provider read"
+      ],
+      "guards": [
+        "immutable user ID",
+        "complete deleted inventory",
+        "valid provider deletion timestamp",
+        "no transport-to-authority fallback"
+      ],
+      "terminalStates": [],
+      "recovery": "Missing authority preserves the queued failure and existing evidence; it never authorizes an offboarding mutation or manufactures a tombstone. The retained queue wire still accepts its historical notification fields; they are no longer an authority source."
     }
   ],
   "justifiedRepresentationExceptions": [
@@ -766,5 +775,19 @@
     }
   ],
   "reviewedUpstreamHead": "7ad879551b989c1bdf48813456a0e4d469a2add0",
-  "ownedApplicationTables": []
+  "ownedApplicationTables": [],
+  "googleWatchRetirement": {
+    "version": "0.7.0",
+    "removedExports": [
+      "channel-authenticator",
+      "channel-manager",
+      "google-watch-gateway",
+      "receipt-store",
+      "subject-resolver",
+      "webhook-handler"
+    ],
+    "retained": "Scheduled full directory reconciliation, authoritative identity history, durable lifecycle admission/recovery and already queued refresh consumers.",
+    "storage": "The package owns no database. Consuming-app empty-table assertions, archives, migrations and operational observations remain in the host.",
+    "verification": "Regressions exercise missing/deleted/failed provider authority; generated docs, full pinned verify and exact-head CI/release qualification remain mandatory."
+  }
 }

@@ -3,7 +3,6 @@ import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
 
 import { contentHash } from "../src/github-access-audit/content-hash.ts";
-import { googleWatchTokenSha256 } from "../src/identity-lifecycle/channel-authenticator.ts";
 import {
   bytesToHex,
   canonicalJson,
@@ -38,9 +37,6 @@ describe("shared SHA-256", () => {
     "preserves UTF-8 bytes: %j",
     async (value) => {
       await expect(sha256(value)).resolves.toBe(expected(value));
-      await expect(googleWatchTokenSha256(value)).resolves.toBe(
-        expected(value),
-      );
     },
   );
 
