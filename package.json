@@ -1,6 +1,6 @@
 {
   "name": "@sarj-ai/workspace-sync",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "private": true,
   "description": "Sync profiles and access from Google Workspace",
   "license": "MIT",
@@ -126,14 +126,6 @@
       "types": "./dist/identity-lifecycle/google-directory-authority-reader.d.ts",
       "import": "./dist/identity-lifecycle/google-directory-authority-reader.js"
     },
-    "./identity-lifecycle/channel-authenticator": {
-      "types": "./dist/identity-lifecycle/channel-authenticator.d.ts",
-      "import": "./dist/identity-lifecycle/channel-authenticator.js"
-    },
-    "./identity-lifecycle/channel-manager": {
-      "types": "./dist/identity-lifecycle/channel-manager.d.ts",
-      "import": "./dist/identity-lifecycle/channel-manager.js"
-    },
     "./identity-lifecycle/contracts": {
       "types": "./dist/identity-lifecycle/contracts.d.ts",
       "import": "./dist/identity-lifecycle/contracts.js"
@@ -150,29 +142,13 @@
       "types": "./dist/identity-lifecycle/google-directory-identity-history.d.ts",
       "import": "./dist/identity-lifecycle/google-directory-identity-history.js"
     },
-    "./identity-lifecycle/google-watch-gateway": {
-      "types": "./dist/identity-lifecycle/google-admin-directory-watch-gateway.d.ts",
-      "import": "./dist/identity-lifecycle/google-admin-directory-watch-gateway.js"
-    },
     "./identity-lifecycle/project-google-directory-authority": {
       "types": "./dist/identity-lifecycle/project-google-directory-authority.d.ts",
       "import": "./dist/identity-lifecycle/project-google-directory-authority.js"
     },
-    "./identity-lifecycle/receipt-store": {
-      "types": "./dist/identity-lifecycle/d1-google-watch-notification-receipt-store.d.ts",
-      "import": "./dist/identity-lifecycle/d1-google-watch-notification-receipt-store.js"
-    },
     "./identity-lifecycle/refresh-handler": {
       "types": "./dist/identity-lifecycle/google-directory-lifecycle-refresh-handler.d.ts",
       "import": "./dist/identity-lifecycle/google-directory-lifecycle-refresh-handler.js"
-    },
-    "./identity-lifecycle/subject-resolver": {
-      "types": "./dist/identity-lifecycle/authoritative-google-directory-notification-subject-resolver.d.ts",
-      "import": "./dist/identity-lifecycle/authoritative-google-directory-notification-subject-resolver.js"
-    },
-    "./identity-lifecycle/webhook-handler": {
-      "types": "./dist/identity-lifecycle/webhook-handler.d.ts",
-      "import": "./dist/identity-lifecycle/webhook-handler.js"
     },
     "./identity-provisioning/attio-deprovision-authority-capture": {
       "types": "./dist/identity-provisioning/attio-deprovision-authority-capture.d.ts",

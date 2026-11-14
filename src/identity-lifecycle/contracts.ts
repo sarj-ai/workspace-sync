@@ -5,84 +5,16 @@ export const GoogleDirectoryUserIdSchema = z
   .regex(/^\d{5,30}$/)
   .brand<"GoogleDirectoryUserId">();
 
-const GoogleWatchChannelIdSchema = z
-  .string()
-  .min(16)
-  .max(64)
-  .regex(/^[A-Za-z0-9._:-]+$/)
-  .brand<"GoogleWatchChannelId">();
-const GoogleWatchResourceIdSchema = z
-  .string()
-  .min(1)
-  .max(512)
-  .brand<"GoogleWatchResourceId">();
-const GoogleWatchMessageNumberSchema = z
-  .string()
-  .max(20)
-  .regex(/^(?:0|[1-9]\d*)$/)
-  .brand<"GoogleWatchMessageNumber">();
-const GoogleWatchChannelTokenSchema = z.string().min(32).max(256);
-const GoogleWatchEventSchema = z.enum([
+export const GoogleDirectoryLifecycleEventSchema = z.enum([
   "add",
   "delete",
   "makeAdmin",
-  "sync",
   "undelete",
   "update",
 ]);
-export const GoogleDirectoryLifecycleEventSchema =
-  GoogleWatchEventSchema.exclude(["sync"]);
-
-export const GoogleDirectoryWatchNotificationSchema = z.strictObject({
-  channelExpiration: z.string().min(1).max(128).optional(),
-  channelId: GoogleWatchChannelIdSchema,
-  channelToken: GoogleWatchChannelTokenSchema,
-  changed: z.string().min(1).max(512).optional(),
-  event: GoogleWatchEventSchema,
-  messageNumber: GoogleWatchMessageNumberSchema,
-  resourceId: GoogleWatchResourceIdSchema,
-  resourceUri: z.url({ protocol: /^https$/u }),
-});
-export const GoogleDirectoryLifecycleNotificationSchema =
-  GoogleDirectoryWatchNotificationSchema.extend({
-    event: GoogleDirectoryLifecycleEventSchema,
-  });
-
-export type GoogleDirectoryWatchNotification = z.output<
-  typeof GoogleDirectoryWatchNotificationSchema
->;
 export type GoogleDirectoryUserId = z.output<
   typeof GoogleDirectoryUserIdSchema
 >;
-export type GoogleDirectoryLifecycleNotification = z.output<
-  typeof GoogleDirectoryLifecycleNotificationSchema
->;
-
-export const GoogleDirectoryWatchUserBodySchema = z.strictObject({
-  etag: z.string().min(1).max(512),
-  id: GoogleDirectoryUserIdSchema,
-  kind: z.literal("admin#directory#user"),
-  primaryEmail: z.email(),
-});
-
-export type GoogleDirectoryWatchUserBody = z.output<
-  typeof GoogleDirectoryWatchUserBodySchema
->;
-
-export function parseGoogleDirectoryWatchHeaders(
-  headers: Headers,
-): GoogleDirectoryWatchNotification {
-  return GoogleDirectoryWatchNotificationSchema.parse({
-    channelExpiration: headers.get("x-goog-channel-expiration") ?? undefined,
-    channelId: headers.get("x-goog-channel-id"),
-    channelToken: headers.get("x-goog-channel-token"),
-    changed: headers.get("x-goog-changed") ?? undefined,
-    event: headers.get("x-goog-resource-state"),
-    messageNumber: headers.get("x-goog-message-number"),
-    resourceId: headers.get("x-goog-resource-id"),
-    resourceUri: headers.get("x-goog-resource-uri"),
-  });
-}
 
 const RefetchedGoogleDirectoryUserSchema = z.strictObject({
   archived: z.boolean().optional().default(false),
@@ -173,9 +105,3 @@ export const RefreshGoogleDirectoryUserTaskSchema = z.strictObject({
 export type RefreshGoogleDirectoryUserTask = z.output<
   typeof RefreshGoogleDirectoryUserTaskSchema
 >;
-
-export function googleDirectoryNotificationId(
-  notification: GoogleDirectoryWatchNotification,
-): z.input<typeof RefreshGoogleDirectoryUserTaskSchema>["notificationId"] {
-  return `${notification.channelId}:${notification.messageNumber}`;
-}

@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 
 import {
   authoritativeGoogleDirectoryUserState,
-  GoogleDirectoryWatchNotificationSchema,
   RefreshGoogleDirectoryUserTaskSchema,
 } from "../src/identity-lifecycle/contracts.ts";
 
@@ -69,47 +68,15 @@ describe("Google Directory lifecycle contracts", () => {
     });
   });
 
-  it("rejects malformed watch transport headers and sync refresh tasks", () => {
-    expect(
-      GoogleDirectoryWatchNotificationSchema.safeParse({
-        channelId: "too-short",
-        channelToken: "short",
-        event: "update",
-        messageNumber: "01",
-        resourceId: "resource",
-        resourceUri: "ftp://admin.googleapis.com/users",
-      }).success,
-    ).toBe(false);
+  it("rejects sync as a queued user refresh event", () => {
     expect(
       RefreshGoogleDirectoryUserTaskSchema.safeParse({
         event: "sync",
         googleUserId: GOOGLE_USER_ID,
         notificationId: "channel:1",
+        notificationPrimaryEmail: "person@company.test",
         observedAt: "2026-08-20T12:00:00.000Z",
         type: "identity.refresh-google-directory-user",
-      }).success,
-    ).toBe(false);
-  });
-
-  it("enforces the Google notification channel ID limit", () => {
-    const base = {
-      channelToken: "a-secure-channel-token-with-32-bytes",
-      event: "update",
-      messageNumber: "1",
-      resourceId: "resource",
-      resourceUri: "https://admin.googleapis.com/admin/directory/v1/users",
-    } as const;
-
-    expect(
-      GoogleDirectoryWatchNotificationSchema.safeParse({
-        ...base,
-        channelId: "c".repeat(64),
-      }).success,
-    ).toBe(true);
-    expect(
-      GoogleDirectoryWatchNotificationSchema.safeParse({
-        ...base,
-        channelId: "c".repeat(65),
       }).success,
     ).toBe(false);
   });
