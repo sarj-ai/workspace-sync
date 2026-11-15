@@ -3240,7 +3240,8 @@ function liveCapabilityError(
       (change) =>
         !scopeSet.has(
           change.isPrivate ? "groups:write.invites" : "channels:write.invites",
-        ),
+        ) &&
+        !scopeSet.has(change.isPrivate ? "groups:write" : "channels:write"),
     )
   ) {
     return "Slack token lacks the matching channel invitation scope";
