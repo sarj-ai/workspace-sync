@@ -281,6 +281,8 @@ export interface AllTeamPolicy {
   googleGroupEmails: readonly string[];
   membershipMode: "additive" | "authoritative";
   protectedGoogleUserIds?: readonly string[];
+  /** Invite the employee union into active public channels with these prefixes using the existing bounded direct-invitation path. Group defaults and ownership pins remain unchanged. */
+  publicChannelPrefixes?: readonly string[];
   slackUserGroup: {
     automationOwnership?: SlackUserGroupAutomationOwnership;
     expectedId?: string;
@@ -443,6 +445,19 @@ export function buildOrgChannelPlan(input: {
     input.allTeam,
     publicAsksChannels,
   );
+  const publicEnrollmentChannels = resolvePublicEnrollmentChannels(
+    input.allTeam,
+    input.slack.channels,
+  );
+  const publicEnrollmentAdditions: ChannelMembershipChange[] = [];
+  for (const channel of publicEnrollmentChannels)
+    appendMissing(publicEnrollmentAdditions, channel, allTeamSlackIds);
+  const additions = new Map(
+    [
+      ...teamPlans.flatMap((plan) => plan.additions),
+      ...publicEnrollmentAdditions,
+    ].map((change) => [`${change.channelId}:${change.slackUserId}`, change]),
+  );
   const allTeamUserGroup = planAllTeamUserGroup(
     input.allTeam,
     allTeamChannels,
@@ -463,12 +478,12 @@ export function buildOrgChannelPlan(input: {
     allTeamSlackIds,
     excludedSlackIds,
     includedViaAnotherSourceSlackIds,
-    allTeamChannels,
+    uniqueChannels([...allTeamChannels, ...publicEnrollmentChannels]),
     channelRenames,
     userGroups,
   );
   return {
-    additions: sortChanges(teamPlans.flatMap((plan) => plan.additions)),
+    additions: sortChanges(additions.values().toArray()),
     channelRenames,
     errors: uniqueSorted(errors),
     lifecycle,
@@ -479,6 +494,34 @@ export function buildOrgChannelPlan(input: {
     userGroups,
     warnings: uniqueSorted(warnings),
   };
+}
+
+function resolvePublicEnrollmentChannels(
+  policy: AllTeamPolicy | undefined,
+  snapshots: readonly SlackChannelSnapshot[],
+): SlackChannelSnapshot[] {
+  if (!policy) return [];
+  const ownership = policy.slackUserGroup.automationOwnership;
+  const prefixes = policy.publicChannelPrefixes ?? [];
+  if (prefixes.some((prefix) => !/^[a-z0-9][a-z0-9_-]*-$/u.test(prefix)))
+    throw new Error(
+      "All-team public channel prefixes must be nonempty Slack name prefixes ending in a hyphen",
+    );
+  if (prefixes.length > 0) {
+    if (ownership === undefined || ownership.kind === "legacy_unmanaged")
+      throw new Error(
+        "All-team public channel enrollment requires managed user group ownership",
+      );
+    return uniqueChannels(
+      snapshots.filter(
+        (channel) =>
+          !channel.isPrivate &&
+          !channel.isArchived &&
+          prefixes.some((prefix) => channel.name.startsWith(prefix)),
+      ),
+    );
+  }
+  return [];
 }
 
 function resolveAllTeamChannels(

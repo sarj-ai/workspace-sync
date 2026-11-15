@@ -161,6 +161,7 @@ export interface IOrgChannelSlackClient {
     deadlineAt?: number,
     includeUserGroups?: boolean,
     managedUserGroupHandles?: readonly string[],
+    publicChannelPrefixes?: readonly string[],
   ): Promise<SlackChannelSyncSnapshot>;
   removeUserGroupMembers?(
     userGroupId: string,
@@ -403,6 +404,7 @@ export class OrgChannelSlackClient implements IOrgChannelSlackClient {
     deadlineAt?: number,
     includeUserGroups = false,
     managedUserGroupHandles: readonly string[] = [],
+    publicChannelPrefixes: readonly string[] = [],
   ): Promise<SlackChannelSyncSnapshot> {
     const authResponse = await this.#transport.call("auth.test", {}, runId, {
       deadlineAt,
@@ -431,7 +433,12 @@ export class OrgChannelSlackClient implements IOrgChannelSlackClient {
     const candidates = inventory.filter(
       (channel) =>
         requestedNames.has(channel.name) ||
-        associatedChannelIds.has(channel.id),
+        associatedChannelIds.has(channel.id) ||
+        (!channel.isPrivate &&
+          !channel.isArchived &&
+          publicChannelPrefixes.some((prefix) =>
+            channel.name.startsWith(prefix),
+          )),
     );
     if (candidates.length > MAX_HYDRATED_CHANNELS) {
       throw new Error(
