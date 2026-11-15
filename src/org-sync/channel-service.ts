@@ -759,6 +759,7 @@ export class OrgChannelSyncService
         deadlineAt,
         requireUserGroups,
         managedUserGroupHandles,
+        this.#config.allTeam?.publicChannelPrefixes,
       ),
     ]);
     const projectedGroupEmails = this.#config.managedTeams.map(

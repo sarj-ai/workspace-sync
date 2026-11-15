@@ -69,6 +69,32 @@ function fixture(
 }
 
 describe("bounded channel hydration", () => {
+  it("hydrates newly discovered matching public channels while excluding private and archived matches", async () => {
+    const f = fixture();
+    const [publicChannel, privateChannel, archivedChannel, otherChannel] =
+      f.channels;
+    if (!publicChannel || !privateChannel || !archivedChannel || !otherChannel)
+      throw new Error("channel fixture missing");
+    publicChannel.name = "asks-new-team";
+    privateChannel.name = "asks-private";
+    privateChannel["is_private"] = true;
+    archivedChannel.name = "asks-archived";
+    archivedChannel["is_archived"] = true;
+    otherChannel.name = "general";
+    const result = await f.client.listSnapshot(
+      [],
+      "run",
+      undefined,
+      false,
+      [],
+      ["asks-"],
+    );
+    expect(result.channels.map(({ id }) => id)).toEqual([publicChannel.id]);
+    expect(
+      f.calls.filter((call) => call.startsWith("conversations.info:")),
+    ).toEqual([`conversations.info:${publicChannel.id}:`]);
+  });
+
   it("hydrates exactly two channels at once and preserves canonical output under reversed completion", async () => {
     const gates = [
       Promise.withResolvers<undefined>(),
