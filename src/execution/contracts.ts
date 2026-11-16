@@ -38,6 +38,7 @@ import {
   ReviewedSlackNameActionSchema,
 } from "./reviewed-name-plan.ts";
 import { ReviewedPagerDutyTeamSchema } from "./reviewed-pagerduty-team.ts";
+import { ReviewedPosthogMembershipSchema } from "./reviewed-posthog-membership.ts";
 import { ReviewedSentryWorkspaceSchema } from "./reviewed-sentry-workspace.ts";
 import {
   ClaimedReviewedProviderIntentSchema,
@@ -80,6 +81,7 @@ export const WORKSPACE_DIRECTORY_ACTION_IDS = {
   googleGroupCleanup: "workspace-directory.google-group-cleanup",
   pagerDutyTeams: "workspace-directory.pagerduty-teams",
   sentryMemberships: "workspace-directory.sentry-memberships",
+  posthogMemberships: "workspace-directory.posthog-memberships",
 } as const;
 export const WorkspaceDirectoryAuthorizedActionIdSchema = z.enum(
   Object.values(WORKSPACE_DIRECTORY_ACTION_IDS),
@@ -803,11 +805,25 @@ export const SentryMembershipsBranchPlanSchema = z
     "Sentry kill switch must match execution",
   );
 
+export const PosthogMembershipsBranchPlanSchema = z
+  .strictObject({
+    ...BRANCH_BASE,
+    branchId: z.literal("posthog-memberships"),
+    execution: BranchExecutionSchema,
+    reviewed: ReviewedPosthogMembershipSchema.nullable(),
+    sourceFingerprint: z.string().regex(/^[a-f0-9]{64}$/u),
+  })
+  .refine(
+    (branch) => branch.killSwitchEngaged === (branch.execution !== "managed"),
+    "PostHog kill switch must match execution",
+  );
+
 export const WorkspaceDirectoryBranchPlanSchema = z.discriminatedUnion(
   "branchId",
   [
     PagerDutyTeamsBranchPlanSchema,
     SentryMembershipsBranchPlanSchema,
+    PosthogMembershipsBranchPlanSchema,
     SlackProfilesBranchPlanSchema,
     DriveOrgChartBranchPlanSchema,
     SlackGroupsChannelsBranchPlanSchema,
@@ -844,6 +860,7 @@ export const WorkspaceDirectoryPlanSchema = z
           GoogleGroupCleanupBranchPlanSchema,
           PagerDutyTeamsBranchPlanSchema,
           SentryMembershipsBranchPlanSchema,
+          PosthogMembershipsBranchPlanSchema,
         ]),
       )
       .refine(
@@ -855,6 +872,7 @@ export const WorkspaceDirectoryPlanSchema = z
     googleUsers: z.number().int().nonnegative(),
     policyVersion: z.enum([
       "workspace-directory-v10",
+      "workspace-directory-v11",
       WORKSPACE_DIRECTORY_FLOW.policyVersion,
     ]),
   })
@@ -867,9 +885,16 @@ export const WorkspaceDirectoryPlanSchema = z
           branchId !== "linear-profiles" &&
           branchId !== "google-group-cleanup" &&
           branchId !== "pagerduty-teams" &&
-          branchId !== "sentry-memberships",
+          branchId !== "sentry-memberships" &&
+          branchId !== "posthog-memberships",
       ),
     "legacy workspace policy cannot authorize new name branches",
+  )
+  .refine(
+    (plan) =>
+      plan.policyVersion !== "workspace-directory-v11" ||
+      plan.branches.every(({ branchId }) => branchId !== "posthog-memberships"),
+    "legacy workspace policy cannot authorize PostHog memberships",
   );
 export type WorkspaceDirectoryPlan = z.output<
   typeof WorkspaceDirectoryPlanSchema
@@ -899,9 +924,22 @@ function validSentrySelection(plan: WorkspaceDirectoryPlan): boolean {
   );
 }
 
+function validPosthogSelection(plan: WorkspaceDirectoryPlan): boolean {
+  const branch = plan.branches.find(
+    (candidate) => candidate.branchId === "posthog-memberships",
+  );
+  return (
+    branch?.execution === "managed" &&
+    branch.reviewed !== null &&
+    branch.sourceFingerprint === plan.authorityFingerprint &&
+    !branch.diagnostics.some(({ severity }) => severity === "blocker")
+  );
+}
+
 type PlannedChangeKind =
   | "pagerduty-teams"
   | "sentry-memberships"
+  | "posthog-memberships"
   | "google-group-cleanup"
   | "slack-names"
   | "linear-profiles"
@@ -933,6 +971,10 @@ export const WorkspaceDirectoryChangeDetailsSchema: z.ZodType<WorkspaceDirectory
     }),
     z.strictObject({
       kind: z.literal("sentry-memberships"),
+      plan: StoredWorkspaceDirectoryPlanSchema,
+    }),
+    z.strictObject({
+      kind: z.literal("posthog-memberships"),
       plan: StoredWorkspaceDirectoryPlanSchema,
     }),
     z.strictObject({
@@ -1195,6 +1237,19 @@ export const WorkspaceDirectoryWorkflowParamsSchema = z
       });
   })
   .superRefine((params, context) => {
+    if (
+      params.authorizedActionIds.includes(
+        WORKSPACE_DIRECTORY_ACTION_IDS.posthogMemberships,
+      ) &&
+      !validPosthogSelection(params.plan)
+    )
+      context.addIssue({
+        code: "custom",
+        message:
+          "PostHog requires one original managed reviewed action and matching Google authority",
+      });
+  })
+  .superRefine((params, context) => {
     for (const branchId of ["slack-names", "linear-profiles"] as const) {
       if (
         !params.authorizedActionIds.includes(`workspace-directory.${branchId}`)
@@ -1316,8 +1371,11 @@ const WorkspaceDirectoryWorkflowBranchResultSchema = z.union([
   auditedWorkflowResult("pagerduty-teams"),
   disabledWorkflowResult("pagerduty-teams"),
   managedWorkflowResult("sentry-memberships"),
+  managedWorkflowResult("posthog-memberships"),
   auditedWorkflowResult("sentry-memberships"),
+  auditedWorkflowResult("posthog-memberships"),
   disabledWorkflowResult("sentry-memberships"),
+  disabledWorkflowResult("posthog-memberships"),
   auditedWorkflowResult("google-group-cleanup"),
   disabledWorkflowResult("google-group-cleanup"),
   auditedWorkflowResult("trycomp-people"),

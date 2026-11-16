@@ -50,6 +50,7 @@ export function createWorkspaceIdentityParentContext(
     | "google-group-cleanup"
     | "pagerduty-teams"
     | "sentry-memberships"
+    | "posthog-memberships"
     | "slack-groups-channels",
 ): WorkspaceIdentityParentContext {
   const { params } = input;

@@ -19,6 +19,11 @@ import {
   pagerDutyTeamSourceIdentity,
 } from "./reviewed-pagerduty-team.ts";
 import {
+  posthogMembershipManagedSlice,
+  posthogMembershipResourceId,
+  posthogMembershipSourceIdentity,
+} from "./reviewed-posthog-membership.ts";
+import {
   sentryWorkspaceManagedSlice,
   sentryWorkspaceResourceId,
   sentryWorkspaceSourceIdentity,
@@ -38,6 +43,27 @@ export function workspaceBranchSourceIdentity(
   if (branch.execution !== "managed")
     throw new Error("workspace_branch_not_managed");
   switch (branch.branchId) {
+    case "posthog-memberships": {
+      if (
+        branch.reviewed === null ||
+        managedChange?.actionId !== "workspace-directory.posthog-memberships" ||
+        managedChange.resource.type !== "posthog-membership" ||
+        managedChange.resource.id !==
+          posthogMembershipResourceId(branch.reviewed) ||
+        !sameJson(
+          managedChange.before,
+          posthogMembershipManagedSlice(branch.reviewed, "pending"),
+        ) ||
+        !sameJson(
+          managedChange.after,
+          posthogMembershipManagedSlice(branch.reviewed, "converged"),
+        )
+      )
+        throw new Error("workspace_branch_posthog_pin_mismatch");
+      return SOURCE_IDENTITY.parse(
+        posthogMembershipSourceIdentity(branch.reviewed),
+      );
+    }
     case "sentry-memberships":
       return sentrySourceIdentity(branch, managedChange);
     case "pagerduty-teams":

@@ -9,6 +9,10 @@ export async function readWorkspaceDirectoryManagedSlice(
 ) {
   const details = WorkspaceDirectoryChangeDetailsSchema.parse(change.details);
   switch (details.kind) {
+    case "posthog-memberships":
+      if (runtime.readPosthogMembershipsSlice === undefined)
+        throw new Error("workspace_posthog_adapter_required");
+      return runtime.readPosthogMembershipsSlice(details.plan);
     case "sentry-memberships":
       if (runtime.readSentryMembershipsSlice === undefined)
         throw new Error("workspace_sentry_adapter_required");

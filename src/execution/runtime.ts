@@ -50,6 +50,7 @@ import type { OrgSyncRunReport } from "../org-sync/service.ts";
 import { logErrorEvent } from "../shared/log-event.ts";
 import { sameStringMultiset } from "../shared/same-string-multiset.ts";
 import type { TrycompReviewedPlan } from "../trycomp/model.ts";
+import { D1PosthogManagedGrantRepository } from "../workspace-directory/d1-posthog-managed-grant-repository.ts";
 import { D1WorkspaceLedgerHistoryIndex } from "../workspace-directory/d1-workspace-ledger-history-index.ts";
 import { bindWorkspaceLinearParentContext } from "./bind-workspace-linear-parent-context.ts";
 import { captureWorkspaceNameBranches } from "./capture-workspace-name-branches.ts";
@@ -84,6 +85,7 @@ import {
 } from "./managed-slices.ts";
 import { observeOriginalSlackMembershipTarget } from "./observe-original-slack-membership-target.ts";
 import type { PagerDutyTeamExecutionPort } from "./pager-duty-team-service.ts";
+import type { PosthogMembershipExecutionPort } from "./posthog-membership-service.ts";
 import type {
   WorkspaceSyncRuntimeBindings,
   WorkspaceNameServices,
@@ -102,6 +104,8 @@ import {
   type PagerDutyTeamParentContext,
   ReviewedPagerDutyTeamAdapter,
 } from "./reviewed-pager-duty-team-adapter.ts";
+import { ReviewedPosthogMembershipAdapter } from "./reviewed-posthog-membership-adapter.ts";
+import type { PosthogMembershipAdapterDependencies } from "./reviewed-posthog-membership-adapter.ts";
 import {
   ReviewedSentryWorkspaceAdapter,
   type SentryWorkspaceParentContext,
@@ -187,6 +191,11 @@ export interface WorkspaceDirectoryRuntimeOptions {
     plan: WorkspaceDirectoryPlan,
   ) => ReviewedSlackLifecycleDurableParent;
   scheduledLinearSuspensions?: boolean;
+  posthogIdentityBudget?: IdentityWriteBudget;
+  posthogParentContext?: NonNullable<
+    PosthogMembershipAdapterDependencies["parentContext"]
+  >;
+  posthogService?: PosthogMembershipExecutionPort;
   sentryIdentityBudget?: IdentityWriteBudget;
   sentryParentContext?: (
     plan: WorkspaceDirectoryPlan,
@@ -288,6 +297,25 @@ export function createWorkspaceDirectoryRuntime(
   let names = options.nameServices;
   let cleanup = options.googleGroupCleanupService;
   let pagerDuty = options.pagerDutyTeamService;
+  let posthog = options.posthogService;
+  function posthogService(): PosthogMembershipExecutionPort {
+    if (
+      !env.workspaceDirectoryParentEnabled ||
+      !env.workspaceDirectoryPosthogEnabled
+    )
+      throw new Error("workspace_posthog_parent_disabled");
+    if (posthog !== undefined) return posthog;
+    if (options.channelDatabase === undefined || bindings.posthog === undefined)
+      throw new Error("workspace_posthog_persistence_required");
+    const leases =
+      options.channelLeaseRepository ??
+      new D1ResourceLeaseRepository(options.channelDatabase);
+    posthog = bindings.posthog(
+      leases,
+      new D1PosthogManagedGrantRepository(options.channelDatabase),
+    );
+    return posthog;
+  }
   let sentry = options.sentryService;
   function sentryService(): SentryWorkspaceExecutionPort {
     if (!env.workspaceDirectoryParentEnabled) {
@@ -579,6 +607,20 @@ export function createWorkspaceDirectoryRuntime(
     plan = await appendPagerDutyBranch(plan, includes);
     plan = await appendSentryBranch(plan, includes);
     if (
+      env.workspaceDirectoryParentEnabled &&
+      getWorkspaceExecutionPolicy().posthog !== null &&
+      includes(WORKSPACE_DIRECTORY_ACTION_IDS.posthogMemberships)
+    ) {
+      const branch = await posthogAdapter.capture(
+        plan,
+        env.workspaceDirectoryPosthogEnabled === true,
+      );
+      plan = parseWorkspaceDirectoryPlan({
+        ...plan,
+        branches: [...plan.branches, branch],
+      });
+    }
+    if (
       !namesEnabled() ||
       (!includes(WORKSPACE_DIRECTORY_ACTION_IDS.slackNames) &&
         !includes(WORKSPACE_DIRECTORY_ACTION_IDS.linearProfiles))
@@ -682,6 +724,13 @@ export function createWorkspaceDirectoryRuntime(
       parentContext: options.pagerDutyTeamParentContext,
     }),
   });
+  const posthogAdapter = new ReviewedPosthogMembershipAdapter({
+    service: posthogService,
+    assertGoogleAuthority,
+    ...(options.posthogParentContext !== undefined && {
+      parentContext: options.posthogParentContext,
+    }),
+  });
   const sentryAdapter = new ReviewedSentryWorkspaceAdapter({
     service: sentryService,
     assertGoogleAuthority,
@@ -699,6 +748,8 @@ export function createWorkspaceDirectoryRuntime(
   return {
     applyGoogleGroupCleanup: (plan) => cleanupAdapter.apply(plan),
     applyPagerDutyTeams: (plan) => pagerDutyAdapter.apply(plan),
+    applyPosthogMemberships: (plan) => posthogAdapter.apply(plan),
+    readPosthogMembershipsSlice: (plan) => posthogAdapter.readSlice(plan),
     applySentryMemberships: (plan) => sentryAdapter.apply(plan),
     readPagerDutyTeamsSlice: (plan) => pagerDutyAdapter.readSlice(plan),
     readSentryMembershipsSlice: (plan) => sentryAdapter.readSlice(plan),

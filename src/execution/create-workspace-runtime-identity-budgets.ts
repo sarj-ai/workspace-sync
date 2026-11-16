@@ -9,6 +9,11 @@ export function createWorkspaceRuntimeIdentityBudgets(
 ) {
   if (parentExecutionKey === undefined) return {};
   return {
+    posthogIdentityBudget: createWorkspaceIdentityWriteBudget(
+      database,
+      parentExecutionKey,
+      "posthog",
+    ),
     pagerDutyIdentityBudget: createWorkspaceIdentityWriteBudget(
       database,
       parentExecutionKey,

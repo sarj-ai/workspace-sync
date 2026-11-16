@@ -28,6 +28,7 @@ const EXPECTED_DETAILS_KIND_BY_ACTION_ID = {
   [WORKSPACE_DIRECTORY_ACTION_IDS.linearSuspensions]: "linear-suspensions",
   [WORKSPACE_DIRECTORY_ACTION_IDS.pagerDutyTeams]: "pagerduty-teams",
   [WORKSPACE_DIRECTORY_ACTION_IDS.sentryMemberships]: "sentry-memberships",
+  [WORKSPACE_DIRECTORY_ACTION_IDS.posthogMemberships]: "posthog-memberships",
   [WORKSPACE_DIRECTORY_ACTION_IDS.slackGroupsChannels]: "slack-groups-channels",
   [WORKSPACE_DIRECTORY_ACTION_IDS.slackNames]: "slack-names",
   [WORKSPACE_DIRECTORY_ACTION_IDS.slackProfiles]: "slack-profiles",

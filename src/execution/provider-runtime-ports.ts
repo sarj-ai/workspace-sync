@@ -17,12 +17,14 @@ import type { OrgSyncServiceContract } from "../org-sync/service.ts";
 import type { ITrycompPeopleSyncService } from "../trycomp/service.ts";
 import type { WorkspaceLedgerHistoryIndex } from "../workspace-directory/d1-workspace-ledger-history-index.ts";
 import type { PagerDutyTeamSyncSettings } from "../workspace-directory/pagerduty-team-config.ts";
+import type { IPosthogManagedGrantRepository } from "../workspace-directory/posthog-membership-plan.ts";
 import type { GoogleGroupCleanupServiceContract } from "./google-group-cleanup-service.ts";
 import type {
   ILinearProfileReader,
   ILinearProfileWriter,
 } from "./linear-profile-service.ts";
 import type { PagerDutyTeamExecutionPort } from "./pager-duty-team-service.ts";
+import type { PosthogMembershipExecutionPort } from "./posthog-membership-service.ts";
 import type { SentryWorkspaceExecutionPort } from "./sentry-workspace-service.ts";
 import type {
   ISlackNameReader,
@@ -103,6 +105,10 @@ export interface WorkspaceSyncRuntimeBindings {
   ): WorkspaceNameServices;
   trycomp(): TrycompPeopleSyncRuntime;
   sentry(lease?: ResourceLeaseRepository): SentryWorkspaceExecutionPort;
+  posthog?(
+    lease: ResourceLeaseRepository,
+    grants: IPosthogManagedGrantRepository,
+  ): PosthogMembershipExecutionPort;
   pagerDuty(lease?: ResourceLeaseRepository): PagerDutyTeamExecutionPort;
   googleCleanup(
     lease?: ResourceLeaseRepository,

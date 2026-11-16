@@ -30,6 +30,7 @@ const BranchSystem = {
   "google-group-cleanup": "google-workspace",
   "pagerduty-teams": "pagerduty",
   "sentry-memberships": "sentry",
+  "posthog-memberships": "posthog",
 } as const;
 const SourceIdentitySchema = z.discriminatedUnion("kind", [
   z.strictObject({

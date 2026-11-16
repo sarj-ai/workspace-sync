@@ -39,6 +39,7 @@ const BRANCH_ACTION_IDS: Readonly<
   "google-group-cleanup": WORKSPACE_DIRECTORY_ACTION_IDS.googleGroupCleanup,
   "pagerduty-teams": WORKSPACE_DIRECTORY_ACTION_IDS.pagerDutyTeams,
   "sentry-memberships": WORKSPACE_DIRECTORY_ACTION_IDS.sentryMemberships,
+  "posthog-memberships": WORKSPACE_DIRECTORY_ACTION_IDS.posthogMemberships,
 };
 
 export interface WorkspaceDirectorySlackManifestItem {

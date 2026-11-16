@@ -36,6 +36,10 @@ import {
   pagerDutyTeamResourceId,
 } from "./reviewed-pagerduty-team.ts";
 import {
+  posthogMembershipManagedSlice,
+  posthogMembershipResourceId,
+} from "./reviewed-posthog-membership.ts";
+import {
   sentryWorkspaceManagedSlice,
   sentryWorkspaceResourceId,
 } from "./reviewed-sentry-workspace.ts";
@@ -87,6 +91,7 @@ const SCHEDULED_ACTION_BRANCH_BY_ID = {
   [WORKSPACE_DIRECTORY_ACTION_IDS.googleGroupCleanup]: "google-group-cleanup",
   [WORKSPACE_DIRECTORY_ACTION_IDS.pagerDutyTeams]: "pagerduty-teams",
   [WORKSPACE_DIRECTORY_ACTION_IDS.sentryMemberships]: "sentry-memberships",
+  [WORKSPACE_DIRECTORY_ACTION_IDS.posthogMemberships]: "posthog-memberships",
 } as const satisfies Readonly<
   Record<WorkspaceDirectoryAuthorizedActionId, WorkspaceDirectoryBranchId>
 >;
@@ -1099,6 +1104,7 @@ function scheduledSelectionAllowsApply(
     case WORKSPACE_DIRECTORY_ACTION_IDS.googleGroupCleanup:
     case WORKSPACE_DIRECTORY_ACTION_IDS.pagerDutyTeams:
     case WORKSPACE_DIRECTORY_ACTION_IDS.sentryMemberships:
+    case WORKSPACE_DIRECTORY_ACTION_IDS.posthogMemberships:
       return true;
   }
 }
@@ -1181,7 +1187,20 @@ function scheduledParentRiskAcknowledged(
     directoryPlan,
     parentEnabled,
   );
-  if (!trycomp && !cleanup && !pagerDuty && !slack && !linear && !sentry)
+  const posthog = isScheduledPosthogMemberships(
+    signedPlan,
+    directoryPlan,
+    parentEnabled,
+  );
+  if (
+    !trycomp &&
+    !cleanup &&
+    !pagerDuty &&
+    !slack &&
+    !linear &&
+    !sentry &&
+    !posthog
+  )
     return false;
   const riskyChanges = signedPlan.plan.changes.filter(
     ({ kind, risk }) => kind === "remove" || risk === "high",
@@ -1190,6 +1209,8 @@ function scheduledParentRiskAcknowledged(
     riskyChanges.length > 0 &&
     riskyChanges.every(
       ({ actionId }) =>
+        (posthog &&
+          actionId === WORKSPACE_DIRECTORY_ACTION_IDS.posthogMemberships) ||
         (sentry &&
           actionId === WORKSPACE_DIRECTORY_ACTION_IDS.sentryMemberships) ||
         (linear &&
@@ -1220,6 +1241,8 @@ function boundedParentActionAllowed(
     return isScheduledPagerDutyTeams(signedPlan, directoryPlan, enabled);
   if (actionId === WORKSPACE_DIRECTORY_ACTION_IDS.sentryMemberships)
     return isScheduledSentryMemberships(signedPlan, directoryPlan, enabled);
+  if (actionId === WORKSPACE_DIRECTORY_ACTION_IDS.posthogMemberships)
+    return isScheduledPosthogMemberships(signedPlan, directoryPlan, enabled);
   if (actionId === WORKSPACE_DIRECTORY_ACTION_IDS.googleGroupCleanup)
     return isScheduledGoogleGroupCleanup(signedPlan, directoryPlan, enabled);
   return true;
@@ -1263,6 +1286,53 @@ export function isScheduledSlackProfiles(
   );
 }
 
+export function isScheduledPosthogMemberships(
+  signedPlan: SignedOperationPlan,
+  directoryPlan: WorkspaceDirectoryPlan,
+  enabled: boolean,
+): boolean {
+  const branch = directoryPlan.branches.find(
+    (item) => item.branchId === "posthog-memberships",
+  );
+  const changes = signedPlan.plan.changes.filter(
+    ({ actionId }) =>
+      actionId === WORKSPACE_DIRECTORY_ACTION_IDS.posthogMemberships,
+  );
+  const change = changes.length === 1 ? changes[0] : undefined;
+  if (
+    !enabled ||
+    directoryPlan.policyVersion !== "workspace-directory-v12" ||
+    branch?.execution !== "managed" ||
+    branch.reviewed === null ||
+    branch.sourceFingerprint !== directoryPlan.authorityFingerprint ||
+    branch.diagnostics.some(({ severity }) => severity === "blocker") ||
+    change === undefined
+  )
+    return false;
+  const action = branch.reviewed.action;
+  return (
+    change.resource.type === "posthog-membership" &&
+    change.resource.id === posthogMembershipResourceId(branch.reviewed) &&
+    change.kind ===
+      (action.type === "invite"
+        ? "add"
+        : action.type === "retire-grant" || action.type === "bind-member"
+          ? "change"
+          : "remove") &&
+    change.risk ===
+      (action.type === "remove-member" || action.type === "cancel-invite"
+        ? "high"
+        : "medium") &&
+    sameJson(
+      change.before,
+      posthogMembershipManagedSlice(branch.reviewed, "pending"),
+    ) &&
+    sameJson(
+      change.after,
+      posthogMembershipManagedSlice(branch.reviewed, "converged"),
+    )
+  );
+}
 export function isScheduledSentryMemberships(
   signedPlan: SignedOperationPlan,
   directoryPlan: WorkspaceDirectoryPlan,

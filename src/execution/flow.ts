@@ -30,6 +30,7 @@ const SystemDescriptorIdSchema = z
     "google-workspace",
     "linear",
     "pagerduty",
+    "posthog",
     "sentry",
     "slack",
     "trycomp",
@@ -84,6 +85,7 @@ export const WorkspaceDirectoryBranchIdSchema = z.enum([
   "google-group-cleanup",
   "pagerduty-teams",
   "sentry-memberships",
+  "posthog-memberships",
 ]);
 
 export const WorkspaceDirectoryTargetSchema = z
@@ -215,6 +217,13 @@ const SentryMembershipsBranchSchema = z
   })
   .readonly();
 
+const PosthogMembershipsBranchSchema = z
+  .strictObject({
+    ...BRANCH_BASE_SHAPE,
+    branchId: z.literal("posthog-memberships"),
+  })
+  .readonly();
+
 function branchValidationIssues(
   branch: Omit<z.output<typeof SlackProfilesBranchSchema>, "branchId">,
 ): string[] {
@@ -276,6 +285,7 @@ export const WorkspaceDirectoryFlowSchema = z
           GoogleGroupCleanupBranchSchema,
           PagerDutyTeamsBranchSchema,
           SentryMembershipsBranchSchema,
+          PosthogMembershipsBranchSchema,
         ]),
       )
       .refine(
@@ -286,7 +296,7 @@ export const WorkspaceDirectoryFlowSchema = z
       )
       .readonly(),
     operationId: z.literal("workspace-directory.reconcile"),
-    policyVersion: z.literal("workspace-directory-v11"),
+    policyVersion: z.literal("workspace-directory-v12"),
     requiredRole: z.literal("operations-admin"),
     requiredScope: z.literal("workspace-directory:apply"),
     schemaVersion: z.literal(1),
@@ -692,9 +702,34 @@ export const WORKSPACE_DIRECTORY_FLOW = WorkspaceDirectoryFlowSchema.parse({
         },
       ],
     },
+    {
+      branchId: "posthog-memberships",
+      displayName: "PostHog memberships",
+      enabledExecution: "managed",
+      relatedIntegrationId: null,
+      relatedScheduleJobId: "organization-sync",
+      relatedSyncPipelineId: "google-workspace-posthog-memberships",
+      rolloutState: "enabled",
+      scheduledExecution: "bounded-automatic",
+      sourcePaths: [
+        "apps/internal-automations/src/workspace-sync-host/http/posthog-membership-router.ts",
+      ],
+      sourceSystemIds: ["google-workspace"],
+      summary:
+        "Reconciles one employee Member grant from a pinned Google access group; only owned grants may be removed.",
+      targets: [
+        {
+          effect: "reconcile",
+          mode: "managed",
+          surface: "One reviewed organization membership",
+          systemId: "posthog",
+          verification: "target-readback",
+        },
+      ],
+    },
   ],
   operationId: "workspace-directory.reconcile",
-  policyVersion: "workspace-directory-v11",
+  policyVersion: "workspace-directory-v12",
   requiredRole: "operations-admin",
   requiredScope: "workspace-directory:apply",
   schemaVersion: 1,

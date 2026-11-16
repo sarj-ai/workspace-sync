@@ -27,6 +27,8 @@ export function workspaceDirectoryAnnouncedChanges(
       `workspace_directory_announcement_branch_missing:${branchId}`,
     );
   switch (branch.branchId) {
+    case "posthog-memberships":
+      return posthogMembershipAnnouncements(branch);
     case "sentry-memberships":
       return sentryMembershipAnnouncements(branch);
     case "pagerduty-teams":
@@ -83,6 +85,18 @@ function sentryMembershipAnnouncements(
     {
       changeKey: `sentry-memberships:${branch.reviewed.googleUserId}:${branch.reviewed.action.type}`,
       text: `Workspace sync planned · Sentry ${branch.reviewed.action.type} · ${branch.reviewed.action.email}`,
+    },
+  ];
+}
+
+function posthogMembershipAnnouncements(
+  branch: Branch<"posthog-memberships">,
+): readonly WorkspaceDirectoryAnnouncedChange[] {
+  if (branch.execution !== "managed" || branch.reviewed === null) return [];
+  return [
+    {
+      changeKey: `posthog-memberships:${branch.reviewed.action.googleUserId}:${branch.reviewed.action.type}`,
+      text: `Workspace sync planned · PostHog ${branch.reviewed.action.type} · ${branch.reviewed.action.email}`,
     },
   ];
 }

@@ -45,6 +45,7 @@ export const IdentityProviderIdSchema = z.enum([
   "pagerduty",
   "sentry",
   "slack",
+  "posthog",
 ]);
 export const ProvisioningProviderIdSchema = z.enum([
   "ashby",

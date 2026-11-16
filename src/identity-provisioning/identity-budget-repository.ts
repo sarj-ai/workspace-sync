@@ -19,6 +19,21 @@ const READ = `SELECT parent_execution_key AS parentExecutionKey, service_id AS s
   google_user_id AS googleUserId, reserved_at_ms AS reservedAtMs
   FROM identity_reconciliation_budget_reservation WHERE parent_execution_key = ?1 AND service_id = ?2`;
 
+const INSERT = `INSERT INTO identity_reconciliation_budget_reservation
+  (parent_execution_key, service_id, google_user_id, reserved_at_ms)
+  SELECT ?1, ?2, ?3, ?4 WHERE NOT EXISTS (
+    SELECT 1 FROM identity_reconciliation_budget_reservation WHERE parent_execution_key = ?1 AND service_id = ?2
+  )`;
+// A separate additive table leaves historical immutable reservations and recovery views untouched.
+const POSTHOG_READ = READ.replaceAll(
+  "identity_reconciliation_budget_reservation",
+  "workspace_posthog_identity_budget",
+);
+const POSTHOG_INSERT = INSERT.replaceAll(
+  "identity_reconciliation_budget_reservation",
+  "workspace_posthog_identity_budget",
+);
+
 interface IdentityBudgetReservationReader {
   read(input: BudgetKey): Promise<IdentityBudgetReservation | null>;
 }
@@ -57,11 +72,7 @@ export class IdentityBudgetRepository
     const session = this.#db.withSession("first-primary");
     const [inserted, selected] = await session.batch([
       session
-        .prepare(`INSERT INTO identity_reconciliation_budget_reservation
-        (parent_execution_key, service_id, google_user_id, reserved_at_ms)
-        SELECT ?1, ?2, ?3, ?4 WHERE NOT EXISTS (
-          SELECT 1 FROM identity_reconciliation_budget_reservation WHERE parent_execution_key = ?1 AND service_id = ?2
-        )`)
+        .prepare(reservation.serviceId === "posthog" ? POSTHOG_INSERT : INSERT)
         .bind(
           reservation.parentExecutionKey,
           reservation.serviceId,
@@ -69,7 +80,7 @@ export class IdentityBudgetRepository
           reservation.reservedAtMs,
         ),
       session
-        .prepare(READ)
+        .prepare(reservation.serviceId === "posthog" ? POSTHOG_READ : READ)
         .bind(reservation.parentExecutionKey, reservation.serviceId),
     ]);
     const stored = IdentityBudgetReservationSchema.parse(selected?.results[0]);
@@ -88,7 +99,7 @@ export class IdentityBudgetRepository
     }).parse(input);
     const row = await this.#db
       .withSession("first-primary")
-      .prepare(READ)
+      .prepare(key.serviceId === "posthog" ? POSTHOG_READ : READ)
       .bind(key.parentExecutionKey, key.serviceId)
       .first();
     return row === null ? null : IdentityBudgetReservationSchema.parse(row);
