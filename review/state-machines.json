@@ -747,6 +747,47 @@
       ],
       "terminalStates": [],
       "recovery": "Missing authority preserves the queued failure and existing evidence; it never authorizes an offboarding mutation or manufactures a tombstone. The retained queue wire still accepts its historical notification fields; they are no longer an authority source."
+    },
+    {
+      "id": "posthog-managed-grant",
+      "oldRepresentation": "Managed/retired string with nullable inviteId and userUuid, a default managed lifecycle and an at-least-one-ID refinement. Application decisions inferred three provider-evidence phases from nullable fields.",
+      "replacement": "Explicit managed/retired lifecycle with invitation, membership or accepted-invitation evidence. Every variant requires exactly its valid provider IDs; IDs are separately branded and runtime validated. No default lifecycle or application-level nullable ID bag remains.",
+      "states": [
+        "managed.invitation",
+        "managed.membership",
+        "managed.accepted-invitation",
+        "retired.invitation",
+        "retired.membership",
+        "retired.accepted-invitation"
+      ],
+      "events": [
+        "positive owned invitation receipt",
+        "bind-member after verified provider readback",
+        "retire after verified cancellation/removal/absence"
+      ],
+      "commands": [
+        "existing signed-parent provider invitation/cancellation/removal",
+        "fenced D1 current ownership update"
+      ],
+      "guards": [
+        "Existing exact immutable source and target plan hashes, reviewed preannouncement, final source authority, identity write budget, organization resource lease and final readback remain unchanged.",
+        "Only managed invitations may bind a membership; the original invitation ID is retained. Retired grants accept no transition event; repeated/invalid rebinding throws.",
+        "Existing protected/elevated/foreign identities and actor roles never become removal authority. The action convergence switch is exhaustive."
+      ],
+      "transitions": "A positive owned invitation establishes managed.invitation. Verified acceptance binds managed.accepted-invitation without discarding invitation evidence. A verified cancellation/removal/absence retires any managed evidence while preserving it. A separately reviewed new invitation may establish a new current grant under the existing signed parent; retirement itself never reactivates a grant.",
+      "terminalStates": ["retired with exact retained evidence"],
+      "invalidTransitions": "Malformed input, absent provider evidence, contradictory evidence payloads, missing lifecycle, retired transition and repeated binding fail closed.",
+      "sideEffects": "The pure transition makes no network or storage call. Existing service executes provider changes under its signed parent and lease, verifies provider readback and persists through the fenced repository.",
+      "recovery": "Provider uncertainty continues through the existing reviewed-action/signed-parent journal. This representation change does not infer that a failed request did not create an invitation and does not introduce retries or standalone mutation authority.",
+      "sources": [
+        "src/workspace-directory/posthog-managed-grant.ts",
+        "src/workspace-directory/posthog-membership-plan.ts",
+        "src/workspace-directory/d1-posthog-managed-grant-repository.ts",
+        "src/execution/posthog-membership-service.ts"
+      ],
+      "decision": "simplify-convert",
+      "inventory": "review/posthog-grant-accounting.json",
+      "authoritativeReplacement": "Explicit managed/retired lifecycle with invitation, membership or accepted-invitation evidence. Every variant requires exactly its valid provider IDs; IDs are separately branded and runtime validated. No default lifecycle or application-level nullable ID bag remains."
     }
   ],
   "justifiedRepresentationExceptions": [
@@ -774,7 +815,7 @@
       ]
     }
   ],
-  "reviewedUpstreamHead": "7ad879551b989c1bdf48813456a0e4d469a2add0",
+  "reviewedUpstreamHead": "af97c3b89ccf7f64998694f3b2141d064ad65af1",
   "ownedApplicationTables": [],
   "googleWatchRetirement": {
     "version": "0.7.0",
@@ -789,5 +830,28 @@
     "retained": "Scheduled full directory reconciliation, authoritative identity history, durable lifecycle admission/recovery and already queued refresh consumers.",
     "storage": "The package owns no database. Consuming-app empty-table assertions, archives, migrations and operational observations remain in the host.",
     "verification": "Regressions exercise missing/deleted/failed provider authority; generated docs, full pinned verify and exact-head CI/release qualification remain mandatory."
-  }
+  },
+  "posthogAccounting": "review/posthog-grant-accounting.json",
+  "posthogStorageException": [
+    {
+      "table": "workspace_posthog_managed_grant",
+      "owner": "consuming application, sarj-ai/automations",
+      "decision": "retain constrained relational encoding at storage boundary only",
+      "readers": [
+        "D1PosthogManagedGrantRepository.list; primary-session runtime codec before planner/service"
+      ],
+      "writers": [
+        "D1PosthogManagedGrantRepository.record; only a matching active organization resource lease can change a row"
+      ],
+      "constraints": "Organization/Google-user composite primary key; managed/retired CHECK; at-least-one-provider-ID CHECK; nonnegative update timestamp. This encodes exactly the six domain variants. UUID/email/Google-ID codecs reject malformed stored rows before they grant authority.",
+      "migration": "No SQL rewrite is required: the bidirectional codec maps every existing valid combination to exactly one domain variant and back. Preserve rows, IDs, timestamps and constraints. Tenant adoption configuration must move to the new explicit input in the consuming app before SDK adoption.",
+      "reason": "A second JSON state column, version column or new history table would duplicate the existing fenced current ownership and signed-parent recovery evidence. The six valid SQL states already have enforceable relational invariants; nullable columns never escape the adapter. Retired rows protect later manual grants from accidental adoption."
+    },
+    {
+      "table": "workspace_posthog_identity_budget",
+      "owner": "consuming application, sarj-ai/automations",
+      "decision": "retain existing immutable shared identity-budget protocol",
+      "reason": "One parent/service reservation with exact Google-user identity and nonnegative timestamp. Three existing triggers prevent update, deletion and conflicting replacement. Required for one-identity execution bounds; this change does not modify budget semantics."
+    }
+  ]
 }
