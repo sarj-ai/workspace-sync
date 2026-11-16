@@ -12,6 +12,13 @@ import { sameJson } from "../operations/canonical.ts";
 import { JsonValueSchema } from "../operations/schemas.ts";
 import type { IGoogleDirectoryClient } from "../org-sync/google-directory-client.ts";
 import type { IGoogleGroupsClient } from "../org-sync/google-groups-client.ts";
+import {
+  PosthogManagedGrantSchema,
+  posthogGrantTransition,
+  posthogInvitationId,
+  posthogUserUuid,
+  PosthogUserUuidSchema,
+} from "../workspace-directory/posthog-managed-grant.ts";
 import type {
   IPosthogMembershipClient,
   PosthogMembershipSnapshot,
@@ -193,13 +200,12 @@ export class PosthogMembershipService implements PosthogMembershipExecutionPort 
           await this.#ports.leases.assertActive(lease);
           await this.#ports.grants.record(
             this.#policy.organizationId,
-            {
+            PosthogManagedGrantSchema.parse({
               googleUserId: action.googleUserId,
               email: action.email,
-              inviteId: invite.id,
-              userUuid: null,
+              evidence: { kind: "invitation", inviteId: invite.id },
               state: "managed",
-            },
+            }),
             lease,
           );
         } else {
@@ -233,10 +239,15 @@ export class PosthogMembershipService implements PosthogMembershipExecutionPort 
     await this.#ports.leases.assertActive(lease);
     const grant = this.#ownedGrant(action.googleUserId, stored);
     if (grant === undefined) throw new Error("posthog_managed_grant_missing");
-    const updated: PosthogManagedGrant =
+    if (grant.state !== "managed")
+      throw new Error("posthog_retired_grant_transition");
+    const updated =
       action.type === "bind-member"
-        ? { ...grant, userUuid: action.userUuid, state: "managed" }
-        : { ...grant, state: "retired" };
+        ? posthogGrantTransition(grant, {
+            kind: "bind-member",
+            userUuid: PosthogUserUuidSchema.parse(action.userUuid),
+          })
+        : posthogGrantTransition(grant, { kind: "retire" });
     await this.#ports.grants.record(
       this.#policy.organizationId,
       updated,
@@ -286,29 +297,35 @@ export class PosthogMembershipService implements PosthogMembershipExecutionPort 
     const invite = current.provider.invites.find(
       (item) => item["target_email"] === action.email,
     );
-    if (action.type === "bind-member")
-      return (
-        grant?.state === "managed" &&
-        grant.userUuid === action.userUuid &&
-        member?.user.uuid === action.userUuid
-      );
-    if (action.type === "invite")
-      return (
-        grant?.state === "managed" &&
-        ((member !== undefined && member.level >= 1) ||
-          (invite !== undefined &&
-            !invite["is_expired"] &&
-            invite.level === 1 &&
-            invite.id === grant.inviteId))
-      );
-    return (
-      grant?.state === "retired" &&
-      (action.type === "remove-member"
-        ? member === undefined
-        : action.type === "cancel-invite"
-          ? invite === undefined
-          : member === undefined && invite === undefined)
-    );
+    switch (action.type) {
+      case "bind-member":
+        return (
+          grant?.state === "managed" &&
+          posthogUserUuid(grant.evidence) === action.userUuid &&
+          member?.user.uuid === action.userUuid
+        );
+      case "invite":
+        return (
+          grant?.state === "managed" &&
+          ((member !== undefined && member.level >= 1) ||
+            (invite !== undefined &&
+              !invite["is_expired"] &&
+              invite.level === 1 &&
+              invite.id === posthogInvitationId(grant.evidence)))
+        );
+      case "remove-member":
+        return grant?.state === "retired" && member === undefined;
+      case "cancel-invite":
+        return grant?.state === "retired" && invite === undefined;
+      case "retire-grant":
+        return (
+          grant?.state === "retired" &&
+          member === undefined &&
+          invite === undefined
+        );
+      default:
+        return impossiblePosthogAction(action);
+    }
   }
 }
 
@@ -342,4 +359,8 @@ function ownedMutationObserved(
         invite === undefined
       );
   }
+}
+
+function impossiblePosthogAction(value: never): never {
+  throw new Error(`Unexpected PostHog action: ${String(value)}`);
 }

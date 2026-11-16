@@ -1,16 +1,83 @@
 import type { D1Database } from "@cloudflare/workers-types";
 import { z } from "zod";
 
+import { GoogleUserIdSchema } from "../catalog/identity-authority.ts";
 import {
   ResourceLeaseFencedError,
   type ActiveResourceLease,
 } from "../identity-sync/resource-lease.ts";
-import { PosthogIdSchema } from "./posthog-membership-client.ts";
 import {
   PosthogManagedGrantSchema,
-  type IPosthogManagedGrantRepository,
-  type PosthogManagedGrant,
+  type PosthogGrantEvidence,
+} from "./posthog-managed-grant.ts";
+import { PosthogIdSchema } from "./posthog-membership-client.ts";
+import type {
+  IPosthogManagedGrantRepository,
+  PosthogManagedGrant,
 } from "./posthog-membership-plan.ts";
+
+const PosthogGrantRowSchema = z
+  .strictObject({
+    googleUserId: GoogleUserIdSchema,
+    email: z.email().toLowerCase(),
+    inviteId: PosthogIdSchema.nullable(),
+    userUuid: PosthogIdSchema.nullable(),
+    state: z.enum(["managed", "retired"]),
+  })
+  .refine(
+    (row) => row.inviteId !== null || row.userUuid !== null,
+    "Provider evidence is required",
+  );
+// The existing SQL constraint represents precisely the three valid evidence shapes for either lifecycle. No optional-field bag escapes this storage boundary.
+export const PosthogGrantRowCodecSchema = z.codec(
+  PosthogGrantRowSchema,
+  PosthogManagedGrantSchema,
+  {
+    decode(row) {
+      const identity = {
+        googleUserId: row.googleUserId,
+        email: row.email,
+        state: row.state,
+      };
+      let evidence: unknown;
+      if (row.inviteId !== null)
+        evidence =
+          row.userUuid === null
+            ? { kind: "invitation", inviteId: row.inviteId }
+            : {
+                kind: "accepted-invitation",
+                inviteId: row.inviteId,
+                userUuid: row.userUuid,
+              };
+      else evidence = { kind: "membership", userUuid: row.userUuid };
+      return PosthogManagedGrantSchema.parse({ ...identity, evidence });
+    },
+    encode(grant) {
+      const validated = PosthogManagedGrantSchema.parse(grant);
+      return {
+        ...grantSqlIdentity(validated),
+        ...grantSqlEvidence(validated.evidence),
+      };
+    },
+  },
+);
+function grantSqlIdentity(grant: PosthogManagedGrant) {
+  return {
+    googleUserId: grant.googleUserId,
+    email: grant.email,
+    state: grant.state,
+  };
+}
+function grantSqlEvidence(evidence: PosthogGrantEvidence) {
+  switch (evidence.kind) {
+    case "invitation":
+      return { inviteId: evidence.inviteId, userUuid: null };
+    case "membership":
+      return { inviteId: null, userUuid: evidence.userUuid };
+    case "accepted-invitation":
+      return { inviteId: evidence.inviteId, userUuid: evidence.userUuid };
+  }
+}
 
 /** The host owns the migration; retired rows prevent re-adopting later manual grants. */
 export class D1PosthogManagedGrantRepository implements IPosthogManagedGrantRepository {
@@ -27,7 +94,10 @@ export class D1PosthogManagedGrantRepository implements IPosthogManagedGrantRepo
     `)
       .bind(PosthogIdSchema.parse(organizationId))
       .all();
-    return z.array(PosthogManagedGrantSchema).max(10_000).parse(result.results);
+    return z
+      .array(PosthogGrantRowCodecSchema)
+      .max(10_000)
+      .parse(result.results);
   }
   async record(
     organizationId: string,
@@ -36,7 +106,10 @@ export class D1PosthogManagedGrantRepository implements IPosthogManagedGrantRepo
   ): Promise<void> {
     if (lease.resourceKey !== `workspace-directory/posthog/${organizationId}`)
       throw new ResourceLeaseFencedError(lease);
-    const grant = PosthogManagedGrantSchema.parse(raw);
+    const grant = z.encode(
+      PosthogGrantRowCodecSchema,
+      PosthogManagedGrantSchema.parse(raw),
+    );
     const result = await this.#database
       .withSession("first-primary")
       .prepare(`

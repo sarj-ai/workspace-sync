@@ -1,6 +1,6 @@
 {
   "name": "@sarj-ai/workspace-sync",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "private": true,
   "description": "Sync profiles and access from Google Workspace",
   "license": "MIT",
@@ -1030,6 +1030,10 @@
     "./workspace-directory/d1-posthog-managed-grant-repository": {
       "types": "./dist/workspace-directory/d1-posthog-managed-grant-repository.d.ts",
       "import": "./dist/workspace-directory/d1-posthog-managed-grant-repository.js"
+    },
+    "./workspace-directory/posthog-managed-grant": {
+      "types": "./dist/workspace-directory/posthog-managed-grant.d.ts",
+      "import": "./dist/workspace-directory/posthog-managed-grant.js"
     }
   },
   "scripts": {

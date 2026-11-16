@@ -13,6 +13,7 @@ import {
 } from "../src/identity-sync/resource-lease.ts";
 import type { GoogleGroupSnapshot } from "../src/org-sync/channel-model.ts";
 import type { GoogleDirectoryUser } from "../src/org-sync/model.ts";
+import { PosthogInvitationIdSchema } from "../src/workspace-directory/posthog-managed-grant.ts";
 import {
   PosthogMembershipClient,
   type IPosthogMembershipClient,
@@ -20,6 +21,7 @@ import {
 } from "../src/workspace-directory/posthog-membership-client.ts";
 import {
   planPosthogMemberships,
+  PosthogManagedGrantSchema,
   PosthogMembershipPolicySchema,
   type PosthogManagedGrant,
 } from "../src/workspace-directory/posthog-membership-plan.ts";
@@ -58,14 +60,13 @@ function snapshot(): PosthogMembershipSnapshot {
 function grant(
   overrides: Partial<PosthogManagedGrant> = {},
 ): PosthogManagedGrant {
-  return {
+  return PosthogManagedGrantSchema.parse({
     googleUserId: GoogleUserIdSchema.parse("222222"),
     email: "product@company.test",
-    inviteId: null,
-    userUuid: target,
+    evidence: { kind: "membership", userUuid: target },
     state: "managed",
     ...overrides,
-  };
+  });
 }
 async function fixture(mode: "parent" | "audit-only" = "parent") {
   const users = structuredClone(people);
@@ -233,7 +234,15 @@ describe("PostHog owned membership reconciliation", () => {
   });
   it("requires review if an unbound accepted Member leaves the group", async () => {
     const f = await fixture();
-    f.records.set("222222", grant({ userUuid: null, inviteId }));
+    f.records.set(
+      "222222",
+      grant({
+        evidence: {
+          kind: "invitation",
+          inviteId: PosthogInvitationIdSchema.parse(inviteId),
+        },
+      }),
+    );
     f.providerState.members.push({
       id: memberRecordId,
       level: 1,

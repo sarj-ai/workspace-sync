@@ -5,25 +5,23 @@ import { contentHash } from "../github-access-audit/content-hash.ts";
 import type { ActiveResourceLease } from "../identity-sync/resource-lease.ts";
 import type { GoogleDirectoryUser } from "../org-sync/model.ts";
 import {
+  PosthogManagedGrantSchema,
+  posthogInvitationId,
+  posthogUserUuid,
+  type PosthogManagedGrant,
+} from "./posthog-managed-grant.ts";
+import {
   PosthogIdSchema,
   PosthogOriginSchema,
   type PosthogMembershipSnapshot,
 } from "./posthog-membership-client.ts";
+export {
+  PosthogManagedGrantSchema,
+  type PosthogManagedGrant,
+} from "./posthog-managed-grant.ts";
 
 const EmailSchema = z.email().transform((email) => email.toLowerCase());
-export const PosthogManagedGrantSchema = z
-  .strictObject({
-    googleUserId: GoogleUserIdSchema,
-    email: EmailSchema,
-    inviteId: PosthogIdSchema.nullable(),
-    userUuid: PosthogIdSchema.nullable(),
-    state: z.enum(["managed", "retired"]).default("managed"),
-  })
-  .refine(
-    (grant) => grant.inviteId !== null || grant.userUuid !== null,
-    "A managed grant requires provider evidence",
-  );
-export type PosthogManagedGrant = z.output<typeof PosthogManagedGrantSchema>;
+
 export const PosthogMembershipPolicySchema = z.strictObject({
   origin: PosthogOriginSchema,
   organizationId: PosthogIdSchema,
@@ -197,14 +195,14 @@ function identityBlocker(
   );
   if (
     member !== undefined &&
-    grant.userUuid !== null &&
-    member.user.uuid !== grant.userUuid
+    posthogUserUuid(grant.evidence) !== null &&
+    member.user.uuid !== posthogUserUuid(grant.evidence)
   )
     return "posthog_managed_provider_identity_changed";
   if (
     invite !== undefined &&
-    grant.inviteId !== null &&
-    invite.id !== grant.inviteId
+    posthogInvitationId(grant.evidence) !== null &&
+    invite.id !== posthogInvitationId(grant.evidence)
   )
     return "posthog_managed_invitation_changed";
   return undefined;
@@ -220,7 +218,7 @@ function memberFinding(
     email: grant.email,
     userUuid: member.user.uuid,
   };
-  if (grant.userUuid === null)
+  if (grant.evidence.kind === "invitation")
     return eligible
       ? { kind: "action", action: { ...identity, type: "bind-member" } }
       : { kind: "blocker", code: "posthog_unbound_member_requires_review" };
@@ -239,7 +237,7 @@ function inviteFinding(
   if (
     invite.level !== 1 ||
     invite["created_by"].uuid !== actorUuid ||
-    grant.inviteId !== invite.id
+    posthogInvitationId(grant.evidence) !== invite.id
   )
     return {
       kind: "blocker",
