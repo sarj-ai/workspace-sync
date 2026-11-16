@@ -51,6 +51,10 @@ import {
   pagerDutyTeamResourceId,
 } from "./reviewed-pagerduty-team.ts";
 import {
+  posthogMembershipManagedSlice,
+  posthogMembershipResourceId,
+} from "./reviewed-posthog-membership.ts";
+import {
   type ReviewedSentryWorkspace,
   sentryWorkspaceManagedSlice,
   sentryWorkspaceResourceId,
@@ -316,6 +320,7 @@ export function workspaceDirectoryChanges(
     ...googleGroupCleanupChanges(plan),
     ...pagerDutyTeamsChanges(plan),
     ...sentryMembershipChanges(plan),
+    ...posthogMembershipChanges(plan),
     ...(plan.branches[5].schemaPlan.kind === "not-selected"
       ? []
       : [fanoutChange(plan)]),
@@ -329,6 +334,45 @@ export function workspaceDirectoryChanges(
   ];
 }
 
+function posthogMembershipChanges(
+  plan: WorkspaceDirectoryPlan,
+): ManagedChange[] {
+  const branch = plan.branches.find(
+    (item) => item.branchId === "posthog-memberships",
+  );
+  if (
+    branch?.execution !== "managed" ||
+    branch.reviewed === null ||
+    branch.diagnostics.some(({ severity }) => severity === "blocker")
+  )
+    return [];
+  const action = branch.reviewed.action;
+  return [
+    {
+      actionId: WORKSPACE_DIRECTORY_ACTION_IDS.posthogMemberships,
+      before: posthogMembershipManagedSlice(branch.reviewed, "pending"),
+      after: posthogMembershipManagedSlice(branch.reviewed, "converged"),
+      details: JsonValueSchema.parse({ kind: "posthog-memberships", plan }),
+      display: `Apply one reviewed PostHog ${action.type} action for ${action.email}.`,
+      kind:
+        action.type === "invite"
+          ? "add"
+          : action.type === "retire-grant" || action.type === "bind-member"
+            ? "change"
+            : "remove",
+      reason:
+        "A fresh pinned Google group, provider identity and owned-grant record authorize this original bounded change.",
+      resource: {
+        id: posthogMembershipResourceId(branch.reviewed),
+        type: "posthog-membership",
+      },
+      risk:
+        action.type === "remove-member" || action.type === "cancel-invite"
+          ? "high"
+          : "medium",
+    },
+  ];
+}
 function sentryMembershipChanges(
   plan: WorkspaceDirectoryPlan,
 ): ManagedChange[] {

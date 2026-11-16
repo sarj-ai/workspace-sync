@@ -25,6 +25,7 @@ export interface WorkspaceDirectoryRuntime {
   ): Promise<string>;
   applyPagerDutyTeams?(plan: WorkspaceDirectoryPlan): Promise<string>;
   applySentryMemberships?(plan: WorkspaceDirectoryPlan): Promise<string>;
+  applyPosthogMemberships?(plan: WorkspaceDirectoryPlan): Promise<string>;
   applySlackGroupsChannels(plan: WorkspaceDirectoryPlan): Promise<string>;
   applySlackProfiles(plan: WorkspaceDirectoryPlan): Promise<string>;
   applyTrycomp(plan: WorkspaceDirectoryPlan): Promise<string>;
@@ -57,6 +58,9 @@ export interface WorkspaceDirectoryRuntime {
   ): Promise<null | string>;
   readPagerDutyTeamsSlice?(plan: WorkspaceDirectoryPlan): Promise<JsonValue>;
   readSentryMembershipsSlice?(plan: WorkspaceDirectoryPlan): Promise<JsonValue>;
+  readPosthogMembershipsSlice?(
+    plan: WorkspaceDirectoryPlan,
+  ): Promise<JsonValue>;
   readSlackGroupsChannelsObservationSlice?(
     plan: WorkspaceDirectoryPlan,
   ): Promise<JsonValue>;

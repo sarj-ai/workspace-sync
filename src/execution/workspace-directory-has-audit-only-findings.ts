@@ -62,6 +62,7 @@ export function workspaceDirectoryHasAuditOnlyFindings(
         );
       case "google-group-cleanup":
       case "pagerduty-teams":
+      case "posthog-memberships":
       case "sentry-memberships":
         return branch.execution === "audit-only" && branch.reviewed !== null;
       case "access-guard":

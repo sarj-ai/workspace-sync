@@ -224,6 +224,7 @@ function alignOptionalBranchExecutions(
     "google-group-cleanup",
     "pagerduty-teams",
     "sentry-memberships",
+    "posthog-memberships",
   ] as const) {
     if (result.branches.some((branch) => branch.branchId === branchId))
       continue;
@@ -318,6 +319,8 @@ export function managedBranchActionId(
       return WORKSPACE_DIRECTORY_ACTION_IDS.pagerDutyTeams;
     case "sentry-memberships":
       return WORKSPACE_DIRECTORY_ACTION_IDS.sentryMemberships;
+    case "posthog-memberships":
+      return WORKSPACE_DIRECTORY_ACTION_IDS.posthogMemberships;
     case "access-guard":
       return WORKSPACE_DIRECTORY_ACTION_IDS.linearSuspensions;
     case "drive-org-chart":

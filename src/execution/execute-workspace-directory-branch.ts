@@ -25,6 +25,7 @@ type WorkflowRuntime = Pick<
   | "applyNameRepair"
   | "applyPagerDutyTeams"
   | "applySentryMemberships"
+  | "applyPosthogMemberships"
   | "applySlackGroupsChannels"
   | "applySlackProfiles"
   | "applyTrycomp"
@@ -48,6 +49,8 @@ export async function executeWorkspaceDirectoryBranch(
   githubDispatchClaim?: GithubDispatchClaim,
 ): Promise<WorkflowBranchResult> {
   switch (branch.branchId) {
+    case "posthog-memberships":
+      return executePosthogBranch(runtime, params, authorizedActionIds, branch);
     case "sentry-memberships":
       return executeSentryBranch(runtime, params, authorizedActionIds, branch);
     case "pagerduty-teams":
@@ -343,8 +346,38 @@ async function executeSentryBranch(
   };
 }
 
+async function executePosthogBranch(
+  runtime: WorkflowRuntime,
+  params: WorkspaceDirectoryWorkflowParams,
+  authorizedActionIds: ReadonlySet<WorkspaceDirectoryAuthorizedActionId>,
+  branch: Branch<"posthog-memberships">,
+): Promise<WorkflowBranchResult> {
+  if (branch.execution !== "managed") return nonManagedResult(branch);
+  if (
+    !authorizedActionIds.has(WORKSPACE_DIRECTORY_ACTION_IDS.posthogMemberships)
+  ) {
+    return {
+      branchId: branch.branchId,
+      detail: "No Posthog membership was authorized.",
+      execution: "managed",
+      state: "skipped",
+    };
+  }
+  if (runtime.applyPosthogMemberships === undefined) {
+    throw new Error("workspace_posthog_adapter_required");
+  }
+  return {
+    branchId: branch.branchId,
+    detail: await runtime.applyPosthogMemberships(params.plan),
+    execution: "managed",
+    state: "applied",
+  };
+}
+
 function branchDetail(branch: WorkflowBranch): string {
   switch (branch.branchId) {
+    case "posthog-memberships":
+      return "PostHog membership reconciliation is disabled; no membership write was attempted.";
     case "sentry-memberships":
       return "Sentry membership reconciliation is disabled; no membership write was attempted.";
     case "pagerduty-teams":

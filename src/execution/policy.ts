@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { PosthogMembershipPolicySchema } from "../workspace-directory/posthog-membership-plan.ts";
 import { AccessGuardSettingsSchema } from "./access-guard-settings-schema.ts";
 
 const DigestSchema = z.string().regex(/^[a-f0-9]{64}$/u);
@@ -27,6 +28,7 @@ export const CanaryResolutionPinsSchema = z.strictObject({
 export type CanaryResolutionPins = z.output<typeof CanaryResolutionPinsSchema>;
 export const WorkspaceExecutionPolicySchema = z.strictObject({
   notificationStatusUrl: z.url(),
+  posthog: PosthogMembershipPolicySchema.nullable().default(null),
   sentry: z.strictObject({
     organizationSlug: z.string().regex(/^[a-z0-9][a-z0-9_-]*$/u),
     authorityGroupEmail: z.email(),

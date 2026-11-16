@@ -87,6 +87,7 @@ const PROVIDER_LEDGER_BRANCH_IDS = Object.freeze([
   "linear-profiles",
   "pagerduty-teams",
   "sentry-memberships",
+  "posthog-memberships",
 ]);
 
 const WORKSPACE_DIRECTORY_BRANCH_ACTION_IDS = {
@@ -102,6 +103,7 @@ const WORKSPACE_DIRECTORY_BRANCH_ACTION_IDS = {
   "google-group-cleanup": "workspace-directory.google-group-cleanup",
   "pagerduty-teams": "workspace-directory.pagerduty-teams",
   "sentry-memberships": "workspace-directory.sentry-memberships",
+  "posthog-memberships": "workspace-directory.posthog-memberships",
 } as const satisfies Record<
   WorkspaceDirectoryWorkflowParams["plan"]["branches"][number]["branchId"],
   WorkspaceDirectoryWorkflowParams["authorizedActionIds"][number]
@@ -502,6 +504,36 @@ export async function runWorkspaceDirectoryWorkflow(input: {
             },
             plan,
             "sentry-memberships",
+          );
+          return {
+            ...parent,
+            mode: "parent",
+            identityBudget,
+            verifyPreannouncement: async () => {
+              await parent.assertWriteAuthority();
+            },
+          };
+        },
+        posthogParentContext: (plan) => {
+          const identityBudget = identityBudgets.posthogIdentityBudget;
+          if (identityBudget?.required !== true) {
+            throw new Error("workspace_posthog_budget_required");
+          }
+          const parent = createWorkspaceIdentityParentContext(
+            {
+              enabled:
+                validatedEnv.workspaceDirectoryParentEnabled &&
+                validatedEnv.workspaceDirectoryPosthogEnabled === true,
+              params,
+              handles: ledgerHandles,
+              ledger: changeLedger,
+              identityBudget,
+              repository: new WorkspaceScheduleHealthRepository(
+                input.bindings.AUTOMATIONS_DB,
+              ),
+            },
+            plan,
+            "posthog-memberships",
           );
           return {
             ...parent,

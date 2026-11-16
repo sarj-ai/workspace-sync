@@ -1,6 +1,6 @@
 {
   "name": "@sarj-ai/workspace-sync",
-  "version": "0.8.1",
+  "version": "0.9.0",
   "private": true,
   "description": "Sync profiles and access from Google Workspace",
   "license": "MIT",
@@ -1010,6 +1010,26 @@
     "./execution/get-workspace-execution-policy": {
       "types": "./dist/execution/get-workspace-execution-policy.d.ts",
       "import": "./dist/execution/get-workspace-execution-policy.js"
+    },
+    "./execution/posthog-membership-service": {
+      "types": "./dist/execution/posthog-membership-service.d.ts",
+      "import": "./dist/execution/posthog-membership-service.js"
+    },
+    "./execution/reviewed-posthog-membership": {
+      "types": "./dist/execution/reviewed-posthog-membership.d.ts",
+      "import": "./dist/execution/reviewed-posthog-membership.js"
+    },
+    "./workspace-directory/posthog-membership-client": {
+      "types": "./dist/workspace-directory/posthog-membership-client.d.ts",
+      "import": "./dist/workspace-directory/posthog-membership-client.js"
+    },
+    "./workspace-directory/posthog-membership-plan": {
+      "types": "./dist/workspace-directory/posthog-membership-plan.d.ts",
+      "import": "./dist/workspace-directory/posthog-membership-plan.js"
+    },
+    "./workspace-directory/d1-posthog-managed-grant-repository": {
+      "types": "./dist/workspace-directory/d1-posthog-managed-grant-repository.d.ts",
+      "import": "./dist/workspace-directory/d1-posthog-managed-grant-repository.js"
     }
   },
   "scripts": {

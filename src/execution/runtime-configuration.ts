@@ -40,6 +40,7 @@ export interface WorkspaceRuntimeConfiguration {
   readonly workspaceDirectoryGoogleGroupCleanupDisabled: boolean;
   readonly workspaceDirectoryGoogleGroupCleanupMode: "audit" | "live";
   readonly workspaceDirectoryLinearSuspensionsEnabled: boolean;
+  readonly workspaceDirectoryPosthogEnabled?: boolean;
   readonly workspaceDirectoryParentEnabled: boolean;
   readonly workspaceDirectorySentryAuthorityPins: string;
   readonly workspaceDirectorySentryEnabled: boolean;
