@@ -1,5 +1,5 @@
 # Managed by `code-standards setup`; commit this file.
-bundle = "9.19.0"
+bundle = "9.75.0"
 rule_profile = "all"
 schema = 4
 
@@ -39,3 +39,6 @@ typescript = "."
 
 [hooks]
 manager = "pre-commit"
+
+[baseline]
+diagnostics = "diagnostic-baseline.json"

@@ -1,0 +1,1459 @@
+{
+  "schemaVersion": 2,
+  "provenance": {
+    "bundleVersion": "9.75.0",
+    "consumerBaseSha": "ca6e4f060d2cf881f90fbdcdd58ff73924c1ffe4",
+    "catalogDigest": "ed64614f526f9b90eea29a6bdae88b2153fdfacba51fe71ba72dc8aff3ca4bb8"
+  },
+  "diagnostics": [
+    {
+      "fingerprint": "339834c30eb759fb0f259adc8579995cc171a3ab0d0c24316a166fb8ec16bff1",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-explicit-type-predicate",
+      "path": "src/execution/execute-scheduled-workspace-branch.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "3689b27a1cd1eda5bba650502bacab52ac996e2cec51fd95be1f6ffdd687713b",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-explicit-type-predicate",
+      "path": "src/execution/sentry-deprovision.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "c9ae238c7577d1498d716124df8fb674e4d432a684d0b67ec0d5ac089b9900b4",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-explicit-type-predicate",
+      "path": "src/execution/sentry-workspace-service.ts",
+      "count": 2
+    },
+    {
+      "fingerprint": "32e01004a2a2a2e16d1e6bd02a19de7d2bd58e6b1cadd22fd6b5c1c31a727398",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-explicit-type-predicate",
+      "path": "src/execution/workspace-schedule-health-repository.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "37ea7a9f87c27d68bca0118b2da429bbe8f0240c9a7e15b7230d1db1b69ce07a",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-explicit-type-predicate",
+      "path": "src/identity-provisioning/github-authority-projector.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "dbadc44bf091545b370c839216f91de8d7f8262419782f9059e3e876c0fe6166",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-explicit-type-predicate",
+      "path": "src/identity-sync/github-identity-seed-planner.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "746d00b0d412d2d0c2402e1d6a472f435d505cc3be4c7faa31dc0075e4a7f45a",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-explicit-type-predicate",
+      "path": "src/operations/kernel.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "062ff5bb2ce982515067061e02c77b33ad6da92f3cb2ea223e050e4c4ab5dcdc",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-explicit-type-predicate",
+      "path": "src/operations/registry.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "05ca5eb6c55e484e2ffd590c657c926400d0522d0f56b3d8b207db320903d5ee",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-explicit-type-predicate",
+      "path": "src/org-sync/channel-model.ts",
+      "count": 3
+    },
+    {
+      "fingerprint": "394868321718f242768d02b89dd06911029ac6fc048a9247166db817543b95c3",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-explicit-type-predicate",
+      "path": "src/org-sync/channel-service.ts",
+      "count": 2
+    },
+    {
+      "fingerprint": "1870e42bc4bb40441dedbdd606ca4031c1f3e97e5f5f66af57cbca54662c5b2c",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-explicit-type-predicate",
+      "path": "src/org-sync/model.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "259e9cd947220c3e23b49e93560f5585dba02ae732e17b9436930569aa236932",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-explicit-type-predicate",
+      "path": "src/trycomp/reviewed-identity.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "bfdb8f4c4a7795ccd8c3e7bc364b524898eeaab9aa617efa6ff0b4884814a8e8",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-explicit-type-predicate",
+      "path": "src/workspace-directory/sentry-workspace-sync.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "bebee0ce2685c96103f81031765dbec61559c7a01dfb300000f0e28fca22c935",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-explicit-type-predicate",
+      "path": "test/support/value-guards.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "a2cc99db2116800d804c6778c0525ddf62de69b284a3fb36430d4dc7f4a38116",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-logical-or-fallback",
+      "path": "src/access-guard/provider.ts",
+      "count": 2
+    },
+    {
+      "fingerprint": "4c918152d1b66db9bf919c0c6d93295c1a85855813de7e361c78f4e7d3942d6c",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-logical-or-fallback",
+      "path": "src/execution/workspace-directory-slack-manifest.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "17d8e973dbce1581e830b0025b53387ceb690934084138fa9f17029826febf0a",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-logical-or-fallback",
+      "path": "src/execution/zero-change-plan-message.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "b69c976016bde7334fda3b3d9fd8b01f7e126e4a4f0cc39c4b48adc342b94993",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-logical-or-fallback",
+      "path": "src/operations/kernel.ts",
+      "count": 3
+    },
+    {
+      "fingerprint": "3fe07b818c952724e37c865ec95dbcc33a4a2951d9fd55600481d12b36bdcc0b",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-logical-or-fallback",
+      "path": "src/org-sync/channel-model.ts",
+      "count": 4
+    },
+    {
+      "fingerprint": "d1c40ccc2dd3fb3be00e79af4a64e3da99f1172b7f967a4c879daa7e436d79df",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-logical-or-fallback",
+      "path": "src/org-sync/channel-service.ts",
+      "count": 7
+    },
+    {
+      "fingerprint": "7370413116284aa592e5a50b3ae17532c9cc27e90a0af5a81bb5f298a31807fe",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-logical-or-fallback",
+      "path": "src/org-sync/model.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "8fb92a41bb8c6c32e5946b45c92a79d1a805670a6a15f962553facde7d37b7ce",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-logical-or-fallback",
+      "path": "src/org-sync/org-channel-slack-client.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "456f117da5203dd7936f749ff35aab948101ae8b7ee8e11dcf0e660e53856627",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-logical-or-fallback",
+      "path": "src/org-sync/org-chart.ts",
+      "count": 3
+    },
+    {
+      "fingerprint": "6d175c2d5f7afd62668c389276f967ee9d20f8cd30776d46009050358c2b9ce5",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-logical-or-fallback",
+      "path": "src/org-sync/render-org-chart-html.ts",
+      "count": 4
+    },
+    {
+      "fingerprint": "ca2b0066e1f3c3e8abdd8ab6a89c6a83d2fe3b98ee36644724f5e008c6d9e92b",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-logical-or-fallback",
+      "path": "src/org-sync/service.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "5b3b257b6f64a7a1f9beae39cce625ff2ffed76a1e7be26a37194c32e386fe64",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-logical-or-fallback",
+      "path": "src/trycomp/plan.ts",
+      "count": 2
+    },
+    {
+      "fingerprint": "3ee2ba96f893a8a4434769de78417802d477d80de580a945b7a8d7ed123a60c7",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-logical-or-fallback",
+      "path": "src/trycomp/service.ts",
+      "count": 4
+    },
+    {
+      "fingerprint": "59ec8010e6810f37927eb976198475ffb1f0ef3f9fb1dc48e343ccdfac23f74e",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-logical-or-fallback",
+      "path": "src/workspace-directory/google-group-cleanup-sync.ts",
+      "count": 9
+    },
+    {
+      "fingerprint": "644425120b7a020a7191f61c8c3c718b10e5a0ca1381c03df7637231f84307bd",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-logical-or-fallback",
+      "path": "src/workspace-directory/posthog-membership-plan.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "9b5b18647e36968aaef9e6bc09fdb8bf8ea23631c4a8469cfc994b1d95e0035d",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-mutating-input-with-result",
+      "path": "src/identity-provisioning/github-organization-api-port.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "fe0308687a4bafdd92a6bcdb8851b436a429361226e3aaaf624c680e03eb04ed",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-mutating-input-with-result",
+      "path": "src/org-sync/channel-service.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "f9a10303191844d8b2f66880839e8f64e9ca8e9e8561eeb1dd7d29067f2bfe09",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-mutating-input-with-result",
+      "path": "src/workspace-directory/pagerduty-team-client.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "52a596fa78f73823db467ce4e3bb32ffdd01550d5e1898db73d76cd224a16760",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-mutating-input-with-result",
+      "path": "test/google-drive-client.test.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "3633cfa9a186684f1367759d7ec21c7ca23d95fb7e48b1ae1341d11ba616d9fe",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-mutating-input-with-result",
+      "path": "test/google-group-rename-client.test.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "e542595a2f3526d2ff32fc08f0da04a5d3ec3af2976bf4df81a7f105715e3070",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-mutating-input-with-result",
+      "path": "test/org-channel-sync-clients.test.ts",
+      "count": 2
+    },
+    {
+      "fingerprint": "04545781770ffd41e2473d8344793c669269b8b787aed1149494837baae8f67d",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/access-guard/access-guard-service.ts",
+      "count": 3
+    },
+    {
+      "fingerprint": "1fa0809a0999cf37d2cdc29cbaad9696d49c25fc1f4aafc4e4da62973c468936",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/access-guard/compute.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "bbf2e7c8206788e06ae9bd8174575f2fa1b6b10bacfe11eb3c9967d4a916054e",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/access-guard/slack-access-client.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "34aed5ba2163f27f0b29c7fb46319962b7a4937186eeb34efd2abea59c812162",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/execution/attio-deprovision-operation.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "0efbec859a76a55956d2c5bbfe278b4148ad463ba0a8504b29e29dd7604bfa80",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/execution/canary-branch-resolution-store.ts",
+      "count": 2
+    },
+    {
+      "fingerprint": "2a25291398a3a7be4a22dba6b95ee0a56a5bd5f029d2df1c108dac9fdb5d166d",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/execution/change-ledger.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "e70422f4eb2a7093ab146cd815cef6d5adfcfade6fd8e4d111410d1f44fa511c",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/execution/create-exact-google-group-rename-operation.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "a988a7f04ae45addae729fc87cc47098d6e07db317b3f7f1462fddc601c31f23",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/execution/create-google-group-retirement-readiness-operation.ts",
+      "count": 3
+    },
+    {
+      "fingerprint": "58d9510a38993231b009ccb59da3a1005cb87a36a974065d6f1a89d92ad0bc22",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/execution/create-privileged-google-group-cleanup-operation.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "f90d4df96cb07aeeda506b46748dc2871f7470089d801bd23efdff7c77ca71af",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/execution/create-workspace-scheduled-terminal-receipt-verifier.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "933adcdaa36dcb67985c1342eb6c3907ac96b90c6672b1cabba6bd8a192c7351",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/execution/create-workspace-slack-lifecycle-parent-context.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "0a3ce481e80f72cf105a4cbcbc24d0361d33208581ec3afb7d61f361d6d6a1e6",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/execution/execute-scheduled-workspace-branch.ts",
+      "count": 2
+    },
+    {
+      "fingerprint": "8b8b8c70e8e83e669b117204b4eb2cd1fea65490df80a10501fccf31efa8574f",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/execution/github-access-managed.ts",
+      "count": 4
+    },
+    {
+      "fingerprint": "bd2851ab40eab2cc7802b324a1b4ff636034daa62c29fe93f8cd5fad6781184e",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/execution/github-deprovision-operation.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "f8a1fcc14828ab2fcf1438d2d07fa44330c9fa3a36baf4afae192922ce812275",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/execution/github-identity-admin-attestation-operation.ts",
+      "count": 2
+    },
+    {
+      "fingerprint": "81df1d41aa242b767d1d0f6d8640932a1569257e4612bbd361d07437e51569f1",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/execution/linear-profile-service.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "1f853638bbc4d057803b47cb6a5923ca2429c86d985ccec0ff17fb9776608348",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/execution/managed-slices.ts",
+      "count": 3
+    },
+    {
+      "fingerprint": "4e9f1c4662eef5601323121fe764593b436f381c24875ebef157eafc535aa34e",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/execution/observation-carrier.ts",
+      "count": 2
+    },
+    {
+      "fingerprint": "5975c7a35febe15b60223e3fa22a713026938c7b4ec819e63dc4e0ddd0b4c5af",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/execution/observe-original-slack-membership-target.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "18dba85e930248e739369ca9ad0bcd9ecb28312910675fe57c3ea76ff663f225",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/execution/operation.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "9ec87f703bd099bbcfd348f335c9bc945be2d8dc41816cdb56589e7289d8539b",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/execution/pager-duty-team-service.ts",
+      "count": 3
+    },
+    {
+      "fingerprint": "ac308b1d44bf700edf0be98a9626ee7d4dd4767cc4c4ba015d47afbdf40d07e0",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/execution/read-workspace-directory-managed-slice.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "6d7cbb54fa829edff9c110585b805c8828b54806317984177a9512f92958186e",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/execution/reconstruct-verified-failed-workflow-result.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "c5a57360e33d5eee56803f4713114542a723da8b012dce934f8be14315b5054d",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/execution/reviewed-google-group-cleanup-adapter.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "c4d60056a35084fecd15264340411320bdc96506a934ccb61b5f329d82d6f4da",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/execution/reviewed-pager-duty-team-adapter.ts",
+      "count": 2
+    },
+    {
+      "fingerprint": "25fc3dc024545fa7d83b676f6a54d391ab89e6aacca97733bc5da1ab63b9ab21",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/execution/reviewed-pagerduty-team.ts",
+      "count": 4
+    },
+    {
+      "fingerprint": "1a2250c6ec0ba7cca568864fa93c8d6943b1cdbf22863b9d26b3d165cdfb5e70",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/execution/reviewed-posthog-membership-adapter.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "fccf98353a38694e8ba889bf06049fe95c89b35dd1a2160be0c321c6464735d4",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/execution/reviewed-provider-admission.ts",
+      "count": 5
+    },
+    {
+      "fingerprint": "f4c5820582ff906167dca28337b8944555166fb677d5f9f80ace678d3a95b996",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/execution/reviewed-sentry-workspace-adapter.ts",
+      "count": 2
+    },
+    {
+      "fingerprint": "36c0effbd45d6982e5b663e4a6bc3e26d8f8936caeb280bb8288cdb836cf3eaf",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/execution/reviewed-slack-lifecycle-admission.ts",
+      "count": 2
+    },
+    {
+      "fingerprint": "378e179b4009a670f9c66c0aea500014eba5d0df0afa6fb3f12eb33457b2311c",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/execution/runtime.ts",
+      "count": 7
+    },
+    {
+      "fingerprint": "ad8d038c51fbaae739abddfe475c17f7025fe3d76476252773383e6ce195ea7e",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/execution/sentry-workspace-authority-pins.ts",
+      "count": 2
+    },
+    {
+      "fingerprint": "928c75e2cf681d95871cc2d1c2d2253f22335fe497a420c754b6daa5bf45485d",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/execution/sentry-workspace-service.ts",
+      "count": 2
+    },
+    {
+      "fingerprint": "d17fa9fa2a0e0436ab4ddcf56350b9958d9720cf2c67a7abfe2db79200b2ae5b",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/execution/slack-name-service.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "9b24f43062f45be9f431b911990796848afd613aaff728139f9df6148ffb21a3",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/execution/trycomp-status.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "15607613edb2ef5fdcd62b356c8889173d812953d268b8890a95970f35b6918d",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/execution/workspace-schedule-health-repository.ts",
+      "count": 5
+    },
+    {
+      "fingerprint": "d207d4ad8de9f051bb249423c09f2ea408d010ecf7e78258782a143ca4baacaa",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/execution/writer-readiness.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "b97e90954333710223913de0e06e21f8d4e29ce64510846c52da0abae1b60dc9",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/execution/zero-change-plan-message.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "09d0022741536639cd04383464e5f1fc0646b5040fd9548c49e6b7bb16090713",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/github/organization-membership-reader.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "66e325fd02679f9eb63e44c5bb9b098981836b6baa49f38adbccb0b745557875",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/identity-provisioning/git-hub-deprovision-authority-port.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "6154bf09c717fe63461e1f3404bc087f183f90a63a90403b0cd961e22e36e386",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/identity-provisioning/github-authority-projector.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "8b96bf51513891cde7c0f2481b3700e891f657d1b0993cd4ecd4d0865615f7d0",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/identity-provisioning/github-organization-api-port.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "a531d40ab10dbcad35595e17957f8ca2624bbe6d7a72d5bd824a15575c55afa2",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/identity-provisioning/identity-budget-contracts.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "b4cbfbbe33d03ef62922efc53e7fbaa0c05e623cf9a4ac806cb01793ed14e8b6",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/identity-provisioning/orchestrator.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "fcd15dee7d7208554a53bddab25c8702ba08397b7e02e1357c8d064dba21ce23",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/identity-provisioning/persistence.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "7ba9a763ed8e644211d18a480d1591970b81ff614bf6d880a665673206eca265",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/identity-sync/github-inactive-identity-attestation.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "5ce5ea56baabf54161cc2fb741dad781e38a83513d88d97f21c8ab0f631cc826",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/identity-sync/google-github-identity-seed-service.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "241cfe7cbbd35ca91215f67dd9b7630a43b9fb17f99fd9fc450d2ad3dc5237e8",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/operations/kernel.ts",
+      "count": 7
+    },
+    {
+      "fingerprint": "71d569e3cda4d240dd029f172f2ab24bfade372d12b690c8aaaa333e20f85b40",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/operations/registry.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "320c26c9d8ef011167f66119aefb0c9ced70c3aab8561ddba48792ef991ed9e9",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/org-sync/google-directory-client.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "cc0881748869981ebd262c804699beab70ce04f2729acda93820c7f83083a16e",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/org-sync/google-group-rename-client.ts",
+      "count": 2
+    },
+    {
+      "fingerprint": "8ba702c24424857eb309e464fd95f2ae186a0717eecd548358801037a8556e2e",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/org-sync/google-identity-schema.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "70c6be6b9a4ae36dd1e8790fcff7e0d8c0bb8f61cde6ea9cbc10d306ac01b1a3",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/provider-readiness.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "a60a09379fc31f3aa03b40f2250267ca3fe301b8441fc6075e0df7adb2bcd0ab",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/trycomp/plan.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "44fea8c3c597188f78ce274a703320039df55f0b2032d3adb7fb1af986a29470",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/trycomp/safety.ts",
+      "count": 2
+    },
+    {
+      "fingerprint": "a58358c36e91a540e657f65bf1f48f086be938a04180bd3d73f64958a1ab12b6",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/workspace-directory/d1-workspace-ledger-history-index.ts",
+      "count": 5
+    },
+    {
+      "fingerprint": "2e8b0f20e3da15e84fc25097ccc3902efe0b08b632d17909d781e3e4bfda8442",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/workspace-directory/fingerprint-name-authority.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "09b24eb8bcc9efdb1d949458efd95b50c57c4a76ebda3cd0b286b3d76458fa0b",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/workspace-directory/google-group-cleanup-sync.ts",
+      "count": 2
+    },
+    {
+      "fingerprint": "228d8957c71e73ce352d3af12fada89de0deb623751e44103f9a289c977ec006",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/workspace-directory/linear-profile-sync.ts",
+      "count": 6
+    },
+    {
+      "fingerprint": "4bfbdb7e3acdefe10f21a8e71fbab917389453ef04340af042d15eeb14a965a2",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/workspace-directory/pagerduty-team-client.ts",
+      "count": 2
+    },
+    {
+      "fingerprint": "7e21b3b3321622e4e1badf50b7348a308b91333ae3f5e239148ee050a6be7423",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/workspace-directory/pagerduty-team-sync.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "c884224a9e998df49660ba7d2e24dc769cdc0c670f37dd000101eec54fed1e08",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/workspace-directory/sentry-workspace-sync.ts",
+      "count": 4
+    },
+    {
+      "fingerprint": "ba3bcfdd5f9428823e5a91d7b27daf6c4fc9691ee0df4bedf796e785414eb3b1",
+      "source": "oxlint",
+      "ruleId": "@sarj/no-zod-parse-typed-object",
+      "path": "src/workspace-directory/slack-name-sync.ts",
+      "count": 3
+    },
+    {
+      "fingerprint": "d15f138ecd4e2352177484369a49a4889f22475c3fe2956ca3f29e8b3d74ad42",
+      "source": "oxlint",
+      "ruleId": "@sarj/prefer-coded-error-result",
+      "path": "src/operations/kernel.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "65f8fa21b672631eef83af167ddca025631b7e9d292903ac6388b43986275c35",
+      "source": "oxlint",
+      "ruleId": "@sarj/prefer-module-level-refined-schema",
+      "path": "src/workspace-directory/d1-posthog-managed-grant-repository.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "3e3d03e245c0028a60669d8db3f2b1eed02516a669a68704c9c821c7b3ec8552",
+      "source": "oxlint",
+      "ruleId": "@sarj/prefer-typed-cli",
+      "path": "examples/audit-directory.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "a416603bdfdf26bc7fcc0058a730a68b711888cdca3a77f33ef54abc98865eb0",
+      "source": "oxlint",
+      "ruleId": "@sarj/prefer-typed-cli",
+      "path": "scripts/documentation.ts",
+      "count": 2
+    },
+    {
+      "fingerprint": "eba2fda39dcd734eb28ef4523001e45b7dabfb7edcaf472b2abd487117784b46",
+      "source": "oxlint",
+      "ruleId": "@sarj/prefer-typed-cli",
+      "path": "scripts/release.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "d47a2184c664b25fd29775127c22b60db435029e9f7af449c71c3a94ae8fa13d",
+      "source": "oxlint",
+      "ruleId": "eslint-js/preserve-caught-error",
+      "path": "scripts/release.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "33529496703b4ddc0f6232bffeee15eea9a4f6f989e47b27a943c3af263fa26d",
+      "source": "oxlint",
+      "ruleId": "eslint-js/preserve-caught-error",
+      "path": "src/execution/read-ashby-offboarding-accounts.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "8e8c39f966169b9f7c5f57944e368f2f81a0f0ef9e68e291dafc69b51b23d9a2",
+      "source": "oxlint",
+      "ruleId": "eslint-js/preserve-caught-error",
+      "path": "src/org-sync/exchange-google-token.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "a974632905458a93046d18d68d0a607749f61f8bb9ed37b0a615cfd85185684e",
+      "source": "oxlint",
+      "ruleId": "eslint-js/preserve-caught-error",
+      "path": "src/org-sync/http.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "c2ca8927a23b9855cb1582fd848b22d4e30f452d8c938603c600d983054bc960",
+      "source": "oxlint",
+      "ruleId": "import/no-anonymous-default-export",
+      "path": "site/worker.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "f28e44b945359189ffa61fd33592a9a0c6ee2d3c72b7fcb302a6814e412d8d23",
+      "source": "oxlint",
+      "ruleId": "no-promise-executor-return",
+      "path": "test/http-security.test.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "7686fe52e386d8aa458834b46f156194e6726a80ac6771ea404c920b626eec50",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "scripts/derive-documentation-reference.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "a3b206f63dd50460dcce89c70c52fcb9abd4b063a07379a14ee1f57138824001",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "scripts/documentation.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "11a60535ced24179576c2eddac2343e8069e2aa67b0d20fc77ec9fc29083b3f9",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "scripts/release.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "362a633433ef94d87b15ac1cd3bbc5302f6a866e79d26a7b4fdd2a3f637c8a7d",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "site/src/integrations/cloudflare-artifacts.ts",
+      "count": 3
+    },
+    {
+      "fingerprint": "0f7ddaab951d8fcec1848c1831592c197f0de3ed3912b37d1abd496eab48a798",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/access-guard/access-guard-service.ts",
+      "count": 2
+    },
+    {
+      "fingerprint": "a2f6e832189e6f2ecc1ee17042643a63cf9b3881a7307ddb3a1fc39ed6d5d52d",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/access-guard/provider.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "b1f9c69635260bbb68ea48a5079d8aa1d6f9c05a8853996442a8439c1360cda7",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/execution/attio-deprovision-operation.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "781932af3f30c18321e6ffa2c561f49b39594cec74835d52dda1c8b198064fe1",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/execution/change-ledger.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "9911585fa964fb3cfdf80da0b0d552e7da02be0e8472812ff0dbd1710da62087",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/execution/create-workspace-directory-workflow-executor.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "22176f1ae03719d5e61076e010bce2ef1537ba1152326e4562cf009d10c3e77b",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/execution/execute-scheduled-workspace-branch.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "4ab1590ffac015017dc777e12748aa29e5217b43f8a55d72c4eae1aca519d585",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/execution/github-access-managed.ts",
+      "count": 7
+    },
+    {
+      "fingerprint": "9874bddaaa8f36f66d77e14bf7806ece359fb5aaa42563d19b3b5b938e18fdd1",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/execution/github-deprovision-operation.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "a9fc3e4f58a8cec43b17706aa7ecbb32a77bc640adb44fc13af7e586a52b68d9",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/execution/google-identity-attestation-maintenance-fence.ts",
+      "count": 3
+    },
+    {
+      "fingerprint": "8c2f36f987a95dd3f063132f7cc2a912d51aa67a5098c29f94dd137b3bd6910e",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/execution/identity-provisioning-runtime.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "86d34c6bb39a896b50df36efb917cfd78be4a0ddfb7af524d705d901266c3b88",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/execution/identity-seed-preview.ts",
+      "count": 2
+    },
+    {
+      "fingerprint": "fe0dde363e8212e65e4cab69fb3ff66079c3353ff379229b8b75b2ef7e21efc0",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/execution/inactive-identity-evidence.ts",
+      "count": 3
+    },
+    {
+      "fingerprint": "dbe88bd2a8263ada4db86697b7091cbe223104cb8f09dcd2364d469f78ce8f5c",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/execution/linear-profile-service.ts",
+      "count": 3
+    },
+    {
+      "fingerprint": "d0dc7e0ee92b60eb570a2fc2d44d0d69c6335fd5e9753d5a36868794e81aa428",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/execution/offboarding-status.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "7ce54ba87810a157768be90f0822f3be6822ca79d7a3531eef3e7d6f4152687f",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/execution/operation.ts",
+      "count": 6
+    },
+    {
+      "fingerprint": "a4d14dd43c2b27abc4df7dfe955393030814dc7b8f253e67ee33b6583ee6019c",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/execution/ordered-branch-receipt-set-digest.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "100ba1ad0d14efb82780c31ac3792acb40f4d916a6290572ef10d56fbe498559",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/execution/read-runtime-offboarding-status.ts",
+      "count": 9
+    },
+    {
+      "fingerprint": "8e83cf7a8312b662ef0385e1c8dd6ae28611671ed30fb33430221fac9f79214c",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/execution/read-workspace-source-fingerprint.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "aff19f4a8fa19a2ae65d2830616c123e262e82cc66d7e33575ed3675a2cefde6",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/execution/run-reviewed-slack-lifecycle-intent.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "b296d0823dd8e81fde138fc57119b1fe4b34acdb85ff3f5935182f9da4e4f79c",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/execution/run-workflow.ts",
+      "count": 5
+    },
+    {
+      "fingerprint": "195557f333dc36366ce7120fee7572d754da59d3714ef5cbeb42e0d66b8878a2",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/execution/runtime.ts",
+      "count": 37
+    },
+    {
+      "fingerprint": "c997204d0ba21e2f4f4967f8346cc2df8902bfb5410ee15d40eec65ff9460cc0",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/execution/scheduled.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "2fb502d03ae237b3bd5ffff13970ccafbe7334ee13eb8e22dea574ee27e2ee94",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/execution/sentry-deprovision.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "044d97ea74166cbc19f69942ef0ab4aaa1a1b92e48162cb3757c61eb5d8d6216",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/execution/sentry-workspace-service.ts",
+      "count": 4
+    },
+    {
+      "fingerprint": "c49d1fbe313632936e9ef2192fc149471feaf857559a449d4d7b090b69e772fc",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/execution/slack-name-service.ts",
+      "count": 3
+    },
+    {
+      "fingerprint": "4ee077a5ffa88f129f701c506d61f39f44eab3191a92e40dcf341083943b9970",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/execution/slack-plan-apply-ledger.ts",
+      "count": 8
+    },
+    {
+      "fingerprint": "5208f2f2722805e95cb2aeb2e7db757c283d2fbe07873914522fea5404570db3",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/execution/trycomp-adapter.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "635390b2779b0ee17506e9bdb135f36751068f0278eaf7d6d2c24b0c8336e044",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/execution/trycomp-apply.ts",
+      "count": 5
+    },
+    {
+      "fingerprint": "3808358b5ca9929a04d58a5b262c46c0411645ec3340740d84ddbac85886c4f9",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/execution/workflow-ledger.ts",
+      "count": 2
+    },
+    {
+      "fingerprint": "489fb984d7c529d1c16af11471d07590b2d8e6e5da636db6cc1531414056a0ac",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/github-access-audit/git-hub-access-audit-client.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "1c99bf8b5c9793944174f8c9b5ad545fe65da626f4e43572bed0f1daad4e136f",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/identity-provisioning/attio-deprovision-authority-refresh.ts",
+      "count": 2
+    },
+    {
+      "fingerprint": "e770346500dc5f4a620ba46de5db9987d58011f41114343e2553331efcf19b91",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/identity-provisioning/git-hub-audit-only-connector.ts",
+      "count": 2
+    },
+    {
+      "fingerprint": "3b0449d09287671172de82880cfbe965ad12f760c4c59ce8754bdd655f1c9409",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/identity-provisioning/git-hub-deprovision-authority-port.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "6ad20537c7dc78f1b90ef58223d82a4a825805bf4efa8b0a9ef540d8d833e62b",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/identity-provisioning/git-hub-organization-snapshot-port.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "8d4556dd9ee7c29f13edd64214dbe27277b406f7ad5fa22fad8ee8300dee67af",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/identity-provisioning/github-organization-api-port.ts",
+      "count": 10
+    },
+    {
+      "fingerprint": "fb52c53fbdc7ef2ef603784f8d4e7f24fde5f003c18d6e3f252f9653b1b4f484",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/identity-provisioning/github-organization-connector.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "d57c1b5d948deb7b9063d95a414f12ec97fff56342aa1c8021bf8d40c826ff71",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/identity-provisioning/orchestrator.ts",
+      "count": 2
+    },
+    {
+      "fingerprint": "b9db0f84babecc7a9f5a34755d09dbede2bf02758b8248ecb2cfa3073e1314b4",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/identity-sync/github-identity-admin-attestation.ts",
+      "count": 7
+    },
+    {
+      "fingerprint": "19bbdd2b773574d2eccc2379ea9265409c514ae66d38a3b73136136fa60fb0cd",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/identity-sync/github-inactive-identity-attestation.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "94f2634ca86ac7be26ac2e747248a1f1925322240fb356936d0823537fdd9ec4",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/identity-sync/google-github-identity-seed-service.ts",
+      "count": 2
+    },
+    {
+      "fingerprint": "d08bd353d5796f025d38b8f5cfc9ec584999cf4c7108bb6dcb1fa397591777a1",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/operations/registry.ts",
+      "count": 2
+    },
+    {
+      "fingerprint": "f7030e5cdab6b0b1932c9d0bb8092adfa1753514d51fb1c6993ee1cecb37359f",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/org-sync/channel-service.ts",
+      "count": 7
+    },
+    {
+      "fingerprint": "4464bfe5c9e4c9dde4e7cd38d52a98c9ca5ebcc09e08494dcbe8af4782218f82",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/org-sync/google-api-request.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "943e3051229ca6555035a6da12668cd99f454ffaabc401926a59ef0882baf350",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/org-sync/google-group-rename-client.ts",
+      "count": 2
+    },
+    {
+      "fingerprint": "10e5e97cadf22d62630d1e75ebefaee4a61942a4e0c0b8562ae913a7d2daa827",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/org-sync/google-groups-client.ts",
+      "count": 2
+    },
+    {
+      "fingerprint": "f27d9c4bf421959a0289f4ea02229bec6eb9f1648de39c79d78b585829d132a2",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/org-sync/google-identity-schema.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "16924ef87a453bcf0888f8fcdb889aec27c8e4f8990239fad5b0a4c8cfb0fa83",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/org-sync/http.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "9593ac58e6dcc50a152080732ef06ad0cb542ad630ff3c0d0f78cb878eee3070",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/org-sync/org-channel-slack-client.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "4fad247021cf17ebc8a9fca9ddbcea2ce8b92fb7a79f46a20b9e5e4008dff93b",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/org-sync/service.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "30612a8ed71ac7495b7cd14f57c79c423cf693c1da20efa47023b248664ba2d0",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/runtime/fetch-port.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "8547b8ccbc53a52602052dbc61fcf53e81b35783cc1cfb0cac474684c6974511",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/runtime/sequential.ts",
+      "count": 3
+    },
+    {
+      "fingerprint": "e6f85d8851dbc6eea441bb303a18ac6b59f927857fba23b919f875b2720868a5",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/trycomp/service.ts",
+      "count": 2
+    },
+    {
+      "fingerprint": "c678db47e02b6650bab28885172d1b9c87b6459478f8d31229c00fb28eb5bd21",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "src/workspace-directory/sentry-workspace-client.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "4dd604e27f74a5a8661549647447382d85875942a50dc25d589bf1988a594452",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "test/attio-deprovision-authority-capture.test.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "53b0fc824fb81f42ed8d4b56528a131196651e31e2ae9fb90c188162698422c0",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "test/attio-deprovision-authority-refresh.test.ts",
+      "count": 8
+    },
+    {
+      "fingerprint": "67d129ce8f13b34bef9bfcadd6b2e3110a45dd9765236cf4d69acc049a080fbf",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "test/channel-invitation-scopes.test.ts",
+      "count": 13
+    },
+    {
+      "fingerprint": "5ba5b6b3ac5304bc7faece025f59b4d0165335b3a48379d6b98c6ecaec54829b",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "test/durable-hash-compatibility.test.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "f17473bddc514238707be189c3dcc0d2de9820f20676fa7ba4fc62cb7b266e78",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "test/fetch-port.test.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "85b067486c1076f5577f71b069d056e9cf0d8f250c2839ca7889e85e5edbc72c",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "test/github-access-audit-client.test.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "164e7342c64f4caabff93a47c6f45f799e81b362ab1c8ee5e0f1c58e4ad2a76a",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "test/github-conditional-read-fetch.test.ts",
+      "count": 7
+    },
+    {
+      "fingerprint": "8d1fc6a499e11c837d2dd1f1f17ad39f1fb40ae354afd57536fb3bee335e3d8e",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "test/github-deprovision-authority-refresh.test.ts",
+      "count": 4
+    },
+    {
+      "fingerprint": "7c75512325001404cb2fbbe3a22b414e49f36809a1dbb74800672ce79f1c208c",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "test/github-managed-deprovision-connector.test.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "548a9cdd14e896bb1b773f21dcb0a24f33d87de6940534a5b2c9940062a600e6",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "test/github-organization-api-port.test.ts",
+      "count": 4
+    },
+    {
+      "fingerprint": "91eab6aae5cce36b4e5d74865aad372c87b3c27881713510ba00a694fe4c8dbf",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "test/github-organization-snapshot-port.test.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "09bc709d2f1e7a1c404b85ca3490f3453c4d70b47e781e9e33dc46ed38391032",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "test/google-auth-concurrency.test.ts",
+      "count": 3
+    },
+    {
+      "fingerprint": "3a38f2725d13ee993d18c8d8c1a801d04270bb3c11f92c8b0e6e7e80c0a6eb43",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "test/google-directory-photos.test.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "92a57bd9f507ba98817d0bb186ebd360d5a7ee6316e5394b1655a321f2e63cb7",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "test/google-directory-preferences.test.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "b62e8295be0e2d2dd29177010175dbef6b02563db0e3779f3b5ae7c184d40db5",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "test/google-drive-client.test.ts",
+      "count": 4
+    },
+    {
+      "fingerprint": "924c4e3fa015fb35214b72d8e9f5840c9c46a887966d409a8ea34374331a7d95",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "test/google-group-rename-client.test.ts",
+      "count": 2
+    },
+    {
+      "fingerprint": "a0d8e3c33dd334ab8f61f89bbb5601810479cf6022621ed7773eef7fd1a11f71",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "test/google-identity-authority-transition.test.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "cba5a158c4d666b37b7dfa55f42103ba82fb2be98f86c4827e3a592d9e20a970",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "test/identity-provisioning-orchestrator.test.ts",
+      "count": 6
+    },
+    {
+      "fingerprint": "6cdfcf51922a252ff8947e57ad006dea72672283f359b57771e38a5f0dd89d41",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "test/org-channel-sync-clients.test.ts",
+      "count": 67
+    },
+    {
+      "fingerprint": "9a05e6d648b85adab521085e98791abf9ae101b781af4527b80e45d221d10f9c",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "test/posthog-membership.test.ts",
+      "count": 22
+    },
+    {
+      "fingerprint": "2c7379e7145215bf97d9e093f44e67342476526e65df239ce43ff10e955f1934",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "test/provider-write.test.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "da013c1fa58a1c81c63eb5f620aeb7ffd742375e8573fd556d05c9a168e376d2",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "test/read-body.test.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "9c05b9106496319650c5fd19e59345b10de07943325eef6582ba7ce5c68e6e74",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "test/runtime-fetch.test.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "23542f6119b03f8269ed9375b67f87aab541d8613f5363767a904e23fa91cd3a",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "test/sentry-workspace-sync.test.ts",
+      "count": 3
+    },
+    {
+      "fingerprint": "9047219f1e6f9f44a1c17a76ce5f3d09ec12c66344f7e7936d6f860732e5d0b2",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "test/slack-api-transport.test.ts",
+      "count": 2
+    },
+    {
+      "fingerprint": "c20294a370c6e4d289d6a93e020017073ed5770a5c6179807f88b66af5089ddb",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "test/slack-channel-hydration.test.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "cf6a668d0d3fbc6c978bfd1310022a26f4d92cfb763ef0c339a486156052141e",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "test/support/rsa-private-key-fixture.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "2d24fea76937ca097bd324911137ad0dda1a5a603f84dee82444e0342bfa68b0",
+      "source": "oxlint",
+      "ruleId": "typescript/promise-function-async",
+      "path": "test/trycomp-people-sync.test.ts",
+      "count": 16
+    },
+    {
+      "fingerprint": "52b54871247bae7b5bf07c9f55d5d5c3145114d0586dcafc456eaf266a654d20",
+      "source": "oxlint",
+      "ruleId": "typescript/strict-boolean-expressions",
+      "path": "src/execution/offboarding-status.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "47da9054542434eea81ebd109a59b97dd3e312d3667a4d3f59ea35a5d47a9f5e",
+      "source": "oxlint",
+      "ruleId": "typescript/strict-boolean-expressions",
+      "path": "src/identity-provisioning/github-organization-api-port.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "84bb73aeb28f439125906fbcc6e2a62c872b987305bb5201d9dcde2693cbe083",
+      "source": "oxlint",
+      "ruleId": "typescript/strict-boolean-expressions",
+      "path": "src/org-sync/google-directory-client.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "57838f7469c394d6d7b7379fe88c2af5505d10f16f60c44238746ad1c9ae387c",
+      "source": "oxlint",
+      "ruleId": "typescript/strict-void-return",
+      "path": "test/delay.test.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "8b3f4730f4557c3b623669a1d08483accdae76b93047c2e9fde3f2ebd4ec91a4",
+      "source": "oxlint",
+      "ruleId": "typescript/strict-void-return",
+      "path": "test/execution-boundaries.test.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "96801a1c33f46307f72c758da9981231c2a22163cce2ca1f76b467fdb4b89f6f",
+      "source": "oxlint",
+      "ruleId": "typescript/strict-void-return",
+      "path": "test/http-security.test.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "f5a8efe771e37130aa532d97088692e764bb6e2bea7e92ae055a105679ed3eba",
+      "source": "oxlint",
+      "ruleId": "typescript/strict-void-return",
+      "path": "test/posthog-membership.test.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "458fee1096b88b64e0f62d0140cbbbf1803b8293baf07796e287ca8bd8ab32cf",
+      "source": "oxlint",
+      "ruleId": "unicorn-js/prefer-combined-guards",
+      "path": "src/org-sync/model.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "0a83e8fe01f64f6f2a8997a9b715c855e9237795593295ab31550c515fabf191",
+      "source": "oxlint",
+      "ruleId": "vitest/expect-expect",
+      "path": "test/posthog-grant-state.test.ts",
+      "count": 1
+    },
+    {
+      "fingerprint": "9e91b0c915a9c2309b02da7eb1659f1967b2aa581b8179f2cc20f6a92ae63822",
+      "source": "oxlint",
+      "ruleId": "vitest/no-conditional-expect",
+      "path": "test/trycomp-people-sync.test.ts",
+      "count": 4
+    },
+    {
+      "fingerprint": "0c2b3ab45a14f286b88642b4a6b4a28637b8d3a9d71a31901ca22278ce0d9df7",
+      "source": "stylelint",
+      "ruleId": "declaration-property-value-disallowed-list",
+      "path": "site/src/styles/global.css",
+      "count": 1
+    },
+    {
+      "fingerprint": "346227d34a859c524ac8df2fbd9796f457e2f3cac15a33471931bfa6ab68ca97",
+      "source": "stylelint",
+      "ruleId": "declaration-property-value-disallowed-list",
+      "path": "site/src/styles/global.css",
+      "count": 1
+    },
+    {
+      "fingerprint": "4ee30864fdd5a086c67b2c3280d8e410c913c2e4d25b352eae22cf6ee20ad4c4",
+      "source": "stylelint",
+      "ruleId": "declaration-property-value-disallowed-list",
+      "path": "site/src/styles/global.css",
+      "count": 1
+    }
+  ]
+}

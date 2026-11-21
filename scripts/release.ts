@@ -475,7 +475,7 @@ switch (process.argv[2] ?? "") {
         "--python",
         "3.14",
         "--from",
-        "repo-standards==6.22.3",
+        "repo-standards==8.6.0",
         "repo-standards",
         "check",
         ".",
