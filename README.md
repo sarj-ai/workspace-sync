@@ -4,7 +4,7 @@
 
 Sync profiles and access from Google Workspace.
 
-[Documentation](https://engineering.sarj.ai/projects/workspace-sync/) · [Plan / apply](https://engineering.sarj.ai/projects/workspace-sync/plan-and-apply/) · [API](https://engineering.sarj.ai/projects/workspace-sync/api/)
+[Documentation](https://sarj.ai/engineering/projects/workspace-sync/) · [Plan / apply](https://sarj.ai/engineering/projects/workspace-sync/plan-and-apply/) · [API](https://sarj.ai/engineering/projects/workspace-sync/api/)
 
 Node.js >=24.0.0:
 
@@ -12,7 +12,7 @@ Node.js >=24.0.0:
 pnpm add https://github.com/sarj-ai/workspace-sync/releases/download/v0.10.0/sarj-ai-workspace-sync-0.10.0.tgz zod@4.6.7
 ```
 
-Start with the [read-only example](https://engineering.sarj.ai/projects/workspace-sync/configuration/).
+Start with the [read-only example](https://sarj.ai/engineering/projects/workspace-sync/configuration/).
 Use one immutable policy per process or Worker isolate. The host owns credentials,
 approval and persistence; see [Security](SECURITY.md).
 

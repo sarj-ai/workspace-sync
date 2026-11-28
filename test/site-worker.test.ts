@@ -7,27 +7,26 @@ describe("documentation routing", () => {
     const fetch = vi.fn();
     const response = await worker.fetch(
       new Request(
-        "https://engineering.sarj.ai/projects/workspace-sync?from=hub",
+        "https://sarj.ai/engineering/projects/workspace-sync?from=hub",
       ),
       { ASSETS: { fetch } },
     );
     expect(response.status).toBe(308);
     expect(response.headers.get("location")).toBe(
-      "https://engineering.sarj.ai/projects/workspace-sync/?from=hub",
+      "https://sarj.ai/engineering/projects/workspace-sync/?from=hub",
     );
     expect(fetch).not.toHaveBeenCalled();
   });
 
   it.each([
-    "/projects/other/",
+    "/engineering/projects/other/",
     "/.git/config",
-    "/projects/workspace-sync-foreign/",
+    "/engineering/projects/workspace-sync-foreign/",
   ])("refuses unrelated route %s", async (path) => {
     const fetch = vi.fn();
-    const response = await worker.fetch(
-      new Request(`https://engineering.sarj.ai${path}`),
-      { ASSETS: { fetch } },
-    );
+    const response = await worker.fetch(new Request(`https://sarj.ai${path}`), {
+      ASSETS: { fetch },
+    });
     expect(response.status).toBe(404);
     expect(fetch).not.toHaveBeenCalled();
   });
@@ -37,7 +36,7 @@ describe("documentation routing", () => {
     async (method) => {
       const fetch = vi.fn();
       const response = await worker.fetch(
-        new Request("https://engineering.sarj.ai/projects/workspace-sync/", {
+        new Request("https://sarj.ai/engineering/projects/workspace-sync/", {
           method,
         }),
         { ASSETS: { fetch } },
@@ -54,7 +53,7 @@ describe("documentation routing", () => {
       const response = new Response("documentation");
       const fetch = vi.fn().mockResolvedValue(response);
       const request = new Request(
-        "https://engineering.sarj.ai/projects/workspace-sync/api/",
+        "https://sarj.ai/engineering/projects/workspace-sync/api/",
         { method },
       );
       await expect(worker.fetch(request, { ASSETS: { fetch } })).resolves.toBe(
@@ -64,3 +63,19 @@ describe("documentation routing", () => {
     },
   );
 });
+
+it.each(["", "/", "/api/?keep=one&keep=two"])(
+  "redirects legacy engineering%s directly to the new mount",
+  async (path) => {
+    const fetch = vi.fn();
+    const response = await worker.fetch(
+      new Request(`https://engineering.sarj.ai/projects/workspace-sync${path}`),
+      { ASSETS: { fetch } },
+    );
+    expect(response.status).toBe(308);
+    expect(response.headers.get("location")).toBe(
+      `https://sarj.ai/engineering/projects/workspace-sync${path === "" ? "/" : path}`,
+    );
+    expect(fetch).not.toHaveBeenCalled();
+  },
+);
