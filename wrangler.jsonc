@@ -14,6 +14,14 @@
   },
   "routes": [
     {
+      "pattern": "sarj.ai/engineering/projects/workspace-sync",
+      "zone_name": "sarj.ai",
+    },
+    {
+      "pattern": "sarj.ai/engineering/projects/workspace-sync/*",
+      "zone_name": "sarj.ai",
+    },
+    {
       "pattern": "engineering.sarj.ai/projects/workspace-sync",
       "zone_name": "sarj.ai",
     },
